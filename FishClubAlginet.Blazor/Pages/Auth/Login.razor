@@ -1,0 +1,88 @@
+﻿@page "/login"
+@layout FishClubAlginet.Blazor.Shared.Layouts.LoginLayout
+@using FishClubAlginet.Core.Application.Dtos
+@using FishClubAlginet.Blazor.Auth
+@using FishClubAlginet.Core.Application.Dtos.Request
+@using Microsoft.AspNetCore.Components.Authorization
+@using FishClubAlginet.Core.Constants
+@* Inyectamos las dependencias necesarias *@
+@inject HttpClient Http
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Nav
+@inject NotificationService NotificationService
+
+<PageTitle>Login - Pesca</PageTitle>
+
+<div class="d-flex justify-content-center align-items-center vh-100" style="background-color: #f4f4f4;">
+    <RadzenCard class="w-100" Style="max-width: 400px; padding: 2rem;">
+        <div class="text-center mb-4">
+            <h3 class="fw-bold">Bienvenido</h3>
+            <p class="text-muted">Introduce tus credenciales</p>
+        </div>
+
+        <EditForm Model="@loginModel" OnValidSubmit="HandleLogin">
+            <DataAnnotationsValidator />
+
+            <div class="mb-3">
+                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Email</RadzenText>
+                <RadzenTextBox Placeholder="ejemplo@correo.com" @bind-Value="loginModel.UserName" class="w-100" />
+                <ValidationMessage For="@(() => loginModel.UserName)" />
+            </div>
+
+            <div class="mb-3">
+                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Contraseña</RadzenText>
+                <RadzenPassword Placeholder="******" @bind-Value="loginModel.Password" class="w-100" />
+                <ValidationMessage For="@(() => loginModel.Password)" />
+            </div>
+
+            <div class="d-grid gap-2 mt-4">
+                <RadzenButton ButtonType="ButtonType.Submit" Text="Iniciar Sesión" Icon="login" ButtonStyle="ButtonStyle.Primary" IsBusy="@isLoading" />
+            </div>
+        </EditForm>  
+    </RadzenCard>
+</div>
+
+@code {
+    private LoginDto loginModel = new();
+    private bool isLoading = false;
+
+    private async Task HandleLogin()
+    {
+        isLoading = true;
+        try
+        {
+            var response = await Http.PostAsJsonAsync(ApplicationConstants.Endpoints.Account.Login, loginModel);
+
+            if (response.IsSuccessStatusCode)
+            {
+                // 2. Leer respuesta
+                var result = await response.Content.ReadFromJsonAsync<LoginResponse>();
+
+                // 3. Notificar al AuthProvider (Frontend)
+                // Aquí hacemos el cast porque sabemos que usamos nuestro provider personalizado
+                var customAuthProvider = (JwtAuthenticationStateProvider)AuthStateProvider;
+                await customAuthProvider.LoginAsync(result!.Token);
+
+                // 4. Redirigir al Home
+                Nav.NavigateTo("/");
+            }
+            else
+            {
+                NotificationService.Notify(NotificationSeverity.Error, "Error", "Credenciales inválidas.");
+            }
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Error de Conexión", ex.Message);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    public class LoginResponse
+    {
+        public string Token { get; set; } = string.Empty;
+    }
+}

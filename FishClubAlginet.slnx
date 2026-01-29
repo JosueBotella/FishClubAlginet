@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="FishClubAlginet.Blazor/FishClubAlginet.Blazor.csproj" />
+  <Project Path="FishClubAlginet.Core/FishClubAlginet.Core.csproj" Id="e273e142-86d7-4679-bf4b-acf01a9d3fca" />
+  <Project Path="FishClubAlginet.Infrastructure/FishClubAlginet.Infrastructure.csproj" Id="2bf7c5c4-b601-43f4-9eb7-dbc5dd034b2e" />
+  <Project Path="FishClubAlginet.API/FishClubAlginet.API.csproj" />
+</Solution>

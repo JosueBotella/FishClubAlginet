@@ -1,0 +1,8 @@
+﻿@FishClubAlginet.API_HostAddress = https://localhost:7179
+
+### Obtener saludo
+GET {{FishClubAlginet.API_HostAddress}}/hola
+
+
+### Obtener lista de cursos
+GET {{FishClubAlginet.API_HostAddress}}/api/todolist/2

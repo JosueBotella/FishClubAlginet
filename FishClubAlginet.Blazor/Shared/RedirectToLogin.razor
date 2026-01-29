@@ -1,0 +1,20 @@
+﻿@inject NavigationManager Nav
+@using Microsoft.AspNetCore.Components.Authorization
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthState { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthState;
+
+        // Si no está autenticado, lo mandamos al login
+        if (authState?.User?.Identity is null || !authState.User.Identity.IsAuthenticated)
+        {
+            // forceLoad: true a veces ayuda a limpiar estados raros,
+            // pero false es más rápido (SPA).
+            Nav.NavigateTo("login", forceLoad: false);
+        }
+    }
+}

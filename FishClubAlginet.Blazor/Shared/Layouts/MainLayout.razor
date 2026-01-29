@@ -1,0 +1,77 @@
+﻿@inherits LayoutComponentBase
+@using Microsoft.AspNetCore.Components.Authorization
+@using FishClubAlginet.Blazor.Auth
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Nav
+@inject DialogService DialogService
+
+
+
+<RadzenLayout style="height: 100vh">
+    <RadzenHeader>
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0">
+            <RadzenSidebarToggle Click="@(() => sidebarExpanded = !sidebarExpanded)" />
+
+            <RadzenLabel Text="Base Architecture" Style="margin-left: 1rem; font-weight: bold;" />
+
+            <RadzenButton Icon="logout"
+                          ButtonStyle="ButtonStyle.Secondary"
+                          Size="ButtonSize.Small"
+                          Click="CerrarSesion"
+                          MouseEnter="@(args => TooltipService.Open(args, "Cerrar Sesión"))" />
+        </RadzenStack>
+    </RadzenHeader>
+
+    <RadzenSidebar @bind-Expanded="@sidebarExpanded">
+        <RadzenPanelMenu>
+            <RadzenPanelMenuItem Text="Inicio" Path="/" Icon="home" />
+
+            <AuthorizeView>
+                <Authorized>
+                    <RadzenPanelMenuItem Text="sample" Icon="home" Path="sample" />
+                   
+                </Authorized>
+            </AuthorizeView>
+        </RadzenPanelMenu>
+
+        <div class="p-3" style="position: absolute; bottom: 0; width: 100%;">
+            <RadzenText TextStyle="TextStyle.Caption" TextAlign="TextAlign.Center" TagName="TagName.P">
+                v1.0.0 - Senior Architecture
+            </RadzenText>
+        </div>
+    </RadzenSidebar>
+
+    <RadzenBody>
+        <div class="rz-p-4">
+            @Body
+        </div>
+    </RadzenBody>
+
+    <RadzenFooter>
+        <div class="text-center">
+            &copy; 2026 - Base Architecture
+        </div>
+    </RadzenFooter>
+</RadzenLayout>
+
+@code {
+    bool sidebarExpanded = true;
+
+    [Inject] TooltipService TooltipService { get; set; } = default!;
+
+    private async Task CerrarSesion()
+    {
+        // Preguntamos confirmación (Opcional, pero buena práctica UX)
+        var confirm = await DialogService.Confirm("¿Seguro que quieres salir?", "Cerrar Sesión",
+            new ConfirmOptions() { OkButtonText = "Sí", CancelButtonText = "Cancelar" });
+
+        if (confirm == true)
+        {
+            // Casteamos a nuestro provider personalizado para acceder al método Logout
+            var customAuthState = (JwtAuthenticationStateProvider)AuthStateProvider;
+            await customAuthState.LogoutAsync();
+
+            Nav.NavigateTo("/login");
+        }
+    }
+}

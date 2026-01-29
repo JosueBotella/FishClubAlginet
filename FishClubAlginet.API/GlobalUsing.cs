@@ -1,0 +1,9 @@
+﻿global using Microsoft.AspNetCore.Mvc;
+global using Microsoft.EntityFrameworkCore;
+global using FishClubAlginet.Core.Application.Interfaces;
+global using FishClubAlginet.Infrastructure.Persistence.Contexts;
+global using FishClubAlginet.Infrastructure.Repositories;
+global using FishClubAlginet.Infrastructure.Services;
+global using FishClubAlginet.Core.Application.Dtos.Request;
+global using FishClubAlginet.Infrastructure.Persistence.DbInitializer;
+global using FishClubAlginet.Core.Constants;

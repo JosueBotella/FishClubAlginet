@@ -1,0 +1,13 @@
+﻿global using Microsoft.JSInterop;
+global using System.Text.Json;
+global using System.Net.Http.Headers;
+global using System.Security.Claims;
+global using System.IdentityModel.Tokens.Jwt;
+global using Microsoft.AspNetCore.Components.Authorization;
+global using FishClubAlginet.Blazor.Services;
+global using FishClubAlginet.Blazor.Constants;
+global using Microsoft.AspNetCore.Components.Web;
+global using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+global using FishClubAlginet.Blazor;
+global using FishClubAlginet.Blazor.Auth;
+global using Radzen; 
