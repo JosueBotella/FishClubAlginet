@@ -1,5 +1,6 @@
-﻿@inject NavigationManager Nav
+﻿@inject NavigationManager Navigation
 @using Microsoft.AspNetCore.Components.Authorization
+@attribute [AllowAnonymous] 
 
 @code {
     [CascadingParameter]
@@ -8,13 +9,16 @@
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthState;
-
-        // Si no está autenticado, lo mandamos al login
+        
+        // Solo redirigir si REALMENTE no hay usuario
         if (authState?.User?.Identity is null || !authState.User.Identity.IsAuthenticated)
         {
-            // forceLoad: true a veces ayuda a limpiar estados raros,
-            // pero false es más rápido (SPA).
-            Nav.NavigateTo("login", forceLoad: false);
+            // Evitar redirigir si YA estamos en el login (Esto rompe el bucle)
+            var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+            if (!uri.AbsolutePath.ToLower().Contains("login"))
+            {
+                Navigation.NavigateTo($"login?returnUrl={Uri.EscapeDataString(Navigation.Uri)}");
+            }
         }
     }
 }

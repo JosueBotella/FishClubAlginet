@@ -12,10 +12,10 @@
         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0">
             <RadzenSidebarToggle Click="@(() => sidebarExpanded = !sidebarExpanded)" />
 
-            <RadzenLabel Text="Base Architecture" Style="margin-left: 1rem; font-weight: bold;" />
+            <RadzenLabel Text="Base" Style="margin-left: 1rem; margin-right:1rem; font-weight: bold;" />
 
             <RadzenButton Icon="logout"
-                          ButtonStyle="ButtonStyle.Secondary"
+                          ButtonStyle="ButtonStyle.Secondary"                        
                           Size="ButtonSize.Small"
                           Click="CerrarSesion"
                           MouseEnter="@(args => TooltipService.Open(args, "Cerrar Sesión"))" />
