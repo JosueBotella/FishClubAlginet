@@ -1,6 +1,4 @@
-﻿using FishClubAlginet.Core.Interfaces;
-
-namespace FishClubAlginet.Infrastructure.Services;
+﻿namespace FishClubAlginet.Infrastructure.Services;
 
 public class UnitOfWorkService : IUnitOfWork
 {

@@ -4,7 +4,7 @@ global using FishClubAlginet.Application.Abstractions;
 global using FishClubAlginet.Infrastructure.Persistence.Contexts;
 global using FishClubAlginet.Infrastructure.Persistence.Seeds;
 global using FishClubAlginet.Infrastructure.Repositories;
-global using FishClubAlginet.Application.Dtos.Request;
+global using FishClubAlginet.Contracts.Dtos.Requests.Identity;
 global using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.EntityFrameworkCore.ChangeTracking;

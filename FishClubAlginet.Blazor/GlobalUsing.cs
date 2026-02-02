@@ -10,4 +10,6 @@ global using Microsoft.AspNetCore.Components.Web;
 global using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 global using FishClubAlginet.Blazor;
 global using FishClubAlginet.Blazor.Auth;
-global using Radzen; 
+global using Radzen;
+global using FishClubAlginet.Blazor.Settings;
+global using static FishClubAlginet.Blazor.Constants.UIConstants;

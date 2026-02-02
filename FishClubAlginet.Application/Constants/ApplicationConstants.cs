@@ -2,11 +2,7 @@
 
 public static class ApplicationConstants
 {
-    public static class BlazorSettings
-    {
-        public const string ApiSettingsSectionError = "La URL de la API no está configurada en appsettings.Development.json";
-    }
-
+   
     public static class Database
     {
         public const string ConnectionName = "TodoListContext";
@@ -29,19 +25,5 @@ public static class ApplicationConstants
     }
 
 
-    public static class Endpoints
-    {
-        public static class Account
-        {
-            public const string Login = "api/account/login";
-            public const string Register = "api/account/register";
-        }
-
-        public static class TodoList
-        {
-            public const string GetAll = "api/todolist";
-            public const string Create = "api/todolist";
-            // etc...
-        }
-    }
+    
 }

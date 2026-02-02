@@ -6,6 +6,5 @@ public abstract class BaseEntity<TId>
     public bool IsDeleted { get; set; }
     public DateTime? DeletedTimeUtc { get; set; }
 
-    [ConcurrencyCheck]
     public DateTime LastUpdateUtc { get; set; }
 }

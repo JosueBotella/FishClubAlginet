@@ -1,6 +1,3 @@
-using FishClubAlginet.Blazor.Settings;
-using FishClubAlginet.Core.Constants;
-
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
@@ -15,7 +12,7 @@ var apiSettings = builder.Configuration.GetSection("ApiSettings").Get<ApiSetting
 
 if (apiSettings is null || string.IsNullOrEmpty(apiSettings.BaseUrl))
 {
-    throw new InvalidOperationException(ApplicationConstants.BlazorSettings.ApiSettingsSectionError);
+    throw new InvalidOperationException(BlazorSettings.ApiSettingsSectionError);
 }
 
 builder.Services.AddScoped(sp => new HttpClient

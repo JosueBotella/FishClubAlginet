@@ -1,4 +1,6 @@
-﻿namespace FishClubAlginet.Application.Dtos.Requests.Fisherman;
+﻿using FishClubAlginet.Contracts.Enums;
+
+namespace FishClubAlginet.Contracts.Dtos.Requests.Fisherman;
 
 public class CreateFishermanDto
 {

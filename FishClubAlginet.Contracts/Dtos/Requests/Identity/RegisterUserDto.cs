@@ -1,4 +1,4 @@
-﻿namespace FishClubAlginet.Application.Dtos.Request;
+﻿namespace FishClubAlginet.Contracts.Dtos.Requests.Identity;
 
 public class RegisterUserDto
 {

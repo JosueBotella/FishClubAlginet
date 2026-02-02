@@ -1,5 +1,3 @@
-using FishClubAlginet.Application.Abstractions;
-
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString(ApplicationConstants.Database.ConnectionName)
@@ -10,6 +8,14 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericRepository<,>));
 builder.Services.AddScoped<IUnitOfWork, UnitOfWorkService>();
 builder.Services.AddScoped<IAuthService,AuthService>();
+
+builder.Services.Scan(selector => selector
+    .FromAssemblies(
+        typeof(IRequestHandler<,>).Assembly
+    )
+    .AddClasses(classes => classes.AssignableTo(typeof(IRequestHandler<,>)))
+    .AsImplementedInterfaces()
+    .WithScopedLifetime());
 
 builder.Services.AddIdentityCore<IdentityUser>(options => {
     options.Password.RequireDigit = false;

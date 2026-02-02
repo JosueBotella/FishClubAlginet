@@ -1,4 +1,4 @@
-﻿namespace FishClubAlginet.Core.Domain.Enums;
+﻿namespace FishClubAlginet.Contracts.Enums;
 
 public enum TypeNationalIdentifier
 {

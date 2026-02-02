@@ -1,6 +1,13 @@
 ﻿namespace FishClubAlginet.Application.Abstractions;
 
-public interface IRequestHandler<in TRequest, TResponse>
+
+public interface IRequest<out TResponse>
 {
-    Task<ErrorOr<TResponse>> HandleAsync(TRequest request, CancellationToken cancellationToken = default);
+}
+
+
+public interface IRequestHandler<in TRequest, TResponse>
+    where TRequest : IRequest<ErrorOr<TResponse>>
+{
+    Task<ErrorOr<TResponse>> Handle(TRequest request, CancellationToken cancellationToken);
 }

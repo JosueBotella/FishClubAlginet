@@ -1,40 +1,49 @@
-﻿using FishClubAlginet.Core.Interfaces;
+﻿using FishClubAlginet.Application.Features.Auth.Commands;
 
 namespace FishClubAlginet.API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class AccountController : ControllerBase
+public class AccountController : ApiController 
 {
-    private readonly IAuthService _authService;
-    public AccountController(IAuthService authService)
-    {
-        _authService = authService;
-    }
-    [HttpPost("login")]
-    public async Task<IActionResult> Login(LoginDto model)
-    {
-        var token = await _authService.LoginAsync(model);
+    private readonly IRequestHandler<RegisterUserCommand, string> _registerHandler;
+    private readonly IRequestHandler<LoginUserCommand, string> _loginHandler;
 
-        if (token == null)
-        {
-            return Unauthorized(ApplicationConstants.Authentication.LoginFailed);
-        }
-
-        return Ok(new { Token = token });
+    public AccountController(
+        IRequestHandler<RegisterUserCommand, string> registerHandler,
+        IRequestHandler<LoginUserCommand, string> loginHandler)
+    {
+        _registerHandler = registerHandler;
+        _loginHandler = loginHandler;
     }
 
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterDto model)
+    public async Task<IActionResult> Register([FromBody] RegisterUserDto request)
     {
-        var result = await _authService.RegisterAsync(model);
+        var command = new RegisterUserCommand(          
+            request.Email,
+            request.Password,
+            request.ConfirmPassword
+        );
 
-        if (result.Succeeded)
-        {
-            return Ok(new { Message = ApplicationConstants.Authentication.RegisterSuccess });
-        }
+        var result = await _registerHandler.Handle(command, default);
 
-        // Si hay errores (ej: contraseña débil), los devolvemos todos
-        return BadRequest(result.Errors);
+        return result.Match(
+            token => Ok(new { Token = token }),
+            errors => Problem(errors)
+        );
+    }
+
+    [HttpPost("login")]
+    public async Task<IActionResult> Login([FromBody] LoginDto request)
+    {
+        var command = new LoginUserCommand(request.UserName, request.Password);
+
+        var result = await _loginHandler.Handle(command, default);
+
+        return result.Match(
+            token => Ok(new { Token = token }),
+            errors => Problem(errors)
+        );
     }
 }

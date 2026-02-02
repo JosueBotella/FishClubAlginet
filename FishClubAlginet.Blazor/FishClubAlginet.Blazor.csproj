@@ -22,4 +22,8 @@
     <Folder Include="Shared\ResourceFiles\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\FishClubAlginet.Contracts\FishClubAlginet.Contracts.csproj" />
+  </ItemGroup>
+
 </Project>
