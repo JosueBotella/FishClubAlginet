@@ -2,14 +2,16 @@
 
 public class AppDbContext : IdentityDbContext
 {
-
+    public DbSet<Fisherman> Fishermen { get; set; }
     public AppDbContext(DbContextOptions<AppDbContext> context)
         : base(context)
     {
     }
 
-    // Optional: Only use OnConfiguring if options not already configured.
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) => base.OnConfiguring(optionsBuilder);
-
-    
+    protected override void OnModelCreating(ModelBuilder builder)
+    {
+        base.OnModelCreating(builder);
+        
+        builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+    }
 }

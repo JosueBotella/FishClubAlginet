@@ -1,4 +1,4 @@
-﻿namespace FishClubAlginet.Core.Application.Interfaces;
+﻿namespace FishClubAlginet.Application.Abstractions;
 
 public interface IUnitOfWork : IDisposable
 {

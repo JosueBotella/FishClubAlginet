@@ -1,4 +1,4 @@
-﻿namespace FishClubAlginet.Core.Constants;
+﻿namespace FishClubAlginet.Application.Constants;
 
 public static class ApplicationConstants
 {

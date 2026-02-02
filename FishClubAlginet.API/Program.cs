@@ -1,7 +1,4 @@
-using System.Text;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.IdentityModel.Tokens;
+using FishClubAlginet.Application.Abstractions;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 

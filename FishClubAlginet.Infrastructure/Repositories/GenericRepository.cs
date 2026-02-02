@@ -1,4 +1,6 @@
-﻿namespace FishClubAlginet.Infrastructure.Repositories;
+﻿using FishClubAlginet.Core.Interfaces;
+
+namespace FishClubAlginet.Infrastructure.Repositories;
 
 public class GenericRepository<T, TId> : IGenericRepository<T, TId>
     where T : BaseEntity<TId>

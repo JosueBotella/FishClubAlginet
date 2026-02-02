@@ -1,4 +1,6 @@
-﻿namespace FishClubAlginet.API.Controllers;
+﻿using FishClubAlginet.Core.Interfaces;
+
+namespace FishClubAlginet.API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]

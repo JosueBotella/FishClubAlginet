@@ -56,6 +56,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="ErrorOr" Version="2.0.1" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.1">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -67,6 +69,7 @@
   <ItemGroup>
     <ProjectReference Include="..\FishClubAlginet.Core\FishClubAlginet.Core.csproj" />
     <ProjectReference Include="..\FishClubAlginet.Infrastructure\FishClubAlginet.Infrastructure.csproj" />
+    <ProjectReference Include="..\FishClubAlginet.Application\FishClubAlginet.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>

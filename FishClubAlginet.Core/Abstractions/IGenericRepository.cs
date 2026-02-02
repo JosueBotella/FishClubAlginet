@@ -1,4 +1,4 @@
-﻿namespace FishClubAlginet.Core.Application.Interfaces;
+﻿namespace FishClubAlginet.Application.Abstractions;
 
 public interface IGenericRepository<T, TId>
     where T : BaseEntity<TId>

@@ -1,4 +1,8 @@
-﻿global using Microsoft.AspNetCore.Mvc;
+﻿global using System.Text;
+global using Microsoft.AspNetCore.Authentication.JwtBearer;
+global using Microsoft.AspNetCore.Identity;
+global using Microsoft.IdentityModel.Tokens;
+global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.EntityFrameworkCore;
 global using FishClubAlginet.Core.Application.Interfaces;
 global using FishClubAlginet.Infrastructure.Persistence.Contexts;

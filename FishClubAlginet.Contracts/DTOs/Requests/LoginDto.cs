@@ -1,4 +1,4 @@
-﻿namespace FishClubAlginet.Core.Application.Dtos.Request;
+﻿namespace FishClubAlginet.Application.Dtos.Request;
 
 public class LoginDto
 {    
