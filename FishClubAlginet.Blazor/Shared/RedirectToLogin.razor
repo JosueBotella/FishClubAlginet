@@ -1,6 +1,6 @@
 ﻿@inject NavigationManager Navigation
 @using Microsoft.AspNetCore.Components.Authorization
-@attribute [AllowAnonymous] 
+@attribute [AllowAnonymous]
 
 @code {
     [CascadingParameter]
@@ -9,13 +9,14 @@
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthState;
-        
-        // Solo redirigir si REALMENTE no hay usuario
+
         if (authState?.User?.Identity is null || !authState.User.Identity.IsAuthenticated)
         {
-            // Evitar redirigir si YA estamos en el login (Esto rompe el bucle)
-            var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
-            if (!uri.AbsolutePath.ToLower().Contains("login"))
+            // Obtenemos la ruta relativa (ej: "login" o "counter")
+            var returnUrl = Navigation.ToBaseRelativePath(Navigation.Uri);
+
+            // Si la ruta relativa empieza por 'login', NO redirigimos (evita el bucle)
+            if (string.IsNullOrWhiteSpace(returnUrl) || !returnUrl.StartsWith("login", StringComparison.OrdinalIgnoreCase))
             {
                 Navigation.NavigateTo($"login?returnUrl={Uri.EscapeDataString(Navigation.Uri)}");
             }
