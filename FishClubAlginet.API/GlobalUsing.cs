@@ -2,6 +2,7 @@
 global using Microsoft.AspNetCore.Authentication.JwtBearer;
 global using Microsoft.AspNetCore.Identity;
 global using Microsoft.IdentityModel.Tokens;
+global using Microsoft.AspNetCore.Diagnostics;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.EntityFrameworkCore;
 global using FishClubAlginet.Contracts.Dtos.Requests.Identity;
@@ -11,3 +12,5 @@ global using FishClubAlginet.Infrastructure.Services;
 global using FishClubAlginet.Infrastructure.Persistence.DbInitializer;
 global using FishClubAlginet.Application.Abstractions;
 global using FishClubAlginet.Application.Constants;
+global using FishClubAlginet.Application.Features.Auth.Commands;
+global using FishClubAlginet.Contracts.Dtos.Requests.Fisherman;

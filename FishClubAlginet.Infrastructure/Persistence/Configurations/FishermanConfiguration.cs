@@ -10,27 +10,26 @@ public class FishermanConfiguration : IEntityTypeConfiguration<Fisherman>
 
         builder.Property(x => x.FirstName)
             .IsRequired()
-            .HasMaxLength(50);
+            .HasMaxLength(FisherManConstraints.FistNameMaxLength);
 
         builder.Property(x => x.LastName)
             .IsRequired()
-            .HasMaxLength(100);
+            .HasMaxLength(FisherManConstraints.LastNameMaxLength);
 
         builder.Property(x => x.FederationLicense)
             .IsRequired()
-            .HasMaxLength(20);
+            .HasMaxLength(FisherManConstraints.FederationLicenseMaxLength);
 
         builder.HasIndex(x => x.FederationLicense)
             .IsUnique();
 
-        // Recommended: String for readability in DB, Int for performance. Let's use string here for clarity if you prefer, or default int.
         builder.Property(x => x.DocumentType)
-            .HasConversion<string>() // Saves as "Dni", "Nie" in DB
-            .HasMaxLength(10);
+            .HasConversion<string>() 
+            .HasMaxLength(FisherManConstraints.DocumentTypeMaxLength);
 
         builder.Property(x => x.DocumentNumber)
             .IsRequired()
-            .HasMaxLength(20);
+            .HasMaxLength(FisherManConstraints.DocumentNumberMaxLength);
 
         builder.OwnsOne(x => x.Address, addressBuilder =>
         {
@@ -43,7 +42,7 @@ public class FishermanConfiguration : IEntityTypeConfiguration<Fisherman>
         });
 
         builder.Property(x => x.UserId)
-            .IsRequired(false) // Nullable
-            .HasMaxLength(450); // Standard Identity ID length
+            .IsRequired(false) 
+            .HasMaxLength(450);
     }
 }

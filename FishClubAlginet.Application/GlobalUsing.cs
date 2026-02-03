@@ -7,4 +7,5 @@ global using FishClubAlginet.Contracts.Dtos.Requests.Fisherman;
 global using FishClubAlginet.Contracts.Enums;
 global using Microsoft.AspNetCore.Identity;
 global using FishClubAlginet.Application.Abstractions;
-
+global using FishClubAlginet.Core.Domain.Entities;
+global using FishClubAlginet.Core.Domain.ValueObjects;

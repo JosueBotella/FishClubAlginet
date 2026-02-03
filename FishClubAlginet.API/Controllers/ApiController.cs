@@ -1,4 +1,6 @@
 ﻿using ErrorOr;
+using FishClubAlginet.API.Common.Http; // Para las constantes de claves si hicieran falta
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace FishClubAlginet.API.Controllers;
@@ -7,22 +9,21 @@ namespace FishClubAlginet.API.Controllers;
 [Route("api/[controller]")]
 public class ApiController : ControllerBase
 {
-    // Este método es el que llamamos desde los controladores hijos: return Problem(errors);
     protected IActionResult Problem(List<Error> errors)
     {
-        // Si no hay errores (no debería pasar si llegamos aquí), devolvemos error genérico.
+        // Si no hay errores, devolvemos un 500 genérico (no debería pasar si llegamos aquí)
         if (errors.Count is 0)
         {
             return Problem();
         }
 
-        // Si TODOS los errores son de validación, devolvemos un 400 con el detalle de campos.
+        // Si TODOS los errores son de validación, devolvemos un formato especial con los campos
         if (errors.All(error => error.Type == ErrorType.Validation))
         {
             return ValidationProblem(errors);
         }
 
-        // Si son otros tipos de errores (ej: usuario no encontrado), miramos el primero para decidir el código HTTP.
+        // Si hay errores mixtos o de otro tipo, usamos el primero para determinar el código HTTP
         return Problem(errors[0]);
     }
 
@@ -33,6 +34,7 @@ public class ApiController : ControllerBase
             ErrorType.Conflict => StatusCodes.Status409Conflict,
             ErrorType.Validation => StatusCodes.Status400BadRequest,
             ErrorType.NotFound => StatusCodes.Status404NotFound,
+            ErrorType.Unauthorized => StatusCodes.Status401Unauthorized,
             _ => StatusCodes.Status500InternalServerError
         };
 
@@ -45,7 +47,9 @@ public class ApiController : ControllerBase
 
         foreach (var error in errors)
         {
-            modelStateDictionary.AddModelError(error.Code, error.Description);
+            modelStateDictionary.AddModelError(
+                error.Code,
+                error.Description);
         }
 
         return ValidationProblem(modelStateDictionary);

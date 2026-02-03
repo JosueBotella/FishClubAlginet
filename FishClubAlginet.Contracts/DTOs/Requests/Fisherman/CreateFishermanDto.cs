@@ -8,5 +8,13 @@ public class CreateFishermanDto
     public TypeNationalIdentifier DocumentType { get; set; } = TypeNationalIdentifier.Dni;
     public string DocumentNumber { get; set; } = string.Empty;
 
-    public string FederationLicense { get; set; } = string.Empty;
+    public string? FederationLicense { get; set; } = string.Empty;
+
+    public string AddressStreet { get; set; } = string.Empty;
+    public required string AddressCity { get; set; }
+
+    public string AddressZipCode { get; set; } = string.Empty;
+    public string AddressProvince { get; set; } = string.Empty;
+    public required string AddressPostalCode { get; set;
+
 }

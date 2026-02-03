@@ -1,3 +1,5 @@
+using FishClubAlginet.API.Infrastructure;
+
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString(ApplicationConstants.Database.ConnectionName)
@@ -60,14 +62,15 @@ builder.Services.AddCors(options =>
                   .AllowCredentials(); 
         });
 });
-
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails(); 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 
 WebApplication app = builder.Build();
-
+app.UseExceptionHandler();
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;

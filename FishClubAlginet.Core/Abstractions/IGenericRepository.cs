@@ -3,7 +3,7 @@
 public interface IGenericRepository<T, TId>
     where T : BaseEntity<TId>
 {
-    Task<T> Insert(T entity);
+    Task<ErrorOr<T>> AddAsync(T entity);
     Task<T?> GetById(TId id);
     IQueryable<T> GetAll();
     void Update(T entity);
