@@ -75,7 +75,6 @@
 
   <ItemGroup>
     <Folder Include="Constants\" />
-    <Folder Include="Controllers\" />
   </ItemGroup>
 
 </Project>
