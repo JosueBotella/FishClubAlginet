@@ -56,22 +56,21 @@
 
 @code {
     bool sidebarExpanded = true;
-
+    string pathToNavigate = string.Format("/{0}", "login");
+    string[] confirmDialog= { "¿Seguro que quieres salir?", "Cerrar Sesión","Sí","Cancelar" };
     [Inject] TooltipService TooltipService { get; set; } = default!;
 
     private async Task CerrarSesion()
     {
-        // Preguntamos confirmación (Opcional, pero buena práctica UX)
-        var confirm = await DialogService.Confirm("¿Seguro que quieres salir?", "Cerrar Sesión",
-            new ConfirmOptions() { OkButtonText = "Sí", CancelButtonText = "Cancelar" });
+        var confirm = await DialogService.Confirm(confirmDialog[0], confirmDialog[1],
+            new ConfirmOptions() { OkButtonText = confirmDialog[2], CancelButtonText = confirmDialog[3] });
 
         if (confirm == true)
         {
-            // Casteamos a nuestro provider personalizado para acceder al método Logout
             var customAuthState = (JwtAuthenticationStateProvider)AuthStateProvider;
             await customAuthState.LogoutAsync();
 
-            Nav.NavigateTo("/login");
+            Nav.NavigateTo(pathToNavigate);
         }
     }
 }

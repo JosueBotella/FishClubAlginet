@@ -12,10 +12,8 @@
 
         if (authState?.User?.Identity is null || !authState.User.Identity.IsAuthenticated)
         {
-            // Obtenemos la ruta relativa (ej: "login" o "counter")
             var returnUrl = Navigation.ToBaseRelativePath(Navigation.Uri);
 
-            // Si la ruta relativa empieza por 'login', NO redirigimos (evita el bucle)
             if (string.IsNullOrWhiteSpace(returnUrl) || !returnUrl.StartsWith("login", StringComparison.OrdinalIgnoreCase))
             {
                 Navigation.NavigateTo($"login?returnUrl={Uri.EscapeDataString(Navigation.Uri)}");
