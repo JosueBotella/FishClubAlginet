@@ -11,7 +11,7 @@ global using Microsoft.EntityFrameworkCore.ChangeTracking;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.AspNetCore.Identity;
-global using Microsoft.AspNetCore.Diagnostics;
+//global using Microsoft.AspNetCore.Diagnostics;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.IdentityModel.Tokens;
 global using System.IdentityModel.Tokens.Jwt;

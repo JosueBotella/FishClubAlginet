@@ -15,6 +15,5 @@ public class CreateFishermanDto
 
     public string AddressZipCode { get; set; } = string.Empty;
     public string AddressProvince { get; set; } = string.Empty;
-    public required string AddressPostalCode { get; set;
-
+    public required string AddressPostalCode { get; set; }
 }

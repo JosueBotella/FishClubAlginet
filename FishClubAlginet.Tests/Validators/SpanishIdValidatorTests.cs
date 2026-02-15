@@ -19,7 +19,12 @@ public class CreateFishermanValidatorTests
             LastName = "Doe",
             FederationLicense = "VAL-2026",
             DocumentType = TypeNationalIdentifier.Dni,
-            DocumentNumber = "12345678Z" // Valid: 12345678 % 23 = 14 -> Z
+            DocumentNumber = "12345678Z", // Valid: 12345678 % 23 = 14 -> Z
+            AddressStreet = "123 Main St",
+            AddressCity = "Valencia",
+            AddressZipCode = "46001",
+            AddressProvince = "Valencia",
+            AddressPostalCode = "46001"
         };
 
         // Act
@@ -36,7 +41,12 @@ public class CreateFishermanValidatorTests
         var model = new CreateFishermanDto
         {
             DocumentType = TypeNationalIdentifier.Dni,
-            DocumentNumber = "12345678A" // Invalid letter
+            DocumentNumber = "12345678A" ,// Invalid letter
+            AddressStreet = "123 Main St",
+            AddressCity = "Valencia",
+            AddressZipCode = "46001",
+            AddressProvince = "Valencia",
+            AddressPostalCode = "46001"
         };
 
         // Act
@@ -55,7 +65,12 @@ public class CreateFishermanValidatorTests
         var model = new CreateFishermanDto
         {
             DocumentType = TypeNationalIdentifier.Nie,
-            DocumentNumber = validNie
+            DocumentNumber = validNie,
+            AddressStreet = "123 Main St",
+            AddressCity = "Valencia",
+            AddressZipCode = "46001",
+            AddressProvince = "Valencia",
+            AddressPostalCode = "46001"
         };
 
         var result = _validator.TestValidate(model);
