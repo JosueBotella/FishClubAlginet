@@ -1,6 +1,4 @@
-﻿using FluentValidation;
-
-namespace FishClubAlginet.Application.Features.Auth.Commands;
+﻿namespace FishClubAlginet.Application.Features.Auth.Commands;
 
 
 public record FisherManCommand(
@@ -64,55 +62,59 @@ public class FisherManAddCommandHandler : IRequestHandler<FisherManCommand, int>
         public FisherManCommandValidator()
         {
             RuleFor(x => x.FirstName)
-                .NotEmpty().WithMessage(ValidatorsConstants.FisherManValidationConstants.FirstNameRequired)
+                .NotEmpty()
+                .WithErrorCode(ValidatorsConstants.FisherManValidationConstants.FirstNameRequiredErrorCode)
+                .WithMessage(ValidatorsConstants.FisherManValidationConstants.FirstNameRequiredErrorMessage)
                 .Must(name => !string.IsNullOrWhiteSpace(name))
-                    .WithMessage(ValidatorsConstants.FisherManValidationConstants.FirstNameNotWhitespace)
+                    .WithMessage(ValidatorsConstants.FisherManValidationConstants.FirstNameNotWhitespaceErrorMessage)
                 .MaximumLength(FisherManConstraints.FistNameMaxLength)
                     .WithMessage(string.Format(
-                        ValidatorsConstants.FisherManValidationConstants.FirstNameMaxLength,
+                        ValidatorsConstants.FisherManValidationConstants.FirstNameMaxLengthErrorMessage,
                         FisherManConstraints.FistNameMaxLength));
 
             RuleFor(x => x.LastName)
-                .NotEmpty().WithMessage(ValidatorsConstants.FisherManValidationConstants.LastNameRequired)
+                .NotEmpty().WithMessage(ValidatorsConstants.FisherManValidationConstants.LastNameRequiredErrorMessage)
                 .Must(name => !string.IsNullOrWhiteSpace(name))
-                    .WithMessage(ValidatorsConstants.FisherManValidationConstants.LastNameNotWhitespace)
+                    .WithMessage(ValidatorsConstants.FisherManValidationConstants.LastNameNotWhitespaceErrorMessage)
                 .MaximumLength(FisherManConstraints.LastNameMaxLength)
                     .WithMessage(string.Format(
-                        ValidatorsConstants.FisherManValidationConstants.LastNameMaxLength,
+                        ValidatorsConstants.FisherManValidationConstants.LastNameMaxLengthErrorMessage,
                         FisherManConstraints.LastNameMaxLength));
 
             RuleFor(x => x.DateOfBirth)
                 .LessThan(DateTime.Today)
-                    .WithMessage(ValidatorsConstants.FisherManValidationConstants.BirthDateInPast)
+                    .WithMessage(ValidatorsConstants.FisherManValidationConstants.BirthDateInPastErrorMessage)
                 .Must(BeAtLeastMinimumAge)
                     .WithMessage(string.Format(
-                        ValidatorsConstants.FisherManValidationConstants.MinimumAgeMessage,
+                        ValidatorsConstants.FisherManValidationConstants.MinimumAgeMessageErrorMessage,
                         FisherManConstraints.MinimumAge));
 
             RuleFor(x => x.DocumentType)
                 .Must(dt => Enum.IsDefined(typeof(TypeNationalIdentifier), dt))
-                .WithMessage(ValidatorsConstants.FisherManValidationConstants.InvalidDocumentType);
+                .WithMessage(ValidatorsConstants.FisherManValidationConstants.InvalidDocumentTypeErrorMessage);
 
             RuleFor(x => x.DocumentNumber)
-                .NotEmpty().WithMessage(ValidatorsConstants.FisherManValidationConstants.DocumentNumberRequired)
+                .NotEmpty().WithMessage(ValidatorsConstants.FisherManValidationConstants.DocumentNumberRequiredErrorMessage)
                 .Must(num => !string.IsNullOrWhiteSpace(num))
-                    .WithMessage(ValidatorsConstants.FisherManValidationConstants.DocumentNumberNotWhitespace)
+                    .WithMessage(ValidatorsConstants.FisherManValidationConstants.DocumentNumberNotWhitespaceErrorMessage)
                 .MinimumLength(FisherManConstraints.DocumentNumberMinLength)
                     .WithMessage(string.Format(
-                        ValidatorsConstants.FisherManValidationConstants.DocumentNumberMinLength,
+                        ValidatorsConstants.FisherManValidationConstants.DocumentNumberMinLengthErrorMessage,
                         FisherManConstraints.DocumentNumberMinLength))
                 .MaximumLength(FisherManConstraints.DocumentNumberMaxLength)
                     .WithMessage(string.Format(
-                        ValidatorsConstants.FisherManValidationConstants.DocumentNumberMaxLength,
+                        ValidatorsConstants.FisherManValidationConstants.DocumentNumberMaxLengthErrorMessage,
                         FisherManConstraints.DocumentNumberMaxLength))
                 .Matches(ValidatorsConstants.FisherManValidationConstants.DocumentNumberRegex)
-                    .WithMessage(ValidatorsConstants.FisherManValidationConstants.DocumentNumberInvalidFormat);
+                    .WithErrorCode(ValidatorsConstants.FisherManValidationConstants.DocumentNumberInvalidFormatErrorCode)
+                    .WithMessage(ValidatorsConstants.FisherManValidationConstants.DocumentNumberInvalidFormatErrorMessage);
 
             RuleFor(x => x.FederationLicense)
                 .Cascade(CascadeMode.Stop)
                 .Must(license => license == null || license.Trim().Length <= FisherManConstraints.FederationLicenseMaxLength)
+                .WithErrorCode(errorCode: ValidatorsConstants.FisherManValidationConstants.FederationLicenseMaxLengthErrorCode)
                 .WithMessage(string.Format(
-                    ValidatorsConstants.FisherManValidationConstants.FederationLicenseMaxLengthMessage,
+                    ValidatorsConstants.FisherManValidationConstants.FederationLicenseMaxLengthErrorMessage,
                     FisherManConstraints.FederationLicenseMaxLength));
         }
 
@@ -125,18 +127,7 @@ public class FisherManAddCommandHandler : IRequestHandler<FisherManCommand, int>
 
             return age >= FisherManConstraints.MinimumAge;
         }
-    }
-
-
-    private bool BeAtLeastMinimumAge(DateTime dob)
-    {
-        const int MinimumAge = 10;
-        var today = DateTime.Today;
-        var age = today.Year - dob.Year;
-        if (dob > today.AddYears(-age))
-            age--;
-        return age >= MinimumAge;
-    }
+    }  
     
 }
 

@@ -6,3 +6,8 @@ global using FishClubAlginet.Application.Validators;
 global using FishClubAlginet.Contracts.Dtos.Requests.Identity;
 global using FishClubAlginet.Contracts.Dtos.Requests.Fisherman;
 global using FishClubAlginet.Application.Features.Auth.Commands;
+global using FishClubAlginet.Application.Abstractions;
+global using FishClubAlginet.Core.Domain.Entities;
+global using Moq;
+global using ErrorOr;
+global using FishClubAlginet.Core.Domain.ValueObjects;

@@ -1,59 +1,54 @@
-﻿//using System.Reflection;
+namespace FishClubAlginet.Application.Features.Fishermen;
 
+public record FisherManGetAllQueryResponse(
+    int Id,
+    string FirstName,
+    string LastName,
+    DateTime DateOfBirth,
+    TypeNationalIdentifier DocumentType,
+    string DocumentNumber,
+    string? FederationLicense,
+    string AddressCity,
+    string AddressProvince
+);
 
-//namespace FishClubAlginet.Application.Features.Fishermen;
+public record FisherManGetAllQuery : IRequest<ErrorOr<List<FisherManGetAllQueryResponse>>>;
 
-//internal sealed record GetAllFisherMenQuery();
+public class FisherManGetAllQueryHandler : IRequestHandler<FisherManGetAllQuery, List<FisherManGetAllQueryResponse>>
+{
+    private readonly IGenericRepository<Fisherman, int> _genericRepository;
 
-//internal sealed record FisherManDto(string Id, string Name);
+    public FisherManGetAllQueryHandler(IGenericRepository<Fisherman, int> genericRepository)
+    {
+        _genericRepository = genericRepository;
+    }
 
-//internal class FisherManGetAllQueriesHandler
-//{
-//    private readonly object _commandHandler;
-    
+    public Task<ErrorOr<List<FisherManGetAllQueryResponse>>> Handle(FisherManGetAllQuery request, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var fishermen = _genericRepository.GetAll()
+                .Select(f => new FisherManGetAllQueryResponse(
+                    Id: f.Id,
+                    FirstName: f.FirstName,
+                    LastName: f.LastName,
+                    DateOfBirth: f.DateOfBirth,
+                    DocumentType: f.DocumentType,
+                    DocumentNumber: f.DocumentNumber,
+                    FederationLicense: f.FederationLicense,
+                    AddressCity: f.Address.City,
+                    AddressProvince: f.Address.Province
+                ))
+                .ToList();
 
-//    public FisherManGetAllQueriesHandler(object commandHandler)
-//    {
-//        _commandHandler = commandHandler ?? throw new ArgumentNullException(nameof(commandHandler));
-//    }
-
-//    public async Task<IEnumerable<FisherManDto>> HandleAsync(GetAllFisherMenQuery query, CancellationToken cancellationToken = default)
-//    {
-       
-
-        
-        
-//        object? awaitedResult;
-//        try
-//        {
-//            // invokeResult is expected to be a Task or Task<T>
-//            awaitedResult = await (dynamic)invokeResult;
-//        }
-//        catch
-//        {
-//            // If the method returned a non-task result or fail to await, try to use it directly
-//            awaitedResult = invokeResult;
-//        }
-
-//        if (awaitedResult == null)
-//            return Array.Empty<FisherManDto>();
-
-//        // Try to treat awaitedResult as IEnumerable
-//        if (awaitedResult is System.Collections.IEnumerable enumerable)
-//        {
-//            var list = new List<FisherManDto>();
-//            foreach (var item in enumerable)
-//            {
-//                if (item == null) continue;
-//                var dto = MapToDto(item);
-//                if (dto != null) list.Add(dto);
-//            }
-
-//            return list;
-//        }
-
-//        // Single item returned: try to map to DTO
-//        var singleDto = MapToDto(awaitedResult);
-//        return singleDto is null ? Array.Empty<FisherManDto>() : new[] { singleDto };
-//    }   
-//}
+            return Task.FromResult<ErrorOr<List<FisherManGetAllQueryResponse>>>(fishermen);
+        }
+        catch
+        {
+            var error = Error.Failure(
+                code: ValidatorsConstants.UnexpectedErrorCode,
+                description: ValidatorsConstants.UnexpectedErrorMessage);
+            return Task.FromResult<ErrorOr<List<FisherManGetAllQueryResponse>>>(error);
+        }
+    }
+}

@@ -1,4 +1,6 @@
-﻿namespace FishClubAlginet.Infrastructure.Persistence.DbInitializer;
+﻿using FishClubAlginet.Infrastructure.Persistence.Seeds;
+
+namespace FishClubAlginet.Infrastructure.Persistence.DbInitializer;
 
 public static class DbInitializer
 {
@@ -16,6 +18,7 @@ public static class DbInitializer
             //await context.Database.EnsureDeletedAsync(); // Cuidado con esto
             await context.Database.MigrateAsync();
             await AccountsSeed.SeedAsync(context);
+            await FishermanSeed.SeedAsync(context);
         }
         catch (Exception ex)
         {

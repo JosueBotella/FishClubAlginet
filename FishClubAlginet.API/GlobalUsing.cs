@@ -13,4 +13,7 @@ global using FishClubAlginet.Infrastructure.Persistence.DbInitializer;
 global using FishClubAlginet.Application.Abstractions;
 global using FishClubAlginet.Application.Constants;
 global using FishClubAlginet.Application.Features.Auth.Commands;
+global using FishClubAlginet.Application.Features.Fishermen;
 global using FishClubAlginet.Contracts.Dtos.Requests.Fisherman;
+global using FishClubAlginet.API.Infrastructure;
+global using Scalar.AspNetCore;

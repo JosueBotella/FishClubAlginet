@@ -1,5 +1,3 @@
-using FishClubAlginet.API.Infrastructure;
-
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString(ApplicationConstants.Database.ConnectionName)
@@ -66,7 +64,7 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails(); 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddOpenApi();
 
 
 WebApplication app = builder.Build();
@@ -88,8 +86,8 @@ using (var scope = app.Services.CreateScope())
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 
 app.UseHttpsRedirection();

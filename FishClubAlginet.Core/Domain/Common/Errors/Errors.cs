@@ -3,7 +3,7 @@
 public static partial class Errors
 {
     // Agrupamos por entidad para mantener el orden
-    public static class Fisherman
+    public static class FishermanErrors
     {
         public static Error NotFound => Error.NotFound(
             code: "Fisherman.NotFound",

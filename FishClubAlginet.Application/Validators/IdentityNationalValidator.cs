@@ -15,7 +15,7 @@ public static class SpanishIdValidator
             var type = documentTypeSelector(rootObject);
             return IsDocumentValid(type, documentNumber);
         })
-        .WithMessage(ValidatorsConstants.IdentityNationValidationNumberError);
+        .WithMessage(ValidatorsConstants.IdentityNationValidationNumberErrorMessage);
 
         return ruleBuilderValidation;
     }

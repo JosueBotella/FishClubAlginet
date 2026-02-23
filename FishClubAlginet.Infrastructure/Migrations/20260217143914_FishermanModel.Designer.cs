@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FishClubAlginet.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260130123735_FishermanModel")]
+    [Migration("20260217143914_FishermanModel")]
     partial class FishermanModel
     {
         /// <inheritdoc />
@@ -64,11 +64,10 @@ namespace FishClubAlginet.Infrastructure.Migrations
 
                     b.Property<string>("LastName")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<DateTime>("LastUpdateUtc")
-                        .IsConcurrencyToken()
                         .HasColumnType("datetime2");
 
                     b.Property<string>("RegionalLicense")
