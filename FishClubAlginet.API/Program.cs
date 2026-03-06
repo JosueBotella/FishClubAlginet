@@ -1,3 +1,6 @@
+using FishClubAlginet.API.Infrastructure.BackgroundJobs;
+using FluentValidation;
+
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString(ApplicationConstants.Database.ConnectionName)
@@ -9,14 +12,12 @@ builder.Services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericReposito
 builder.Services.AddScoped<IUnitOfWork, UnitOfWorkService>();
 builder.Services.AddScoped<IAuthService,AuthService>();
 
-builder.Services.Scan(selector => selector
-    .FromAssemblies(
-        typeof(IRequestHandler<,>).Assembly
-    )
-    .AddClasses(classes => classes.AssignableTo(typeof(IRequestHandler<,>)))
-    .AsImplementedInterfaces()
-    .WithScopedLifetime());
+builder.Services.AddMediatR(cfg =>
+{
 
+    cfg.RegisterServicesFromAssembly(typeof(RegisterUserCommand).Assembly);
+});
+builder.Services.AddValidatorsFromAssembly(typeof(LoginUserCommand).Assembly);
 builder.Services.AddIdentityCore<IdentityUser>(options => {
     options.Password.RequireDigit = false;
     options.Password.RequiredLength = 6;
@@ -29,6 +30,11 @@ builder.Services.AddIdentityCore<IdentityUser>(options => {
 
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 var secretKey = jwtSettings.GetValue<string>("SecretKey");
+
+// Program.cs
+builder.Services.AddHostedService<ProcessOutboxMessagesJob>();
+
+
 
 // Configurar el esquema de Autenticación JWT
 builder.Services.AddAuthentication(options => {
@@ -47,14 +53,14 @@ builder.Services.AddAuthentication(options => {
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey!))
     }
 );
-var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(name: MyAllowSpecificOrigins,
+    options.AddPolicy(name: ApplicationConstants.ConfigurationProgram.AddCors_MyAllowSpecificOrigins,
         policy =>
         {
-            policy.WithOrigins("https://localhost:7230") 
+            policy.WithOrigins(ApplicationConstants.ConfigurationProgram.AddCors_WithOrigins) 
                   .AllowAnyHeader()
                   .AllowAnyMethod()
                   .AllowCredentials(); 
@@ -91,10 +97,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseCors(MyAllowSpecificOrigins);
+app.UseCors(ApplicationConstants.ConfigurationProgram.AddCors_MyAllowSpecificOrigins);
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.Run();
+await app.RunAsync();

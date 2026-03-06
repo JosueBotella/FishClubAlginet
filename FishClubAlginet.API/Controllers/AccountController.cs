@@ -6,15 +6,12 @@ namespace FishClubAlginet.API.Controllers;
 [ApiController]
 public class AccountController : ApiController 
 {
-    private readonly IRequestHandler<RegisterUserCommand, string> _registerHandler;
-    private readonly IRequestHandler<LoginUserCommand, string> _loginHandler;
-
-    public AccountController(
-        IRequestHandler<RegisterUserCommand, string> registerHandler,
-        IRequestHandler<LoginUserCommand, string> loginHandler)
+ 
+    private readonly IMediator _mediator;
+    public AccountController(IMediator mediator)
+        
     {
-        _registerHandler = registerHandler;
-        _loginHandler = loginHandler;
+       _mediator = mediator;
     }
 
     [HttpPost("register")]
@@ -26,7 +23,7 @@ public class AccountController : ApiController
             request.ConfirmPassword
         );
 
-        var result = await _registerHandler.Handle(command, default);
+        var result = await _mediator.Send(command, default);
 
         return result.Match(
             token => Ok(new { Token = token }),
@@ -39,7 +36,7 @@ public class AccountController : ApiController
     {
         var command = new LoginUserCommand(request.UserName, request.Password);
 
-        var result = await _loginHandler.Handle(command, default);
+        var result = await _mediator.Send(command, default);
 
         return result.Match(
             token => Ok(new { Token = token }),

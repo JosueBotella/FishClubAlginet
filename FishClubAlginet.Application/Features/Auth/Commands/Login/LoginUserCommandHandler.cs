@@ -1,16 +1,13 @@
-﻿using FishClubAlginet.Application.Abstractions;
+﻿namespace FishClubAlginet.Application.Features.Auth.Commands;
 
 
-namespace FishClubAlginet.Application.Features.Auth.Commands;
-
-// 1. EL COMANDO
 public record LoginUserCommand(
     string Email,
     string Password
 ) : IRequest<ErrorOr<string>>;
 
-// 2. EL HANDLER
-public class LoginUserHandler : IRequestHandler<LoginUserCommand, string>
+
+public class LoginUserHandler : IRequestHandler<LoginUserCommand, ErrorOr<string>>
 {
     private readonly IAuthService _authService;
 

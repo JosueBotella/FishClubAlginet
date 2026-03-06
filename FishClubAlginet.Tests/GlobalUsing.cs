@@ -11,3 +11,5 @@ global using FishClubAlginet.Core.Domain.Entities;
 global using Moq;
 global using ErrorOr;
 global using FishClubAlginet.Core.Domain.ValueObjects;
+global using Microsoft.Extensions.Logging;
+global using FishClubAlginet.Application.Features.Events.Commands.Fishermen;

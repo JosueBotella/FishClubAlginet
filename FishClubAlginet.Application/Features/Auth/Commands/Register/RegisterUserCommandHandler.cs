@@ -8,7 +8,7 @@ public record RegisterUserCommand(
 ) : IRequest<ErrorOr<string>>; 
 
 
-public class RegisterUserHandler : IRequestHandler<RegisterUserCommand, string>
+public class RegisterUserHandler : IRequestHandler<RegisterUserCommand, ErrorOr<string>>
 {
     private readonly IAuthService _authService;
 
@@ -48,4 +48,21 @@ public class RegisterUserHandler : IRequestHandler<RegisterUserCommand, string>
 
         return token;
     }
+    public class RegisterUserCommandValidator : AbstractValidator<RegisterUserCommand>
+    {
+        public RegisterUserCommandValidator()
+        {
+            RuleFor(x => x.Email)
+                .NotEmpty().WithMessage("El email es obligatorio.")
+                .EmailAddress().WithMessage("El formato del email no es válido.");
+
+            RuleFor(x => x.Password)
+                .NotEmpty().WithMessage("La contraseña es obligatoria.")
+                .MinimumLength(6).WithMessage("La contraseña debe tener al menos 6 caracteres.");
+
+            RuleFor(x => x.ConfirmPassword)
+                .Equal(x => x.Password).WithMessage("Las contraseñas no coinciden.");
+        }
+    }
+
 }

@@ -14,7 +14,7 @@ public record FisherManGetAllQueryResponse(
 
 public record FisherManGetAllQuery : IRequest<ErrorOr<List<FisherManGetAllQueryResponse>>>;
 
-public class FisherManGetAllQueryHandler : IRequestHandler<FisherManGetAllQuery, List<FisherManGetAllQueryResponse>>
+public class FisherManGetAllQueryHandler : IRequestHandler<FisherManGetAllQuery, ErrorOr<List<FisherManGetAllQueryResponse>>>
 {
     private readonly IGenericRepository<Fisherman, int> _genericRepository;
 

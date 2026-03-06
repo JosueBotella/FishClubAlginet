@@ -2,7 +2,12 @@
 
 public static class ApplicationConstants
 {
-   
+   public static class ConfigurationProgram
+   {
+        public const string AddCors_MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+        public const string AddCors_WithOrigins = "https://localhost:7230";
+    }
+
     public static class Database
     {
         public const string ConnectionName = "TodoListContext";

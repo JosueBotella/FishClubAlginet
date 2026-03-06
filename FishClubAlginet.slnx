@@ -1,4 +1,8 @@
 <Solution>
+  <Folder Name="/MarkdownFiles/" />
+  <Folder Name="/MarkdownFiles/Documentation/">
+    <File Path="Fisherman.md" />
+  </Folder>
   <Project Path="FishClubAlginet.API/FishClubAlginet.API.csproj" />
   <Project Path="FishClubAlginet.Application/FishClubAlginet.Application.csproj" />
   <Project Path="FishClubAlginet.Blazor/FishClubAlginet.Blazor.csproj" />

@@ -1,4 +1,6 @@
-﻿namespace FishClubAlginet.Application.Features.Auth.Commands;
+﻿using FishClubAlginet.Application.Features.Events.Commands.Fishermen;
+
+namespace FishClubAlginet.Application.Features.Auth.Commands;
 
 
 public record FisherManCommand(
@@ -15,45 +17,71 @@ public record FisherManCommand(
 ) : IRequest<ErrorOr<int>>; 
 
 
-public class FisherManAddCommandHandler : IRequestHandler<FisherManCommand, int>
+public class FisherManAddCommandHandler : IRequestHandler<FisherManCommand, ErrorOr<int>>
 {
     private readonly IGenericRepository<Fisherman,int> _genericRepository;
+    private readonly ILogger<FisherManAddCommandHandler> _logger;
 
-    public FisherManAddCommandHandler(IGenericRepository<Fisherman, int> genericRepository)
+    public FisherManAddCommandHandler(
+        IGenericRepository<Fisherman, int> genericRepository,
+        ILogger<FisherManAddCommandHandler> logger)
     {
         _genericRepository = genericRepository;
+        _logger = logger;
     }
 
     public async Task<ErrorOr<int>> Handle(FisherManCommand command, CancellationToken cancellationToken)
-    {       
-
-        var addFisher = new Fisherman
+    {
+        try
         {
-            Id=0,
-            FirstName = command.FirstName,
-            LastName = command.LastName,
-            DateOfBirth = command.DateOfBirth,
-            DocumentType = command.DocumentType,
-            DocumentNumber = command.DocumentNumber,
-            FederationLicense = command.FederationLicense,     
-            Address = new Address
+            // Use the factory method to create the fisherman
+            var fisherman = Fisherman.Create(
+                command.FirstName,
+                command.LastName,
+                command.DateOfBirth,
+                command.DocumentType,
+                command.DocumentNumber,
+                command.FederationLicense,
+                new Address
+                {
+                    Street = command.AddressStreet ?? string.Empty,
+                    City = command.AddressCity ?? string.Empty,
+                    ZipCode = command.AddressZipCode ?? string.Empty,
+                    Province = command.AddressProvince ?? string.Empty
+                }
+            );
+
+            // Raise the domain event BEFORE saving to ensure it's captured by the interceptor
+            fisherman.RaiseDomainEvent(new FishermanAddedDomainEvent
             {
-                Street = command.AddressStreet ?? string.Empty,
-                City = command.AddressCity ?? string.Empty,
-                ZipCode = command.AddressZipCode ?? string.Empty,
-                Province = command.AddressProvince ?? string.Empty
+                Id = 0, // Will be set by the database
+                FirstName = fisherman.FirstName,
+                LastName = fisherman.LastName,
+                DocumentNumber = fisherman.DocumentNumber
+            });
+
+            // SaveChangesAsync will capture the domain event and convert it to OutboxMessage (ACID transaction)
+            var result = await _genericRepository.AddAsync(fisherman);
+
+            if (result.IsError)
+            {
+                _logger.LogError("Error creating Fisherman: {Errors}", string.Join(", ", result.Errors.Select(e => e.Description)));
+                return result.Errors;
             }
-        };
 
-        var result  = await _genericRepository.AddAsync(addFisher);
-
-        if (result.IsError)
-        {
-            return result.Errors;
+            _logger.LogInformation("Fisherman created successfully with ID: {FishermanId}", result.Value.Id);
+            return result.Value.Id;
         }
+        catch (Exception ex)
+        {
+            // If SaveChanges fails, the entire transaction is rolled back (Fisherman + OutboxMessage)
+            _logger.LogError(ex, "Critical error while saving Fisherman and domain event");
 
-        return result.Value.Id;
-        
+            return Error.Failure(
+                code: "FISHERMAN_SAVE_FAILED",
+                description: "Could not create the fisherman. Please try again."
+            );
+        }
     }
 
   

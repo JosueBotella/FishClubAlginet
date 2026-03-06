@@ -11,19 +11,16 @@ public class ApiController : ControllerBase
 {
     protected IActionResult Problem(List<Error> errors)
     {
-        // Si no hay errores, devolvemos un 500 genérico (no debería pasar si llegamos aquí)
         if (errors.Count is 0)
         {
             return Problem();
         }
 
-        // Si TODOS los errores son de validación, devolvemos un formato especial con los campos
         if (errors.All(error => error.Type == ErrorType.Validation))
         {
             return ValidationProblem(errors);
         }
 
-        // Si hay errores mixtos o de otro tipo, usamos el primero para determinar el código HTTP
         return Problem(errors[0]);
     }
 

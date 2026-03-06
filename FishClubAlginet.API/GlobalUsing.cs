@@ -17,3 +17,7 @@ global using FishClubAlginet.Application.Features.Fishermen;
 global using FishClubAlginet.Contracts.Dtos.Requests.Fisherman;
 global using FishClubAlginet.API.Infrastructure;
 global using Scalar.AspNetCore;
+global using FishClubAlginet.Core.Abstractions;
+global using FishClubAlginet.Core.Domain.Entities;
+global using MediatR;
+global using System.Text.Json;

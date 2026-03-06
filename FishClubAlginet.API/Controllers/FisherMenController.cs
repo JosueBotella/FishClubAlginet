@@ -4,15 +4,11 @@
 [ApiController]
 public class FisherMenController : ApiController
 {
-    private readonly IRequestHandler<FisherManCommand, int> _addHandler;
-    private readonly IRequestHandler<FisherManGetAllQuery, List<FisherManGetAllQueryResponse>> _getAllHandler;
+    private readonly IMediator _mediator;
 
-    public FisherMenController(
-        IRequestHandler<FisherManCommand, int> addHandler,  
-        IRequestHandler<FisherManGetAllQuery, List<FisherManGetAllQueryResponse>> getAllHandler)
+    public FisherMenController(IMediator mediator)
     {
-        _addHandler = addHandler;
-        _getAllHandler = getAllHandler;
+        _mediator = mediator;
     }
 
     [HttpPost("Add")]
@@ -31,10 +27,10 @@ public class FisherMenController : ApiController
             request.AddressProvince
         );
 
-        var result = await _addHandler.Handle(command, default);
+        var result = await _mediator.Send(command, default);
 
         return result.Match(
-            token => Ok(new { Token = token }),
+            fishermanId => Ok(new { Id = fishermanId }),
             errors => Problem(errors)
         );
     }
@@ -43,7 +39,7 @@ public class FisherMenController : ApiController
     public async Task<IActionResult> GetAll()
     {
         var query = new FisherManGetAllQuery();
-        var result = await _getAllHandler.Handle(query, default);
+        var result = await _mediator.Send(query, default);
 
         return result.Match(
             fishermen => Ok(fishermen),

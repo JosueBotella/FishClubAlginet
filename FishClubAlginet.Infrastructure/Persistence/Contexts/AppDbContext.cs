@@ -3,6 +3,7 @@
 public class AppDbContext : IdentityDbContext
 {
     public DbSet<Fisherman> Fishermen { get; set; }
+    public DbSet<OutboxMessage> OutboxMessages { get; set; }
     public AppDbContext(DbContextOptions<AppDbContext> context)
         : base(context)
     {
@@ -13,5 +14,11 @@ public class AppDbContext : IdentityDbContext
         base.OnModelCreating(builder);
         
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+    }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        optionsBuilder.AddInterceptors(new ConvertDomainEventsToOutboxMessagesInterceptor());
+        base.OnConfiguring(optionsBuilder);
     }
 }
