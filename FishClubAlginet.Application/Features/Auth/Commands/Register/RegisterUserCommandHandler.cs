@@ -45,7 +45,10 @@ public class RegisterUserHandler : IRequestHandler<RegisterUserCommand, ErrorOr<
         
         var loginDto = new LoginDto { UserName = command.Email, Password = command.Password };
         var token = await _authService.LoginAsync(loginDto);
-
+        if (token is null)
+        {
+            return Error.Failure("Auth.LoginFailed", "No se pudo generar el token de autenticación.");
+        }
         return token;
     }
     public class RegisterUserCommandValidator : AbstractValidator<RegisterUserCommand>

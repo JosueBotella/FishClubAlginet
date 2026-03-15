@@ -10,7 +10,7 @@ public static class ApplicationConstants
 
     public static class Database
     {
-        public const string ConnectionName = "TodoListContext";
+        public const string ConnectionName = "LocalConnectionString";
         public const string MigrationErrorMessage = "Error durante la migración de base de datos.";
     }
 

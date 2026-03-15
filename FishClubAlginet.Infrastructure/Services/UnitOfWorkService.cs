@@ -4,6 +4,7 @@ public class UnitOfWorkService : IUnitOfWork
 {
     private readonly AppDbContext _context;
     private readonly IDictionary<Type, dynamic> _repositories = new Dictionary<Type, dynamic>();
+    private bool _disposed = false;
 
     public UnitOfWorkService(AppDbContext context)
     {
@@ -23,7 +24,33 @@ public class UnitOfWorkService : IUnitOfWork
         return 0;
     }
 
-    public void Dispose() => _context.Dispose();
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposed)
+        {
+            if (disposing)
+            {
+                _context?.Dispose();
+                
+                foreach (var repository in _repositories.Values)
+                {
+                    if (repository is IDisposable disposable)
+                    {
+                        disposable.Dispose();
+                    }
+                }
+                _repositories.Clear();
+            }
+
+            _disposed = true;
+        }
+    }
 
     public IGenericRepository<T, TId> Repository<T, TId>()
       where T : BaseEntity<TId>

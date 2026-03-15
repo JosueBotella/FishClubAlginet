@@ -1,5 +1,4 @@
-using FishClubAlginet.API.Infrastructure.BackgroundJobs;
-using FluentValidation;
+
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -7,7 +6,7 @@ var connectionString = builder.Configuration.GetConnectionString(ApplicationCons
     ?? throw new InvalidOperationException(ApplicationConstants.Database.MigrationErrorMessage);
 var configuration = builder.Configuration;
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseNpgsql(connectionString));
 builder.Services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericRepository<,>));
 builder.Services.AddScoped<IUnitOfWork, UnitOfWorkService>();
 builder.Services.AddScoped<IAuthService,AuthService>();

@@ -11,10 +11,10 @@ public class AuthService : IAuthService
         _configuration = configuration;
     }
 
-    public async Task<IdentityResult> RegisterAsync(RegisterUserDto RegisterUserDto)
+    public async Task<IdentityResult> RegisterAsync(RegisterUserDto registerDto)
     {
-        var user = new IdentityUser { UserName = RegisterUserDto.Email, Email = RegisterUserDto.Email };
-        return await _userManager.CreateAsync(user, RegisterUserDto.Password);
+        var user = new IdentityUser { UserName = registerDto.Email, Email = registerDto.Email };
+        return await _userManager.CreateAsync(user, registerDto.Password);
     }
 
     public async Task<string?> LoginAsync(LoginDto loginDto)

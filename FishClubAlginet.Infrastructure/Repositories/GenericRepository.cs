@@ -1,6 +1,4 @@
-﻿using ErrorOr;
-using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
+﻿
 
 namespace FishClubAlginet.Infrastructure.Repositories;
 
@@ -23,14 +21,11 @@ public class GenericRepository<T, TId> : IGenericRepository<T, TId>
         }
         catch (DbUpdateException ex)
         {
-            if (ex.InnerException is SqlException sqlEx)
+            if (ex.InnerException is PostgresException pgEx && pgEx.SqlState == "23505")
             {
-                if (sqlEx.Number == 2601 || sqlEx.Number == 2627)
-                {
-                    return Error.Conflict(
-                        code: $"{typeof(T).Name}.Duplicate",
-                        description: "Ya existe un registro con esos datos únicos.");
-                }
+                return Error.Conflict(
+                    code: $"{typeof(T).Name}.Duplicate",
+                    description: "Ya existe un registro con esos datos únicos.");
             }
 
             return Error.Failure(
