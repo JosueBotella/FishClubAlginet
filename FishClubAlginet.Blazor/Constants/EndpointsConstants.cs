@@ -12,5 +12,11 @@ public class EndpointsConstants
     {
         public const string GetAll = "api/todolist";
         public const string Create = "api/todolist";
-    }    
+    }
+
+    public static class Fishermen
+    {
+        public const string Add = "api/fishermen/Add";
+        public const string GetAll = "api/fishermen/GetAll";
+    }
 }
