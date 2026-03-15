@@ -24,7 +24,6 @@ public class CreateFishermanValidatorTests
             AddressCity = "Valencia",
             AddressZipCode = "46001",
             AddressProvince = "Valencia",
-            AddressPostalCode = "46001"
         };
 
         // Act
@@ -46,7 +45,6 @@ public class CreateFishermanValidatorTests
             AddressCity = "Valencia",
             AddressZipCode = "46001",
             AddressProvince = "Valencia",
-            AddressPostalCode = "46001"
         };
 
         // Act
@@ -70,7 +68,6 @@ public class CreateFishermanValidatorTests
             AddressCity = "Valencia",
             AddressZipCode = "46001",
             AddressProvince = "Valencia",
-            AddressPostalCode = "46001"
         };
 
         var result = _validator.TestValidate(model);
