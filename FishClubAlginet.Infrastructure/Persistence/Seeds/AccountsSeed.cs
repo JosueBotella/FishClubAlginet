@@ -1,5 +1,4 @@
-﻿
-namespace FishClubAlginet.Infrastructure.Persistence.Seeds;
+﻿namespace FishClubAlginet.Infrastructure.Persistence.Seeds;
 
 public static class AccountsSeed
 {
@@ -17,9 +16,9 @@ public static class AccountsSeed
             {
                 UserName = SeedConstants.DefaultUserName,
                 Email = SeedConstants.DefaultUserName,
-                NormalizedEmail = SeedConstants.DefaultUserName,
+                NormalizedEmail = SeedConstants.DefaultUserName.ToUpperInvariant(),  
+                NormalizedUserName = SeedConstants.DefaultUserName.ToUpperInvariant(), // ✅ CORREGIDO
                 EmailConfirmed = true,
-                NormalizedUserName = "Josue",
                 PasswordHash = passwordHasher.HashPassword(
                     user: new IdentityUser { UserName = SeedConstants.DefaultUserName },
                     password: "a5848b"
