@@ -11,7 +11,7 @@ El sistema permite la administración de pescadores, licencias federativas, crea
 ### Arquitectura y Backend (.NET 8)
 * **Clean Architecture:** Separación estricta de responsabilidades (Domain, Application, Infrastructure, API).
 * **Seguridad Avanzada:** Sistema de Autenticación y Autorización basado en **ASP.NET Core Identity** y **JWT (JSON Web Tokens)**.
-* **Roles y Permisos:** Gestión diferenciada para Administradores (Gestión total) y Pescadores (Lectura de perfil/rankings).
+* **Roles y Permisos:** Gestión diferenciada para Administradores (Gestión total) y hPescadores (Lectura de perfil/rankings).
 * **Patrones de Diseño:** Implementación de *Generic Repository*, *Unit of Work* y *Specification Pattern*.
 * **Modelado de Dominio Rico:** Uso de Entidades, *Value Objects* (ej. Direcciones) y validaciones de dominio.
 * **Data Seeding:** Inicialización automática de datos maestros (ej. Municipios de Valencia) y usuarios administrador.
@@ -64,7 +64,7 @@ La solución sigue la Regla de Dependencia, dividida en capas concéntricas:
 
 1.  **Clonar el repositorio:**
     ```bash
-    git clone [https://github.com/tu-usuario/ProyectoPesca.git](https://github.com/tu-usuario/ProyectoPesca.git)
+        git clone https://github.com/JosueBotella/FishClubAlginet.git
     ```
 
 2.  **Configurar Base de Datos:**
