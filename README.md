@@ -88,6 +88,6 @@ La solución sigue la Regla de Dependencia, dividida en capas concéntricas:
 
 ## 📄 Licencia
 
-Derechos de autor © 2026 [Tu Nombre]. Todos los derechos reservados.
+Derechos de autor © 2026 Josué Botella. Todos los derechos reservados.
 
 Este proyecto es propiedad intelectual de su creador. No se permite la reproducción, distribución o uso comercial del código fuente sin autorización expresa.
