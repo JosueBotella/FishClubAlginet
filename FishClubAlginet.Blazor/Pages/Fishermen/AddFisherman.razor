@@ -1,0 +1,130 @@
+@page "/fishermen/add"
+@using FishClubAlginet.Blazor.Constants
+@using FishClubAlginet.Contracts.Dtos.Requests.Fisherman
+@using FishClubAlginet.Contracts.Enums
+@inject HttpClient Http
+@inject NavigationManager Nav
+@inject NotificationService NotificationService
+
+<PageTitle>Nuevo Pescador</PageTitle>
+
+<RadzenText TextStyle="TextStyle.H4" TagName="TagName.H1" class="mb-4">Nuevo Pescador</RadzenText>
+
+<RadzenCard class="w-100" Style="max-width: 800px;">
+    <EditForm Model="@model" OnValidSubmit="HandleSubmit">
+        <DataAnnotationsValidator />
+
+        <RadzenText TextStyle="TextStyle.H6" class="mb-3">Datos Personales</RadzenText>
+
+        <RadzenRow Gap="1rem" class="mb-3">
+            <RadzenColumn Size="12" SizeMD="6">
+                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Nombre *</RadzenText>
+                <RadzenTextBox @bind-Value="model.FirstName" Placeholder="Nombre" class="w-100" />
+                <ValidationMessage For="@(() => model.FirstName)" />
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="6">
+                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Apellidos *</RadzenText>
+                <RadzenTextBox @bind-Value="model.LastName" Placeholder="Apellidos" class="w-100" />
+                <ValidationMessage For="@(() => model.LastName)" />
+            </RadzenColumn>
+        </RadzenRow>
+
+        <RadzenRow Gap="1rem" class="mb-3">
+            <RadzenColumn Size="12" SizeMD="4">
+                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Fecha de Nacimiento *</RadzenText>
+                <RadzenDatePicker @bind-Value="model.DateOfBirth" DateFormat="dd/MM/yyyy" class="w-100" Max="@DateTime.Today" />
+                <ValidationMessage For="@(() => model.DateOfBirth)" />
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="4">
+                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Tipo Documento *</RadzenText>
+                <RadzenDropDown @bind-Value="model.DocumentType" Data="@documentTypes"
+                                TextProperty="Text" ValueProperty="Value" class="w-100" />
+                <ValidationMessage For="@(() => model.DocumentType)" />
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="4">
+                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">N. Documento *</RadzenText>
+                <RadzenTextBox @bind-Value="model.DocumentNumber" Placeholder="Numero de documento" class="w-100" />
+                <ValidationMessage For="@(() => model.DocumentNumber)" />
+            </RadzenColumn>
+        </RadzenRow>
+
+        <RadzenRow Gap="1rem" class="mb-4">
+            <RadzenColumn Size="12" SizeMD="6">
+                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Licencia Federativa</RadzenText>
+                <RadzenTextBox @bind-Value="model.FederationLicense" Placeholder="Opcional" class="w-100" />
+                <ValidationMessage For="@(() => model.FederationLicense)" />
+            </RadzenColumn>
+        </RadzenRow>
+
+        <RadzenText TextStyle="TextStyle.H6" class="mb-3">Direccion</RadzenText>
+
+        <RadzenRow Gap="1rem" class="mb-3">
+            <RadzenColumn Size="12" SizeMD="8">
+                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Calle</RadzenText>
+                <RadzenTextBox @bind-Value="model.AddressStreet" Placeholder="Calle" class="w-100" />
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="4">
+                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Ciudad</RadzenText>
+                <RadzenTextBox @bind-Value="model.AddressCity" Placeholder="Ciudad" class="w-100" />
+            </RadzenColumn>
+        </RadzenRow>
+
+        <RadzenRow Gap="1rem" class="mb-4">
+            <RadzenColumn Size="12" SizeMD="6">
+                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Codigo Postal</RadzenText>
+                <RadzenTextBox @bind-Value="model.AddressZipCode" Placeholder="Codigo Postal" class="w-100" />
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="6">
+                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Provincia</RadzenText>
+                <RadzenTextBox @bind-Value="model.AddressProvince" Placeholder="Provincia" class="w-100" />
+            </RadzenColumn>
+        </RadzenRow>
+
+        <div class="d-flex gap-2 mt-4">
+            <RadzenButton ButtonType="ButtonType.Submit" Text="Guardar Pescador" Icon="save"
+                          ButtonStyle="ButtonStyle.Primary" IsBusy="@isLoading" />
+            <RadzenButton Text="Cancelar" Icon="cancel" ButtonStyle="ButtonStyle.Light"
+                          Click="@(() => Nav.NavigateTo("/"))" />
+        </div>
+    </EditForm>
+</RadzenCard>
+
+@code {
+    private CreateFishermanDto model = new();
+    private bool isLoading;
+
+    private readonly List<object> documentTypes = new()
+    {
+        new { Text = "DNI", Value = TypeNationalIdentifier.Dni },
+        new { Text = "NIE", Value = TypeNationalIdentifier.Nie },
+        new { Text = "Pasaporte", Value = TypeNationalIdentifier.Passport }
+    };
+
+    private async Task HandleSubmit()
+    {
+        isLoading = true;
+        try
+        {
+            var response = await Http.PostAsJsonAsync(EndpointsConstants.Fishermen.Add, model);
+
+            if (response.IsSuccessStatusCode)
+            {
+                NotificationService.Notify(NotificationSeverity.Success, "Pescador creado", "El pescador se ha registrado correctamente.");
+                Nav.NavigateTo("/");
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                NotificationService.Notify(NotificationSeverity.Error, "Error", $"No se pudo crear el pescador: {errorContent}");
+            }
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Error de Conexion", ex.Message);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}

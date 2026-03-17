@@ -1,38 +1,46 @@
-﻿namespace FishClubAlginet.API.Controllers;
+﻿using FishClubAlginet.Application.Features.Auth.Commands;
+
+namespace FishClubAlginet.API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class AccountController : ControllerBase
+public class AccountController : ApiController 
 {
-    private readonly IAuthService _authService;
-    public AccountController(IAuthService authService)
+ 
+    private readonly IMediator _mediator;
+    public AccountController(IMediator mediator)
+        
     {
-        _authService = authService;
-    }
-    [HttpPost("login")]
-    public async Task<IActionResult> Login(LoginDto model)
-    {
-        var token = await _authService.LoginAsync(model);
-
-        if (token == null)
-        {
-            return Unauthorized(ApplicationConstants.Authentication.LoginFailed);
-        }
-
-        return Ok(new { Token = token });
+       _mediator = mediator;
     }
 
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterDto model)
+    public async Task<IActionResult> Register([FromBody] RegisterUserDto request)
     {
-        var result = await _authService.RegisterAsync(model);
+        var command = new RegisterUserCommand(          
+            request.Email,
+            request.Password,
+            request.ConfirmPassword
+        );
 
-        if (result.Succeeded)
-        {
-            return Ok(new { Message = ApplicationConstants.Authentication.RegisterSuccess });
-        }
+        var result = await _mediator.Send(command, default);
 
-        // Si hay errores (ej: contraseña débil), los devolvemos todos
-        return BadRequest(result.Errors);
+        return result.Match(
+            token => Ok(new { Token = token }),
+            errors => Problem(errors)
+        );
+    }
+
+    [HttpPost("login")]
+    public async Task<IActionResult> Login([FromBody] LoginDto request)
+    {
+        var command = new LoginUserCommand(request.UserName, request.Password);
+
+        var result = await _mediator.Send(command, default);
+
+        return result.Match(
+            token => Ok(new { Token = token }),
+            errors => Problem(errors)
+        );
     }
 }

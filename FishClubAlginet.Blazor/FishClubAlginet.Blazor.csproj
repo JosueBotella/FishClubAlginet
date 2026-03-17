@@ -17,13 +17,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\FishClubAlginet.Core\FishClubAlginet.Core.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Folder Include="Pages\Users\" />
     <Folder Include="Shared\Components\" />
     <Folder Include="Shared\ResourceFiles\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FishClubAlginet.Contracts\FishClubAlginet.Contracts.csproj" />
   </ItemGroup>
 
 </Project>

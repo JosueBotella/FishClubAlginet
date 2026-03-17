@@ -1,4 +1,6 @@
-﻿namespace FishClubAlginet.Infrastructure.Repositories;
+﻿
+
+namespace FishClubAlginet.Infrastructure.Repositories;
 
 public class GenericRepository<T, TId> : IGenericRepository<T, TId>
     where T : BaseEntity<TId>
@@ -8,10 +10,34 @@ public class GenericRepository<T, TId> : IGenericRepository<T, TId>
     public GenericRepository(AppDbContext context) => _context = context;
 
 
-    public async Task<T> Insert(T entity)
+    public async Task<ErrorOr<T>> AddAsync(T entity)
     {
-        EntityEntry<T> insertedValue = await _context.Set<T>().AddAsync(entity);
-        return insertedValue.Entity;
+        try
+        {
+            await _context.AddAsync(entity);
+            await _context.SaveChangesAsync();
+
+            return entity; 
+        }
+        catch (DbUpdateException ex)
+        {
+            if (ex.InnerException is PostgresException pgEx && pgEx.SqlState == "23505")
+            {
+                return Error.Conflict(
+                    code: $"{typeof(T).Name}.Duplicate",
+                    description: "Ya existe un registro con esos datos únicos.");
+            }
+
+            return Error.Failure(
+                code: "Database.SaveFailure",
+                description: $"Error al guardar {typeof(T).Name}: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            return Error.Unexpected(
+                code: "System.Unexpected",
+                description: ex.Message);
+        }
     }
 
     public virtual async Task<T?> GetById(TId id)

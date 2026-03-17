@@ -7,12 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="10.0.1" />
+    <ProjectReference Include="..\FishClubAlginet.Contracts\FishClubAlginet.Contracts.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Application\DTOs\Responses\" />
-    <Folder Include="Domain\Enums\" />
+    <PackageReference Include="ErrorOr" Version="2.0.1" />
+    <PackageReference Include="MediatR" Version="14.0.0" />
   </ItemGroup>
 
 </Project>

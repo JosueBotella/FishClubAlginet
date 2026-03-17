@@ -1,0 +1,15 @@
+﻿global using FluentValidation;
+global using ErrorOr;
+global using FishClubAlginet.Application.Constants;
+global using System.Text.RegularExpressions;
+global using FishClubAlginet.Contracts.Dtos.Requests.Identity;
+global using FishClubAlginet.Contracts.Dtos.Requests.Fisherman;
+global using FishClubAlginet.Contracts.Enums;
+global using Microsoft.AspNetCore.Identity;
+global using FishClubAlginet.Application.Abstractions;
+global using FishClubAlginet.Core.Abstractions;
+global using FishClubAlginet.Core.Domain.Entities;
+global using FishClubAlginet.Core.Domain.ValueObjects;
+global using MediatR;
+global using FishClubAlginet.Application.Features.Events.Commands.Fishermen;
+global using Microsoft.Extensions.Logging;

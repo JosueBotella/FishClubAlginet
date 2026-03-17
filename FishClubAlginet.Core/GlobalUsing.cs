@@ -1,4 +1,6 @@
 ﻿global using FishClubAlginet.Core.Domain.Entities;
-global using FishClubAlginet.Core.Application.Dtos.Request;
-global using System.ComponentModel.DataAnnotations;
-global using Microsoft.AspNetCore.Identity;
+global using FishClubAlginet.Core.Domain.ValueObjects;
+global using FishClubAlginet.Core.Abstractions;
+global using FishClubAlginet.Contracts.Enums;
+global using ErrorOr;
+global using MediatR;

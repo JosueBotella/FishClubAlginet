@@ -1,5 +1,6 @@
-﻿@inject NavigationManager Nav
+﻿@inject NavigationManager Navigation
 @using Microsoft.AspNetCore.Components.Authorization
+@attribute [AllowAnonymous]
 
 @code {
     [CascadingParameter]
@@ -9,12 +10,14 @@
     {
         var authState = await AuthState;
 
-        // Si no está autenticado, lo mandamos al login
         if (authState?.User?.Identity is null || !authState.User.Identity.IsAuthenticated)
         {
-            // forceLoad: true a veces ayuda a limpiar estados raros,
-            // pero false es más rápido (SPA).
-            Nav.NavigateTo("login", forceLoad: false);
+            var returnUrl = Navigation.ToBaseRelativePath(Navigation.Uri);
+
+            if (string.IsNullOrWhiteSpace(returnUrl) || !returnUrl.StartsWith("login", StringComparison.OrdinalIgnoreCase))
+            {
+                Navigation.NavigateTo($"login?returnUrl={Uri.EscapeDataString(Navigation.Uri)}");
+            }
         }
     }
 }

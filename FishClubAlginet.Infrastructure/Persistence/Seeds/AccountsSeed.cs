@@ -14,13 +14,13 @@ public static class AccountsSeed
         {
             new IdentityUser
             {
-                UserName = "jbotella@mail.com",
-                Email = "jbotella@mail.com",
-                NormalizedEmail = "jbotella@mail.com",
+                UserName = SeedConstants.DefaultUserName,
+                Email = SeedConstants.DefaultUserName,
+                NormalizedEmail = SeedConstants.DefaultUserName.ToUpperInvariant(),  
+                NormalizedUserName = SeedConstants.DefaultUserName.ToUpperInvariant(), // ✅ CORREGIDO
                 EmailConfirmed = true,
-                NormalizedUserName = "Josue",
                 PasswordHash = passwordHasher.HashPassword(
-                    user: new IdentityUser { UserName = "jbotella@mail.com" },
+                    user: new IdentityUser { UserName = SeedConstants.DefaultUserName },
                     password: "a5848b"
                 ),
             }

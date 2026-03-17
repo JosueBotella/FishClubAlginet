@@ -5,32 +5,33 @@
     <Router AppAssembly="@typeof(App).Assembly">
         <Found Context="routeData">
             <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
+
                 <NotAuthorized>
-                    <LayoutView Layout="@typeof(LoginLayout)">
-                        <RedirectToLogin />
+                    <LayoutView Layout="@typeof(FishClubAlginet.Blazor.Shared.Layouts.LoginLayout)">
+                        <FishClubAlginet.Blazor.Shared.RedirectToLogin />
                     </LayoutView>
                 </NotAuthorized>
+
                 <Authorizing>
-                    <LayoutView Layout="@typeof(LoginLayout)">
-                        <div style="display:flex; justify-content:center; align-items:center; height:100vh;">
-                            <p>Cargando...</p>
+                    <div class="d-flex justify-content-center mt-5">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Verificando sesión...</span>
                         </div>
-                    </LayoutView>
+                    </div>
                 </Authorizing>
+
             </AuthorizeRouteView>
-            <FocusOnNavigate RouteData="@routeData" Selector="h1" />
         </Found>
+
         <NotFound>
             <PageTitle>No encontrado</PageTitle>
-            <LayoutView Layout="@typeof(LoginLayout)">
-                <div class="text-center p-5">
-                    <h3>Página no encontrada</h3>
-                    <a href="" class="btn btn-primary">Ir al inicio</a>
+            <LayoutView Layout="@typeof(MainLayout)">
+                <div class="alert alert-warning m-4">
+                    <p role="alert">Lo siento, la dirección que buscas no existe.</p>
                 </div>
             </LayoutView>
         </NotFound>
     </Router>
 </CascadingAuthenticationState>
-
 
 <RadzenComponents />

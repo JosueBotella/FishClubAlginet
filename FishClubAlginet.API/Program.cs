@@ -1,7 +1,4 @@
-using System.Text;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.IdentityModel.Tokens;
+
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -9,11 +6,17 @@ var connectionString = builder.Configuration.GetConnectionString(ApplicationCons
     ?? throw new InvalidOperationException(ApplicationConstants.Database.MigrationErrorMessage);
 var configuration = builder.Configuration;
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseNpgsql(connectionString));
 builder.Services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericRepository<,>));
 builder.Services.AddScoped<IUnitOfWork, UnitOfWorkService>();
 builder.Services.AddScoped<IAuthService,AuthService>();
 
+builder.Services.AddMediatR(cfg =>
+{
+
+    cfg.RegisterServicesFromAssembly(typeof(RegisterUserCommand).Assembly);
+});
+builder.Services.AddValidatorsFromAssembly(typeof(LoginUserCommand).Assembly);
 builder.Services.AddIdentityCore<IdentityUser>(options => {
     options.Password.RequireDigit = false;
     options.Password.RequiredLength = 6;
@@ -26,6 +29,11 @@ builder.Services.AddIdentityCore<IdentityUser>(options => {
 
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 var secretKey = jwtSettings.GetValue<string>("SecretKey");
+
+// Program.cs
+builder.Services.AddHostedService<ProcessOutboxMessagesJob>();
+
+
 
 // Configurar el esquema de Autenticación JWT
 builder.Services.AddAuthentication(options => {
@@ -44,27 +52,28 @@ builder.Services.AddAuthentication(options => {
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey!))
     }
 );
-var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(name: MyAllowSpecificOrigins,
+    options.AddPolicy(name: ApplicationConstants.ConfigurationProgram.AddCors_MyAllowSpecificOrigins,
         policy =>
         {
-            policy.WithOrigins("https://localhost:7230") 
+            policy.WithOrigins(ApplicationConstants.ConfigurationProgram.AddCors_WithOrigins) 
                   .AllowAnyHeader()
                   .AllowAnyMethod()
                   .AllowCredentials(); 
         });
 });
-
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails(); 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddOpenApi();
 
 
 WebApplication app = builder.Build();
-
+app.UseExceptionHandler();
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -82,15 +91,15 @@ using (var scope = app.Services.CreateScope())
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 
 app.UseHttpsRedirection();
-app.UseCors(MyAllowSpecificOrigins);
+app.UseCors(ApplicationConstants.ConfigurationProgram.AddCors_MyAllowSpecificOrigins);
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.Run();
+await app.RunAsync();

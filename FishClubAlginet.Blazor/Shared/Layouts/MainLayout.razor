@@ -12,10 +12,10 @@
         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0">
             <RadzenSidebarToggle Click="@(() => sidebarExpanded = !sidebarExpanded)" />
 
-            <RadzenLabel Text="Base Architecture" Style="margin-left: 1rem; font-weight: bold;" />
+            <RadzenLabel Text="Base" Style="margin-left: 1rem; margin-right:1rem; font-weight: bold;" />
 
             <RadzenButton Icon="logout"
-                          ButtonStyle="ButtonStyle.Secondary"
+                          ButtonStyle="ButtonStyle.Secondary"                        
                           Size="ButtonSize.Small"
                           Click="CerrarSesion"
                           MouseEnter="@(args => TooltipService.Open(args, "Cerrar Sesión"))" />
@@ -29,6 +29,7 @@
             <AuthorizeView>
                 <Authorized>
                     <RadzenPanelMenuItem Text="sample" Icon="home" Path="sample" />
+                    <RadzenPanelMenuItem Text="Nuevo Pescador" Icon="person_add" Path="fishermen/add" />
                    
                 </Authorized>
             </AuthorizeView>
@@ -56,22 +57,21 @@
 
 @code {
     bool sidebarExpanded = true;
-
+    string pathToNavigate = string.Format("/{0}", "login");
+    string[] confirmDialog= { "¿Seguro que quieres salir?", "Cerrar Sesión","Sí","Cancelar" };
     [Inject] TooltipService TooltipService { get; set; } = default!;
 
     private async Task CerrarSesion()
     {
-        // Preguntamos confirmación (Opcional, pero buena práctica UX)
-        var confirm = await DialogService.Confirm("¿Seguro que quieres salir?", "Cerrar Sesión",
-            new ConfirmOptions() { OkButtonText = "Sí", CancelButtonText = "Cancelar" });
+        var confirm = await DialogService.Confirm(confirmDialog[0], confirmDialog[1],
+            new ConfirmOptions() { OkButtonText = confirmDialog[2], CancelButtonText = confirmDialog[3] });
 
         if (confirm == true)
         {
-            // Casteamos a nuestro provider personalizado para acceder al método Logout
             var customAuthState = (JwtAuthenticationStateProvider)AuthStateProvider;
             await customAuthState.LogoutAsync();
 
-            Nav.NavigateTo("/login");
+            Nav.NavigateTo(pathToNavigate);
         }
     }
 }
