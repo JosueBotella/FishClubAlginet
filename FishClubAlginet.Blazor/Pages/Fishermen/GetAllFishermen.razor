@@ -1,0 +1,146 @@
+@page "/fishermen"
+@using FishClubAlginet.Blazor.Constants
+@using FishClubAlginet.Contracts.Enums
+@inject HttpClient Http
+@inject NavigationManager Nav
+@inject NotificationService NotificationService
+
+<PageTitle>Pescadores</PageTitle>
+
+<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween" class="mb-4">
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+        <RadzenIcon Icon="groups" Style="font-size: 2rem;" />
+        <RadzenText TextStyle="TextStyle.H4" TagName="TagName.H1" Style="margin: 0;">Pescadores</RadzenText>
+    </RadzenStack>
+    <RadzenButton Text="Nuevo Pescador" Icon="person_add" ButtonStyle="ButtonStyle.Primary"
+                  Click="@(() => Nav.NavigateTo("fishermen/add"))" />
+</RadzenStack>
+
+@if (isLoading)
+{
+    <RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" class="mt-5">
+        <RadzenProgressBarCircular ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+        <RadzenText TextStyle="TextStyle.Body1" class="mt-2">Cargando pescadores...</RadzenText>
+    </RadzenStack>
+}
+else if (hasError)
+{
+    <RadzenCard class="w-100">
+        <RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" Gap="1rem">
+            <RadzenIcon Icon="error_outline" Style="font-size: 3rem; color: var(--rz-danger);" />
+            <RadzenText TextStyle="TextStyle.H6">Error al cargar los pescadores</RadzenText>
+            <RadzenText TextStyle="TextStyle.Body1">@errorMessage</RadzenText>
+            <RadzenButton Text="Reintentar" Icon="refresh" ButtonStyle="ButtonStyle.Secondary" Click="LoadFishermen" />
+        </RadzenStack>
+    </RadzenCard>
+}
+else
+{
+    <RadzenDataGrid Data="@fishermen" TItem="FishermanRow" AllowPaging="true" PageSize="10"
+                    AllowSorting="true" AllowFiltering="true" FilterMode="FilterMode.Simple"
+                    PagerHorizontalAlign="HorizontalAlign.Center"
+                    AllowColumnResize="true" Style="width: 100%;">
+        <Columns>
+            <RadzenDataGridColumn TItem="FishermanRow" Property="Id" Title="ID" Width="80px"
+                                  Filterable="false" TextAlign="TextAlign.Center" />
+            <RadzenDataGridColumn TItem="FishermanRow" Property="FirstName" Title="Nombre" />
+            <RadzenDataGridColumn TItem="FishermanRow" Property="LastName" Title="Apellidos" />
+            <RadzenDataGridColumn TItem="FishermanRow" Property="DateOfBirth" Title="Fecha Nac."
+                                  FormatString="{0:dd/MM/yyyy}" Width="130px" />
+            <RadzenDataGridColumn TItem="FishermanRow" Property="DocumentTypeName" Title="Tipo Doc." Width="120px" />
+            <RadzenDataGridColumn TItem="FishermanRow" Property="DocumentNumber" Title="N. Documento" />
+            <RadzenDataGridColumn TItem="FishermanRow" Property="FederationLicense" Title="Licencia Fed." />
+            <RadzenDataGridColumn TItem="FishermanRow" Property="AddressCity" Title="Ciudad" />
+            <RadzenDataGridColumn TItem="FishermanRow" Property="AddressProvince" Title="Provincia" />
+        </Columns>
+    </RadzenDataGrid>
+}
+
+@code {
+    private List<FishermanRow> fishermen = new();
+    private bool isLoading = true;
+    private bool hasError;
+    private string errorMessage = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadFishermen();
+    }
+
+    private async Task LoadFishermen()
+    {
+        isLoading = true;
+        hasError = false;
+        errorMessage = string.Empty;
+
+        try
+        {
+            var response = await Http.GetAsync(EndpointsConstants.Fishermen.GetAll);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                hasError = true;
+                errorMessage = $"El servidor respondió con estado {(int)response.StatusCode} ({response.ReasonPhrase}).";
+                return;
+            }
+
+            var result = await response.Content.ReadFromJsonAsync<List<FishermanResponse>>();
+
+            fishermen = result?.Select(f => new FishermanRow
+            {
+                Id = f.Id,
+                FirstName = f.FirstName,
+                LastName = f.LastName,
+                DateOfBirth = f.DateOfBirth,
+                DocumentType = f.DocumentType,
+                DocumentNumber = f.DocumentNumber,
+                FederationLicense = f.FederationLicense,
+                AddressCity = f.AddressCity,
+                AddressProvince = f.AddressProvince
+            }).ToList() ?? new();
+        }
+        catch (Exception ex)
+        {
+            hasError = true;
+            errorMessage = ex.Message;
+            NotificationService.Notify(NotificationSeverity.Error, "Error", $"No se pudieron cargar los pescadores: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private record FishermanResponse(
+        int Id,
+        string FirstName,
+        string LastName,
+        DateTime DateOfBirth,
+        TypeNationalIdentifier DocumentType,
+        string DocumentNumber,
+        string? FederationLicense,
+        string AddressCity,
+        string AddressProvince
+    );
+
+    private class FishermanRow
+    {
+        public int Id { get; set; }
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+        public DateTime DateOfBirth { get; set; }
+        public TypeNationalIdentifier DocumentType { get; set; }
+        public string DocumentNumber { get; set; } = string.Empty;
+        public string? FederationLicense { get; set; }
+        public string AddressCity { get; set; } = string.Empty;
+        public string AddressProvince { get; set; } = string.Empty;
+
+        public string DocumentTypeName => DocumentType switch
+        {
+            TypeNationalIdentifier.Dni => "DNI",
+            TypeNationalIdentifier.Nie => "NIE",
+            TypeNationalIdentifier.Passport => "Pasaporte",
+            _ => DocumentType.ToString()
+        };
+    }
+}
