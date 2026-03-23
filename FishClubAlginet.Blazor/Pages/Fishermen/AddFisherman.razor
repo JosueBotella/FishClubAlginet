@@ -7,83 +7,97 @@
 
 <PageTitle>@FishermanForm.PageTitle</PageTitle>
 
-<RadzenText TextStyle="TextStyle.H4" TagName="TagName.H1" class="mb-4">@FishermanForm.PageTitle</RadzenText>
+<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem" class="mb-4">
+    <RadzenIcon Icon="person_add" Style="font-size: 2rem;" />
+    <RadzenText TextStyle="TextStyle.H4" TagName="TagName.H1" Style="margin: 0;">Nuevo Pescador</RadzenText>
+</RadzenStack>
 
-<RadzenCard class="w-100" Style="max-width: 800px;">
+<RadzenCard class="w-100" Style="max-width: 900px;">
     <EditForm Model="@model" OnValidSubmit="HandleSubmit">
         <DataAnnotationsValidator />
+        <ValidationSummary />
 
-        <RadzenText TextStyle="TextStyle.H6" class="mb-3">@FishermanForm.PersonalDataSection</RadzenText>
+        <RadzenFieldset Text="Datos Personales" class="mb-4">
+            <RadzenRow Gap="1rem" class="mb-3">
+                <RadzenColumn Size="12" SizeMD="6">
+                    <RadzenFormField Text="Nombre *" Style="width: 100%;">
+                        <RadzenTextBox @bind-Value="model.FirstName" Placeholder="Nombre" />
+                    </RadzenFormField>
+                    <ValidationMessage For="@(() => model.FirstName)" />
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="6">
+                    <RadzenFormField Text="Apellidos *" Style="width: 100%;">
+                        <RadzenTextBox @bind-Value="model.LastName" Placeholder="Apellidos" />
+                    </RadzenFormField>
+                    <ValidationMessage For="@(() => model.LastName)" />
+                </RadzenColumn>
+            </RadzenRow>
 
-        <RadzenRow Gap="1rem" class="mb-3">
-            <RadzenColumn Size="12" SizeMD="6">
-                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">@FishermanForm.FirstNameLabel</RadzenText>
-                <RadzenTextBox @bind-Value="model.FirstName" Placeholder="@FishermanForm.FirstNamePlaceholder" class="w-100" />
-                <ValidationMessage For="@(() => model.FirstName)" />
-            </RadzenColumn>
-            <RadzenColumn Size="12" SizeMD="6">
-                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">@FishermanForm.LastNameLabel</RadzenText>
-                <RadzenTextBox @bind-Value="model.LastName" Placeholder="@FishermanForm.LastNamePlaceholder" class="w-100" />
-                <ValidationMessage For="@(() => model.LastName)" />
-            </RadzenColumn>
-        </RadzenRow>
+            <RadzenRow Gap="1rem" class="mb-3">
+                <RadzenColumn Size="12" SizeMD="4">
+                    <RadzenFormField Text="Fecha de Nacimiento *" Style="width: 100%;">
+                        <RadzenDatePicker @bind-Value="model.DateOfBirth" DateFormat="dd/MM/yyyy" Max="@DateTime.Today" />
+                    </RadzenFormField>
+                    <ValidationMessage For="@(() => model.DateOfBirth)" />
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="4">
+                    <RadzenFormField Text="Tipo Documento *" Style="width: 100%;">
+                        <RadzenDropDown @bind-Value="model.DocumentType" Data="@documentTypes"
+                                        TextProperty="Text" ValueProperty="Value" />
+                    </RadzenFormField>
+                    <ValidationMessage For="@(() => model.DocumentType)" />
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="4">
+                    <RadzenFormField Text="N. Documento *" Style="width: 100%;">
+                        <RadzenTextBox @bind-Value="model.DocumentNumber" Placeholder="Numero de documento" />
+                    </RadzenFormField>
+                    <ValidationMessage For="@(() => model.DocumentNumber)" />
+                </RadzenColumn>
+            </RadzenRow>
 
-        <RadzenRow Gap="1rem" class="mb-3">
-            <RadzenColumn Size="12" SizeSM="6" SizeMD="4">
-                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">@FishermanForm.DateOfBirthLabel</RadzenText>
-                <RadzenDatePicker @bind-Value="model.DateOfBirth" DateFormat="@Formats.ShortDate" class="w-100" Max="@DateTime.Today" />
-                <ValidationMessage For="@(() => model.DateOfBirth)" />
-            </RadzenColumn>
-            <RadzenColumn Size="12" SizeSM="6" SizeMD="4">
-                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">@FishermanForm.DocumentTypeLabel</RadzenText>
-                <RadzenDropDown @bind-Value="model.DocumentType" Data="@documentTypes"
-                                TextProperty="Text" ValueProperty="Value" class="w-100" />
-                <ValidationMessage For="@(() => model.DocumentType)" />
-            </RadzenColumn>
-            <RadzenColumn Size="12" SizeSM="12" SizeMD="4">
-                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">@FishermanForm.DocumentNumberLabel</RadzenText>
-                <RadzenTextBox @bind-Value="model.DocumentNumber" Placeholder="@FishermanForm.DocumentNumberPlaceholder" class="w-100" />
-                <ValidationMessage For="@(() => model.DocumentNumber)" />
-            </RadzenColumn>
-        </RadzenRow>
+            <RadzenRow Gap="1rem">
+                <RadzenColumn Size="12" SizeMD="6">
+                    <RadzenFormField Text="Licencia Federativa" Style="width: 100%;">
+                        <RadzenTextBox @bind-Value="model.FederationLicense" Placeholder="Opcional" />
+                    </RadzenFormField>
+                    <ValidationMessage For="@(() => model.FederationLicense)" />
+                </RadzenColumn>
+            </RadzenRow>
+        </RadzenFieldset>
 
-        <RadzenRow Gap="1rem" class="mb-4">
-            <RadzenColumn Size="12" SizeMD="6">
-                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">@FishermanForm.FederationLicenseLabel</RadzenText>
-                <RadzenTextBox @bind-Value="model.FederationLicense" Placeholder="@FishermanForm.FederationLicensePlaceholder" class="w-100" />
-                <ValidationMessage For="@(() => model.FederationLicense)" />
-            </RadzenColumn>
-        </RadzenRow>
+        <RadzenFieldset Text="Dirección" class="mb-4">
+            <RadzenRow Gap="1rem" class="mb-3">
+                <RadzenColumn Size="12" SizeMD="8">
+                    <RadzenFormField Text="Calle" Style="width: 100%;">
+                        <RadzenTextBox @bind-Value="model.AddressStreet" Placeholder="Calle" />
+                    </RadzenFormField>
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="4">
+                    <RadzenFormField Text="Ciudad" Style="width: 100%;">
+                        <RadzenTextBox @bind-Value="model.AddressCity" Placeholder="Ciudad" />
+                    </RadzenFormField>
+                </RadzenColumn>
+            </RadzenRow>
 
-        <RadzenText TextStyle="TextStyle.H6" class="mb-3">@FishermanForm.AddressSection</RadzenText>
+            <RadzenRow Gap="1rem">
+                <RadzenColumn Size="12" SizeMD="6">
+                    <RadzenFormField Text="Codigo Postal" Style="width: 100%;">
+                        <RadzenTextBox @bind-Value="model.AddressZipCode" Placeholder="Codigo Postal" />
+                    </RadzenFormField>
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="6">
+                    <RadzenFormField Text="Provincia" Style="width: 100%;">
+                        <RadzenTextBox @bind-Value="model.AddressProvince" Placeholder="Provincia" />
+                    </RadzenFormField>
+                </RadzenColumn>
+            </RadzenRow>
+        </RadzenFieldset>
 
-        <RadzenRow Gap="1rem" class="mb-3">
-            <RadzenColumn Size="12" SizeSM="8">
-                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">@FishermanForm.StreetLabel</RadzenText>
-                <RadzenTextBox @bind-Value="model.AddressStreet" Placeholder="@FishermanForm.StreetPlaceholder" class="w-100" />
-            </RadzenColumn>
-            <RadzenColumn Size="12" SizeSM="4">
-                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">@FishermanForm.CityLabel</RadzenText>
-                <RadzenTextBox @bind-Value="model.AddressCity" Placeholder="@FishermanForm.CityPlaceholder" class="w-100" />
-            </RadzenColumn>
-        </RadzenRow>
-
-        <RadzenRow Gap="1rem" class="mb-4">
-            <RadzenColumn Size="12" SizeSM="6">
-                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">@FishermanForm.ZipCodeLabel</RadzenText>
-                <RadzenTextBox @bind-Value="model.AddressZipCode" Placeholder="@FishermanForm.ZipCodePlaceholder" class="w-100" />
-            </RadzenColumn>
-            <RadzenColumn Size="12" SizeSM="6">
-                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">@FishermanForm.ProvinceLabel</RadzenText>
-                <RadzenTextBox @bind-Value="model.AddressProvince" Placeholder="@FishermanForm.ProvincePlaceholder" class="w-100" />
-            </RadzenColumn>
-        </RadzenRow>
-
-        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" class="mt-4" Wrap="FlexWrap.Wrap">
-            <RadzenButton ButtonType="ButtonType.Submit" Text="@FishermanForm.SaveButtonText" Icon="save"
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" JustifyContent="JustifyContent.End">
+            <RadzenButton Text="Cancelar" Icon="cancel" ButtonStyle="ButtonStyle.Light"
+                          Click="@(() => Nav.NavigateTo("fishermen"))" />
+            <RadzenButton ButtonType="ButtonType.Submit" Text="Guardar Pescador" Icon="save"
                           ButtonStyle="ButtonStyle.Primary" IsBusy="@isLoading" />
-            <RadzenButton Text="@FishermanForm.CancelButtonText" Icon="cancel" ButtonStyle="ButtonStyle.Light"
-                          Click="@(() => Nav.NavigateTo(RoutesConstants.Home))" />
         </RadzenStack>
     </EditForm>
 </RadzenCard>
@@ -108,8 +122,8 @@
 
             if (response.IsSuccessStatusCode)
             {
-                NotificationService.Notify(NotificationSeverity.Success, FishermanForm.CreatedTitle, FishermanForm.CreatedMessage);
-                Nav.NavigateTo(RoutesConstants.Home);
+                NotificationService.Notify(NotificationSeverity.Success, "Pescador creado", "El pescador se ha registrado correctamente.");
+                Nav.NavigateTo("fishermen");
             }
             else
             {
