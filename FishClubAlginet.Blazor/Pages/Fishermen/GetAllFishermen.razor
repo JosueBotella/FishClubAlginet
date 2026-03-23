@@ -75,7 +75,16 @@ else
 
         try
         {
-            var result = await Http.GetFromJsonAsync<List<FishermanResponse>>(EndpointsConstants.Fishermen.GetAll);
+            var response = await Http.GetAsync(EndpointsConstants.Fishermen.GetAll);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                hasError = true;
+                errorMessage = $"El servidor respondió con estado {(int)response.StatusCode} ({response.ReasonPhrase}).";
+                return;
+            }
+
+            var result = await response.Content.ReadFromJsonAsync<List<FishermanResponse>>();
 
             fishermen = result?.Select(f => new FishermanRow
             {
