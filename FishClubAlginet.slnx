@@ -1,4 +1,9 @@
 <Solution>
+  <Folder Name="/docs/">
+    <File Path="contexto_proyecto.md" />
+    <File Path="modelo_dominio.md" />
+    <File Path="roadmap.md" />
+  </Folder>
   <Project Path="FishClubAlginet.API/FishClubAlginet.API.csproj" />
   <Project Path="FishClubAlginet.Application/FishClubAlginet.Application.csproj" />
   <Project Path="FishClubAlginet.Blazor/FishClubAlginet.Blazor.csproj" />
