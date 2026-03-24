@@ -1,0 +1,27 @@
+# Development Roadmap
+
+- [x] Base Solution Structure (Clean Architecture).
+- [x] Fisherman Implementation (Basic CRUD).
+- [ ] **Phase 1: Identity, Security & User Management**
+    - [ ] Configure Identity Roles (`Admin`, `Fisherman`).
+    - [ ] **User Administration Area (Admin only):**
+        - [ ] User Management Dashboard (List/Block/Edit users).
+        - [ ] Role assignment logic.
+    - [ ] **Fisherman Personal Area:**
+        - [ ] "My Profile" view.
+        - [ ] Dashboard: View current League Position (Ranking).
+        - [ ] Dashboard: View enrolled Competitions and "Validated/Confirmed" status.
+    - [ ] Protect API Endpoints with Authorization attributes.
+- [ ] **Phase 2: League Management**
+    - [ ] Create `League` entity in Core project.
+    - [ ] Implement Commands/Queries for Leagues.
+    - [ ] **Ranking Logic:** Implementation of point calculation for the Leaderboard.
+- [ ] **Phase 3: Competitions & Fishing Spots**
+    - [ ] Create `Competition` entity.
+    - [ ] **Registration System:** - [ ] Logic for a Fisherman to sign up for a Competition.
+        - [ ] Validation flag (Admin must confirm the entry).
+    - [ ] Automatic `FishingSpots` generation logic.
+- [ ] **Phase 4: Blazor UI**
+    - [ ] Admin Dashboard for Leagues and Competitions.
+    - [ ] Public/Fisherman Ranking table.
+    - [ ] Competition Enrollment UI for Fishermen.
