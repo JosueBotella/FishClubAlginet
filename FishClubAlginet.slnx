@@ -3,6 +3,7 @@
     <File Path="domain_model.md" />
     <File Path="project_context.md" />
     <File Path="roadmap.md" />
+    <File Path="skills.md" />
   </Folder>
   <Project Path="FishClubAlginet.API/FishClubAlginet.API.csproj" />
   <Project Path="FishClubAlginet.Application/FishClubAlginet.Application.csproj" />
