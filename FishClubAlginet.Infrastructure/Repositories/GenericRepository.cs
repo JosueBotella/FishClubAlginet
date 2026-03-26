@@ -25,12 +25,12 @@ public class GenericRepository<T, TId> : IGenericRepository<T, TId>
             {
                 return Error.Conflict(
                     code: $"{typeof(T).Name}.Duplicate",
-                    description: "Ya existe un registro con esos datos únicos.");
+                    description: "A record with these unique values already exists.");
             }
 
             return Error.Failure(
                 code: "Database.SaveFailure",
-                description: $"Error al guardar {typeof(T).Name}: {ex.Message}");
+                description: "Failed to save the record. Please try again.");
         }
         catch (Exception ex)
         {

@@ -2,11 +2,14 @@
 
 - [x] Base Solution Structure (Clean Architecture).
 - [x] Fisherman Implementation (Basic CRUD).
+- [x] **i18n Foundation:** `ErrorMessages.resx` in Application layer; all error codes are stable i18n keys; no hardcoded Spanish in production code.
 - [ ] **Phase 1: Identity, Security & User Management**
-    - [ ] Configure Identity Roles (`Admin`, `Fisherman`).
-    - [ ] **User Administration Area (Admin only):**
-        - [ ] User Management Dashboard (List/Block/Edit users).
-        - [ ] Role assignment logic.
+    - [x] Configure Identity Roles (`Admin`, `Fisherman`).
+    - [x] **User Administration Area (Admin only):**
+        - [x] User Management Dashboard (List/Block/Unblock users) — `GET /api/users`, `POST /api/users/{id}/block`, `POST /api/users/{id}/unblock`.
+        - [x] Role assignment logic — `POST /api/users/{id}/assign-role`.
+        - [x] Unit tests for user management features (GetAllUsers, BlockUser, UnblockUser, AssignRole, RolesSeed, ApplicationConstants).
+        - [x] i18n refactor — all user-facing strings moved to `ErrorMessages.resx`; tests assert on codes not descriptions.
     - [ ] **Fisherman Personal Area:**
         - [ ] "My Profile" view.
         - [ ] Dashboard: View current League Position (Ranking).

@@ -16,7 +16,7 @@ public class GlobalExceptionHandler : IExceptionHandler
         Exception exception,
         CancellationToken cancellationToken)
     {
-        _logger.LogError(exception, "Ocurrió una excepción no controlada: {Message}", exception.Message);
+        _logger.LogError(exception, "Unhandled exception: {Message}", exception.Message);
 
         var problemDetails = new ProblemDetails
         {

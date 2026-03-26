@@ -1,23 +1,22 @@
-﻿namespace FishClubAlginet.Application.Validators;
-
+namespace FishClubAlginet.Application.Validators;
 
 public static class SpanishIdValidator
 {
     /// <summary>
-    /// Extension method for FluentValidation to validate Spanish IDs (DNI/NIE) or Passports.
+    /// FluentValidation extension to validate Spanish identification documents (DNI/NIE/Passport).
     /// </summary>
     public static IRuleBuilderOptions<T, string> MustBeValidIdentification<T>(
         this IRuleBuilder<T, string> ruleBuilder,
         Func<T, TypeNationalIdentifier> documentTypeSelector)
     {
-        var ruleBuilderValidation = ruleBuilder.Must((rootObject, documentNumber) =>
-        {
-            var type = documentTypeSelector(rootObject);
-            return IsDocumentValid(type, documentNumber);
-        })
-        .WithMessage(ValidatorsConstants.IdentityNationValidationNumberErrorMessage);
-
-        return ruleBuilderValidation;
+        return ruleBuilder
+            .Must((rootObject, documentNumber) =>
+            {
+                var type = documentTypeSelector(rootObject);
+                return IsDocumentValid(type, documentNumber);
+            })
+            .WithErrorCode(ValidatorsConstants.FisherManValidationConstants.DocumentNumberInvalidControlLetterErrorCode)
+            .WithMessage(ValidatorsConstants.FisherManValidationConstants.DocumentNumberInvalidControlLetterErrorMessage);
     }
 
     private static bool IsDocumentValid(TypeNationalIdentifier type, string documentNumber)
@@ -25,7 +24,6 @@ public static class SpanishIdValidator
         if (string.IsNullOrWhiteSpace(documentNumber))
             return false;
 
-        // Normalize: Upper case and trim spaces
         var sanitizedDoc = documentNumber.ToUpper().Trim();
 
         return type switch
@@ -38,7 +36,7 @@ public static class SpanishIdValidator
     }
 
     private static bool ValidateDni(string dni)
-    {        
+    {
         if (!Regex.IsMatch(dni, @"^\d{8}[A-Z]$"))
             return false;
 
@@ -47,7 +45,7 @@ public static class SpanishIdValidator
 
     private static bool ValidateNie(string nie)
     {
-        // Format: X/Y/Z + 7 digits + 1 Letter (e.g., X1234567Z)
+        // Format: X/Y/Z + 7 digits + 1 letter (e.g., X1234567Z)
         if (!Regex.IsMatch(nie, @"^[XYZ]\d{7}[A-Z]$"))
             return false;
 
@@ -66,14 +64,11 @@ public static class SpanishIdValidator
 
     private static bool ValidatePassport(string passport)
     {
-        // Passports don't have a standard algorithm, checking basic format (Alphanumeric, 5-20 chars)
-        var regexPassport = Regex.IsMatch(passport, @"^[A-Z0-9]{5,20}$");
-        return regexPassport;
+        return Regex.IsMatch(passport, @"^[A-Z0-9]{5,20}$");
     }
 
     private static bool CheckControlLetter(string numberString, char providedLetter)
-    {        
-
+    {
         if (!int.TryParse(numberString, out int number))
             return false;
 

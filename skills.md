@@ -148,6 +148,23 @@ Senior .NET architect focused on building production-grade APIs, microservices, 
 - "Set up health checks for API and database dependencies"
 - "Implement rate limiting for public API endpoints"
 
+## Testing Standards
+- **Pattern:** Use the **AAA (Arrange, Act, Assert)** pattern with explicit comments.
+- **Naming Convention:** `MethodName_StateUnderTest_ExpectedBehavior` (e.g., `Handle_WhenUserExists_ShouldReturnFailure`).
+- **Frameworks:** Use **xUnit**, **Moq**, and **FluentAssertions**.
+- **Assertions:** Use FluentAssertions exclusively (e.g., `result.IsSuccess.Should().BeTrue()`).
+- **Result Pattern Testing:** - For Success: Assert `.IsSuccess` is true and check the `.Value`.
+    - For Failure: Assert `.IsFailure` is true and verify the specific `Error` (e.g., `result.Errors.Should().Contain(Errors.User.DuplicateEmail)`).
+- **Fixtures:** Proactively use and extend existing fixtures (like `FisherManFixture`) to generate test data.
+
+
+### Multi-language (i18n) Pattern
+- When creating errors in `Errors.cs`, the `description` should ideally be a localization key or a generic English message that will be translated by an `IStringLocalizer`.
+- **Avoid:** `description: "El usuario no existe"`
+- **Preferred:** `description: "USER_NOT_FOUND"` or use `.resx` mapping.
+
+
+
 ## Code Style Preferences
 
 ```csharp
@@ -195,3 +212,23 @@ var status = order.State switch
     _ => "Unknown"
 };
 ```
+## Testing Best Practices
+
+```csharp
+// ✅ Preferred: Clear AAA structure and FluentAssertions
+[Fact]
+public async Task Handle_WhenValidRequest_ShouldCreateFisherman()
+{
+    // Arrange
+    var command = FisherManFixture.CreateValidCommand();
+    _repositoryMock.Setup(x => x.AddAsync(It.IsAny<Fisherman>(), It.IsAny<CancellationToken>()))
+        .Returns(Task.CompletedTask);
+
+    // Act
+    var result = await _handler.Handle(command, default);
+
+    // Assert
+    result.IsSuccess.Should().BeTrue();
+    result.Value.Should().NotBeNull();
+    _unitOfWorkMock.Verify(x => x.SaveChangesAsync(default), Times.Once);
+}

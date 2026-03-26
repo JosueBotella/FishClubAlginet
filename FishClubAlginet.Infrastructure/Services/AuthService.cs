@@ -23,25 +23,27 @@ public class AuthService : IAuthService
 
         if (user != null && await _userManager.CheckPasswordAsync(user, loginDto.Password))
         {
-            return GenerateJwtToken(user);
+            return await GenerateJwtTokenAsync(user);
         }
 
         return null;
     }
 
-    private string GenerateJwtToken(IdentityUser user)
+    private async Task<string> GenerateJwtTokenAsync(IdentityUser user)
     {
-        // Usamos las constantes para evitar magic strings
         var jwtSettings = _configuration.GetSection(ApplicationConstants.Authentication.JwtSection);
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["SecretKey"]!));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-        var claims = new[]
+        var claims = new List<Claim>
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Email!),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new Claim(ClaimTypes.NameIdentifier, user.Id)
         };
+
+        var roles = await _userManager.GetRolesAsync(user);
+        claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
         var token = new JwtSecurityToken(
             issuer: jwtSettings["Issuer"],

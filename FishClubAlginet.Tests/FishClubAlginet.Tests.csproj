@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\FishClubAlginet.Application\FishClubAlginet.Application.csproj" />
+    <ProjectReference Include="..\FishClubAlginet.Infrastructure\FishClubAlginet.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
