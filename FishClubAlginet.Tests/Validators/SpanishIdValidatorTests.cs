@@ -52,7 +52,7 @@ public class CreateFishermanValidatorTests
 
         // Assert
         result.ShouldHaveValidationErrorFor(x => x.DocumentNumber)
-              .WithErrorMessage(ValidatorsConstants.IdentityNationValidationNumberErrorMessage);
+              .WithErrorCode(ValidatorsConstants.FisherManValidationConstants.DocumentNumberInvalidControlLetterErrorCode);
     }
 
     [Theory]

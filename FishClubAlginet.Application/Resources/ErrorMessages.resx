@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <!-- Auth -->
+  <data name="Auth_InvalidCredentials" xml:space="preserve">
+    <value>The provided credentials are invalid.</value>
+  </data>
+  <data name="Auth_PasswordMismatch" xml:space="preserve">
+    <value>Passwords do not match.</value>
+  </data>
+  <data name="Auth_TokenGenerationFailed" xml:space="preserve">
+    <value>Failed to generate the authentication token.</value>
+  </data>
+  <data name="Auth_Email_Required" xml:space="preserve">
+    <value>Email is required.</value>
+  </data>
+  <data name="Auth_Email_InvalidFormat" xml:space="preserve">
+    <value>Email format is not valid.</value>
+  </data>
+  <data name="Auth_Password_Required" xml:space="preserve">
+    <value>Password is required.</value>
+  </data>
+  <data name="Auth_Password_MinLength" xml:space="preserve">
+    <value>Password must be at least 6 characters long.</value>
+  </data>
+  <data name="Auth_ConfirmPassword_MustMatch" xml:space="preserve">
+    <value>Confirmation password must match the password.</value>
+  </data>
+
+  <!-- Fisherman validation -->
+  <data name="Fisherman_FirstName_Required" xml:space="preserve">
+    <value>First name is required.</value>
+  </data>
+  <data name="Fisherman_FirstName_NotWhitespace" xml:space="preserve">
+    <value>First name cannot be empty or whitespace only.</value>
+  </data>
+  <data name="Fisherman_FirstName_MaxLength" xml:space="preserve">
+    <value>First name cannot exceed {0} characters.</value>
+  </data>
+  <data name="Fisherman_LastName_Required" xml:space="preserve">
+    <value>Last name is required.</value>
+  </data>
+  <data name="Fisherman_LastName_NotWhitespace" xml:space="preserve">
+    <value>Last name cannot be empty or whitespace only.</value>
+  </data>
+  <data name="Fisherman_LastName_MaxLength" xml:space="preserve">
+    <value>Last name cannot exceed {0} characters.</value>
+  </data>
+  <data name="Fisherman_BirthDate_InPast" xml:space="preserve">
+    <value>Date of birth must be in the past.</value>
+  </data>
+  <data name="Fisherman_MinimumAge" xml:space="preserve">
+    <value>The fisherman must be at least {0} years old.</value>
+  </data>
+  <data name="Fisherman_DocumentType_Invalid" xml:space="preserve">
+    <value>Document type is not valid.</value>
+  </data>
+  <data name="Fisherman_DocumentNumber_Required" xml:space="preserve">
+    <value>Document number is required.</value>
+  </data>
+  <data name="Fisherman_DocumentNumber_NotWhitespace" xml:space="preserve">
+    <value>Document number cannot be empty or whitespace only.</value>
+  </data>
+  <data name="Fisherman_DocumentNumber_MinLength" xml:space="preserve">
+    <value>Document number must be at least {0} characters long.</value>
+  </data>
+  <data name="Fisherman_DocumentNumber_MaxLength" xml:space="preserve">
+    <value>Document number cannot exceed {0} characters.</value>
+  </data>
+  <data name="Fisherman_DocumentNumber_InvalidFormat" xml:space="preserve">
+    <value>Document number can only contain letters, numbers, hyphens, and spaces.</value>
+  </data>
+  <data name="Fisherman_DocumentNumber_InvalidControlLetter" xml:space="preserve">
+    <value>Document number is invalid: the check letter does not match.</value>
+  </data>
+  <data name="Fisherman_FederationLicense_MaxLength" xml:space="preserve">
+    <value>Federation license cannot exceed {0} characters.</value>
+  </data>
+
+  <!-- Fisherman domain errors -->
+  <data name="Fisherman_NotFound" xml:space="preserve">
+    <value>The requested fisherman does not exist.</value>
+  </data>
+  <data name="Fisherman_DuplicateLicense" xml:space="preserve">
+    <value>A fisherman with this federation license already exists.</value>
+  </data>
+  <data name="Fisherman_InvalidDocument" xml:space="preserve">
+    <value>The document number is not valid for the selected document type.</value>
+  </data>
+
+  <!-- Database errors -->
+  <data name="Database_DuplicateEntry" xml:space="preserve">
+    <value>A record with these unique values already exists.</value>
+  </data>
+  <data name="Database_SaveFailure" xml:space="preserve">
+    <value>Failed to save the record. Please try again.</value>
+  </data>
+
+  <!-- User Administration -->
+  <data name="User_NotFound" xml:space="preserve">
+    <value>User not found.</value>
+  </data>
+  <data name="User_BlockFailed" xml:space="preserve">
+    <value>Failed to block the user.</value>
+  </data>
+  <data name="User_UnblockFailed" xml:space="preserve">
+    <value>Failed to unblock the user.</value>
+  </data>
+  <data name="User_RoleAssignFailed" xml:space="preserve">
+    <value>Failed to assign the role to the user.</value>
+  </data>
+  <data name="User_InvalidRole" xml:space="preserve">
+    <value>The specified role is not valid.</value>
+  </data>
+  <data name="User_GetAllFailed" xml:space="preserve">
+    <value>Failed to retrieve users. Please try again.</value>
+  </data>
+
+</root>

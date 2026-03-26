@@ -1,11 +1,9 @@
-﻿namespace FishClubAlginet.Application.Features.Auth.Commands;
-
+namespace FishClubAlginet.Application.Features.Auth.Commands;
 
 public record LoginUserCommand(
     string Email,
     string Password
 ) : IRequest<ErrorOr<string>>;
-
 
 public class LoginUserHandler : IRequestHandler<LoginUserCommand, ErrorOr<string>>
 {
@@ -29,7 +27,7 @@ public class LoginUserHandler : IRequestHandler<LoginUserCommand, ErrorOr<string
             var token = await _authService.LoginAsync(loginDto);
 
             if (string.IsNullOrEmpty(token))
-                return Error.Validation("Auth.InvalidCredentials", "Credenciales inválidas.");
+                return Error.Validation("Auth.InvalidCredentials", ErrorMessages.Auth_InvalidCredentials);
 
             return token;
         }

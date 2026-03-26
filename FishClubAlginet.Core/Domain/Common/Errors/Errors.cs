@@ -1,4 +1,4 @@
-﻿namespace FishClubAlginet.Core.Domain.Common.Errors;
+namespace FishClubAlginet.Core.Domain.Common.Errors;
 
 public static partial class Errors
 {
@@ -6,21 +6,21 @@ public static partial class Errors
     {
         public static Error NotFound => Error.NotFound(
             code: "Fisherman.NotFound",
-            description: "El pescador solicitado no existe en la base de datos.");
+            description: "The requested fisherman does not exist.");
 
         public static Error DuplicateLicense => Error.Conflict(
             code: "Fisherman.DuplicateLicense",
-            description: "Ya existe un pescador con esa licencia federativa.");
+            description: "A fisherman with this federation license already exists.");
 
         public static Error InvalidDocument => Error.Validation(
             code: "Fisherman.InvalidDocument",
-            description: "El número de documento no es válido para el tipo seleccionado.");
+            description: "The document number is not valid for the selected document type.");
     }
 
     public static class Auth
     {
         public static Error InvalidCredentials => Error.Validation(
             code: "Auth.InvalidCredentials",
-            description: "Las credenciales proporcionadas son incorrectas.");
+            description: "The provided credentials are invalid.");
     }
 }

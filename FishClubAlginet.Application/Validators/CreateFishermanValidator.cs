@@ -1,18 +1,19 @@
-﻿namespace FishClubAlginet.Application.Validators;
+namespace FishClubAlginet.Application.Validators;
 
 public class CreateFishermanValidator : AbstractValidator<CreateFishermanDto>
 {
     public CreateFishermanValidator()
     {
-        // REGLA 1: El nombre es obligatorio
         RuleFor(x => x.FirstName)
-            .NotEmpty().WithMessage("Name is required");
+            .NotEmpty()
+                .WithErrorCode(ValidatorsConstants.FisherManValidationConstants.FirstNameRequiredErrorCode)
+                .WithMessage(ValidatorsConstants.FisherManValidationConstants.FirstNameRequiredErrorMessage);
 
-        // REGLA 2: El apellido es obligatorio
         RuleFor(x => x.LastName)
-            .NotEmpty();
+            .NotEmpty()
+                .WithErrorCode(ValidatorsConstants.FisherManValidationConstants.LastNameRequiredErrorCode)
+                .WithMessage(ValidatorsConstants.FisherManValidationConstants.LastNameRequiredErrorMessage);
 
-        // REGLA 3: Validación compleja del DNI (usando nuestra extensión)
         RuleFor(x => x.DocumentNumber)
             .MustBeValidIdentification(dto => dto.DocumentType);
     }

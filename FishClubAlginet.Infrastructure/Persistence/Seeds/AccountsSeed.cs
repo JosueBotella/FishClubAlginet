@@ -1,34 +1,25 @@
-﻿namespace FishClubAlginet.Infrastructure.Persistence.Seeds;
+﻿using FishClubAlginet.Application.Constants;
+using Microsoft.AspNetCore.Identity;
+
+namespace FishClubAlginet.Infrastructure.Persistence.Seeds;
 
 public static class AccountsSeed
 {
-    public static async Task SeedAsync(AppDbContext context)
+    public static async Task SeedAsync(AppDbContext context, UserManager<IdentityUser> userManager)
     {
         if (await context.Users.AnyAsync())
-        {
             return;
-        }
 
-        var passwordHasher = new PasswordHasher<IdentityUser>();
-        var users = new IdentityUser[]
+        var adminUser = new IdentityUser
         {
-            new IdentityUser
-            {
-                UserName = SeedConstants.DefaultUserName,
-                Email = SeedConstants.DefaultUserName,
-                NormalizedEmail = SeedConstants.DefaultUserName.ToUpperInvariant(),  
-                NormalizedUserName = SeedConstants.DefaultUserName.ToUpperInvariant(), // ✅ CORREGIDO
-                EmailConfirmed = true,
-                PasswordHash = passwordHasher.HashPassword(
-                    user: new IdentityUser { UserName = SeedConstants.DefaultUserName },
-                    password: "a5848b"
-                ),
-            }
+            UserName = SeedConstants.DefaultUserName,
+            Email = SeedConstants.DefaultUserName,
+            NormalizedEmail = SeedConstants.DefaultUserName.ToUpperInvariant(),
+            NormalizedUserName = SeedConstants.DefaultUserName.ToUpperInvariant(),
+            EmailConfirmed = true,
         };
 
-
-
-        await context.Users.AddRangeAsync(users);
-        await context.SaveChangesAsync();
+        await userManager.CreateAsync(adminUser, SeedConstants.DefaultPassword);
+        await userManager.AddToRoleAsync(adminUser, ApplicationConstants.Roles.Admin);
     }
 }

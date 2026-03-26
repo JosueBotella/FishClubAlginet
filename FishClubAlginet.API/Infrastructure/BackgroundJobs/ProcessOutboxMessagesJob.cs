@@ -13,7 +13,7 @@ public class ProcessOutboxMessagesJob : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        // Se ejecuta cada 10 segundos
+        // Runs every 10 seconds
         using var timer = new PeriodicTimer(TimeSpan.FromSeconds(10));
 
         while (!stoppingToken.IsCancellationRequested && await timer.WaitForNextTickAsync(stoppingToken))
@@ -24,7 +24,7 @@ public class ProcessOutboxMessagesJob : BackgroundService
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error crítico procesando el Outbox.");
+                _logger.LogError(ex, "Critical error while processing the Outbox.");
             }
         }
     }
