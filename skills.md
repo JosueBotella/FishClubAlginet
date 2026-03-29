@@ -232,3 +232,14 @@ public async Task Handle_WhenValidRequest_ShouldCreateFisherman()
     result.Value.Should().NotBeNull();
     _unitOfWorkMock.Verify(x => x.SaveChangesAsync(default), Times.Once);
 }
+```
+
+
+## Frontend (Blazor WebAssembly) Standards
+- **UI Components:** Use **Radzen Blazor** exclusively for complex UI elements (`RadzenDataGrid`, `RadzenTemplateForm`, `RadzenDropDown`, `RadzenDialog`, `RadzenNotification`).
+- **DataGrid Features:** Enable filtering, sorting, and pagination by default on list views.
+- **Modals/Dialogs:** Prefer opening forms in `DialogService` rather than navigating to new pages for quick CRUD operations (e.g., creating a user or adding a fisherman).
+- **Localization:** Ensure UI labels and Radzen component texts are ready for i18n (avoid hardcoded Spanish).
+- **UI Authorization:** ALWAYS use Blazor's `<AuthorizeView>` component to manage visibility based on roles. 
+  - Example: Use `<AuthorizeView Roles="Admin">` in `NavMenu.razor` to hide administration links from normal Fishermen.
+  - Do not use manual boolean flags (e.g., `isAdmin`) to hide UI elements.

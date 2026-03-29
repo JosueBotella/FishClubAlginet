@@ -39,4 +39,11 @@ public class UsersController : ApiController
         var result = await _mediator.Send(new AssignRoleCommand(userId, request.Role));
         return result.Match(_ => NoContent(), errors => Problem(errors));
     }
+
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] CreateUserRequest request)
+    {
+        var result = await _mediator.Send(new CreateUserCommand(request.Email, request.Password, request.Role));
+        return result.Match(userId => Ok(new { Id = userId }), errors => Problem(errors));
+    }
 }

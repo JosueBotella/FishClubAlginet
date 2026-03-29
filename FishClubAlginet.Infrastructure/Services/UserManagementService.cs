@@ -67,4 +67,35 @@ public class UserManagementService : IUserManagementService
 
         return await _userManager.AddToRoleAsync(user, role);
     }
+
+    public async Task<ErrorOr<string>> CreateUserWithRoleAsync(string email, string password, string role)
+    {
+        var user = new IdentityUser
+        {
+            UserName = email,
+            Email = email,
+            NormalizedEmail = email.ToUpperInvariant(),
+            NormalizedUserName = email.ToUpperInvariant(),
+            EmailConfirmed = true
+        };
+
+        var createResult = await _userManager.CreateAsync(user, password);
+        if (!createResult.Succeeded)
+        {
+            return createResult.Errors
+                .Select(e => Error.Failure(e.Code, e.Description))
+                .ToList();
+        }
+
+        var roleResult = await _userManager.AddToRoleAsync(user, role);
+        if (!roleResult.Succeeded)
+        {
+            await _userManager.DeleteAsync(user);
+            return roleResult.Errors
+                .Select(e => Error.Failure(e.Code, e.Description))
+                .ToList();
+        }
+
+        return user.Id;
+    }
 }

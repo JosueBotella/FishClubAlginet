@@ -1,0 +1,176 @@
+@page "/admin/users"
+@attribute [Authorize(Roles = "Admin")]
+@inject HttpClient Http
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+
+<PageTitle>@UserManagement.PageTitle</PageTitle>
+
+<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
+             JustifyContent="JustifyContent.SpaceBetween" class="mb-4">
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+        <RadzenIcon Icon="manage_accounts" Style="font-size: 2rem;" />
+        <RadzenText TextStyle="TextStyle.H4" TagName="TagName.H1" Style="margin: 0;">
+            @UserManagement.PageTitle
+        </RadzenText>
+    </RadzenStack>
+    <RadzenButton Text="@UserManagement.NewUserButton" Icon="person_add"
+                  ButtonStyle="ButtonStyle.Primary" Click="OpenCreateDialog" />
+</RadzenStack>
+
+@if (isLoading)
+{
+    <RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Center"
+                 JustifyContent="JustifyContent.Center" class="mt-5">
+        <RadzenProgressBarCircular ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+    </RadzenStack>
+}
+else if (hasError)
+{
+    <RadzenCard class="w-100">
+        <RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" Gap="1rem">
+            <RadzenIcon Icon="error_outline" Style="font-size: 3rem; color: var(--rz-danger);" />
+            <RadzenText TextStyle="TextStyle.Body1">@errorMessage</RadzenText>
+            <RadzenButton Text="Retry" Icon="refresh" ButtonStyle="ButtonStyle.Secondary" Click="LoadUsers" />
+        </RadzenStack>
+    </RadzenCard>
+}
+else
+{
+    <RadzenDataGrid Data="@users" TItem="UserRow" AllowPaging="true" PageSize="15"
+                    AllowSorting="true" AllowFiltering="true" FilterMode="FilterMode.Simple"
+                    PagerHorizontalAlign="HorizontalAlign.Center"
+                    AllowColumnResize="true" Style="width: 100%;">
+        <Columns>
+            <RadzenDataGridColumn TItem="UserRow" Property="Email"
+                                  Title="@UserManagement.ColEmail" />
+            <RadzenDataGridColumn TItem="UserRow" Property="RolesDisplay"
+                                  Title="@UserManagement.ColRoles" Filterable="false" />
+            <RadzenDataGridColumn TItem="UserRow" Property="StatusDisplay"
+                                  Title="@UserManagement.ColStatus" Width="120px" Filterable="false">
+                <Template Context="row">
+                    <RadzenBadge Text="@row.StatusDisplay"
+                                 BadgeStyle="@(row.IsLockedOut ? BadgeStyle.Danger : BadgeStyle.Success)" />
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="UserRow" Title="@UserManagement.ColActions"
+                                  Filterable="false" Sortable="false" Width="160px"
+                                  TextAlign="TextAlign.Center">
+                <Template Context="row">
+                    @if (row.IsLockedOut)
+                    {
+                        <RadzenButton Text="@UserManagement.UnblockButtonText" Icon="lock_open"
+                                      ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small"
+                                      Click="@(() => UnblockUser(row))" />
+                    }
+                    else
+                    {
+                        <RadzenButton Text="@UserManagement.BlockButtonText" Icon="block"
+                                      ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small"
+                                      Click="@(() => BlockUser(row))" />
+                    }
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+}
+
+@code {
+    private List<UserRow> users = new();
+    private bool isLoading = true;
+    private bool hasError;
+    private string errorMessage = string.Empty;
+
+    protected override async Task OnInitializedAsync() => await LoadUsers();
+
+    private async Task LoadUsers()
+    {
+        isLoading = true;
+        hasError = false;
+        errorMessage = string.Empty;
+
+        try
+        {
+            var response = await Http.GetAsync(EndpointsConstants.Users.GetAll);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                hasError = true;
+                errorMessage = $"Server responded with {(int)response.StatusCode} ({response.ReasonPhrase}).";
+                return;
+            }
+
+            var result = await response.Content.ReadFromJsonAsync<List<UserResponse>>();
+            users = result?.Select(u => new UserRow(u.Id, u.Email, u.IsLockedOut, u.Roles)).ToList() ?? new();
+        }
+        catch (Exception ex)
+        {
+            hasError = true;
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task OpenCreateDialog()
+    {
+        var result = await DialogService.OpenAsync<CreateUserDialog>(
+            UserManagement.CreateDialogTitle,
+            options: new DialogOptions { Width = "420px", CloseDialogOnOverlayClick = false });
+
+        if (result is true)
+            await LoadUsers();
+    }
+
+    private async Task BlockUser(UserRow row)
+    {
+        var confirm = await DialogService.Confirm(
+            $"Block user {row.Email}?", UserManagement.BlockButtonText,
+            new ConfirmOptions { OkButtonText = "Yes", CancelButtonText = "Cancel" });
+
+        if (confirm != true) return;
+
+        var response = await Http.PostAsync(EndpointsConstants.Users.Block(row.Id), null);
+        if (response.IsSuccessStatusCode)
+        {
+            NotificationService.Notify(NotificationSeverity.Success,
+                UserManagement.BlockedTitle, UserManagement.BlockedMessage);
+            await LoadUsers();
+        }
+        else
+        {
+            NotificationService.Notify(NotificationSeverity.Error,
+                Notifications.ErrorTitle,
+                $"{UserManagement.BlockErrorPrefix}{response.ReasonPhrase}");
+        }
+    }
+
+    private async Task UnblockUser(UserRow row)
+    {
+        var response = await Http.PostAsync(EndpointsConstants.Users.Unblock(row.Id), null);
+        if (response.IsSuccessStatusCode)
+        {
+            NotificationService.Notify(NotificationSeverity.Success,
+                UserManagement.UnblockedTitle, UserManagement.UnblockedMessage);
+            await LoadUsers();
+        }
+        else
+        {
+            NotificationService.Notify(NotificationSeverity.Error,
+                Notifications.ErrorTitle,
+                $"{UserManagement.UnblockErrorPrefix}{response.ReasonPhrase}");
+        }
+    }
+
+    private record UserResponse(string Id, string Email, bool IsLockedOut, IList<string> Roles);
+
+    private record UserRow(string Id, string Email, bool IsLockedOut, IList<string> Roles)
+    {
+        public string RolesDisplay => Roles.Count > 0 ? string.Join(", ", Roles) : "-";
+        public string StatusDisplay => IsLockedOut
+            ? UserManagement.StatusBlocked
+            : UserManagement.StatusActive;
+    }
+}

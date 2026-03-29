@@ -7,6 +7,7 @@ Management platform for a local fishing club. The system manages members (Fisher
 - **Backend:** .NET 9 using Clean Architecture.
 - **Persistence:** Entity Framework Core with SQL Server.
 - **Frontend:** Blazor WebAssembly.
+- **UI Library:** Radzen Blazor Components (for Grids, Forms, Dialogs, and Notifications).
 - **Communication:** MediatR (CQRS Pattern) in the Application layer.
 - **Authentication:** ASP.NET Core Identity (Roles: Admin and Fisherman).
 - **Testing:** xUnit, Moq, FluentAssertions.

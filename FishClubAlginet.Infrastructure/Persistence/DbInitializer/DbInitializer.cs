@@ -1,7 +1,4 @@
-﻿using FishClubAlginet.Infrastructure.Persistence.Seeds;
-using Microsoft.AspNetCore.Identity;
-
-namespace FishClubAlginet.Infrastructure.Persistence.DbInitializer;
+﻿namespace FishClubAlginet.Infrastructure.Persistence.DbInitializer;
 
 public static class DbInitializer
 {

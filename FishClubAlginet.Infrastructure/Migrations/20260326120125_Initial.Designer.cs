@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FishClubAlginet.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260312125658_Initial")]
+    [Migration("20260326120125_Initial")]
     partial class Initial
     {
         /// <inheritdoc />

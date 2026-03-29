@@ -1,4 +1,4 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
 @using Microsoft.AspNetCore.Components.Authorization
 @using FishClubAlginet.Blazor.Auth
 @inject AuthenticationStateProvider AuthStateProvider
@@ -15,30 +15,33 @@
             <RadzenLabel Text="Base" Style="margin-left: 1rem; margin-right:1rem; font-weight: bold;" />
 
             <RadzenButton Icon="logout"
-                          ButtonStyle="ButtonStyle.Secondary"                        
+                          ButtonStyle="ButtonStyle.Secondary"
                           Size="ButtonSize.Small"
-                          Click="CerrarSesion"
-                          MouseEnter="@(args => TooltipService.Open(args, "Cerrar Sesión"))" />
+                          Click="Logout"
+                          MouseEnter="@(args => TooltipService.Open(args, "Logout"))" />
         </RadzenStack>
     </RadzenHeader>
 
     <RadzenSidebar @bind-Expanded="@sidebarExpanded">
         <RadzenPanelMenu>
-            <RadzenPanelMenuItem Text="Inicio" Path="/" Icon="home" />
+            <RadzenPanelMenuItem Text="Home" Path="/" Icon="home" />
 
             <AuthorizeView>
-                <Authorized>
-                    <RadzenPanelMenuItem Text="sample" Icon="home" Path="sample" />
-                    <RadzenPanelMenuItem Text="Pescadores" Icon="groups" Path="fishermen" />
-                    <RadzenPanelMenuItem Text="Nuevo Pescador" Icon="person_add" Path="fishermen/add" />
-                   
+                <Authorized Context="authUser">
+                    <AuthorizeView Roles="Admin" Context="adminUser">
+                        <Authorized>
+                            <RadzenPanelMenuItem Text="Users" Icon="manage_accounts" Path="admin/users" />
+                            <RadzenPanelMenuItem Text="Fishermen" Icon="groups" Path="fishermen" />
+                            <RadzenPanelMenuItem Text="New Fisherman" Icon="person_add" Path="fishermen/add" />
+                        </Authorized>
+                    </AuthorizeView>
                 </Authorized>
             </AuthorizeView>
         </RadzenPanelMenu>
 
         <div class="p-3" style="position: absolute; bottom: 0; width: 100%;">
             <RadzenText TextStyle="TextStyle.Caption" TextAlign="TextAlign.Center" TagName="TagName.P">
-                v1.0.0 - Senior Architecture
+                v1.0.0 - Base Architecture
             </RadzenText>
         </div>
     </RadzenSidebar>
@@ -59,13 +62,14 @@
 @code {
     bool sidebarExpanded = true;
     string pathToNavigate = string.Format("/{0}", "login");
-    string[] confirmDialog= { "¿Seguro que quieres salir?", "Cerrar Sesión","Sí","Cancelar" };
     [Inject] TooltipService TooltipService { get; set; } = default!;
 
-    private async Task CerrarSesion()
+    private async Task Logout()
     {
-        var confirm = await DialogService.Confirm(confirmDialog[0], confirmDialog[1],
-            new ConfirmOptions() { OkButtonText = confirmDialog[2], CancelButtonText = confirmDialog[3] });
+        var confirm = await DialogService.Confirm(
+            "Are you sure you want to log out?",
+            "Logout",
+            new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "Cancel" });
 
         if (confirm == true)
         {

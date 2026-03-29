@@ -1,4 +1,4 @@
-﻿namespace FishClubAlginet.Blazor.Constants;
+namespace FishClubAlginet.Blazor.Constants;
 
 public class UIConstants
 {
@@ -6,7 +6,7 @@ public class UIConstants
 
     public static class BlazorSettings
     {
-        public const string ApiSettingsSectionError = "La URL de la API no está configurada en appsettings.Development.json";
+        public const string ApiSettingsSectionError = "The API URL is not configured in appsettings.Development.json";
     }
 
     public static class Formats
@@ -17,47 +17,85 @@ public class UIConstants
     public static class Notifications
     {
         public const string ErrorTitle = "Error";
-        public const string ConnectionErrorTitle = "Error de Conexión";
+        public const string ConnectionErrorTitle = "Connection Error";
     }
 
     public static class DocumentTypeNames
     {
         public const string Dni = "DNI";
         public const string Nie = "NIE";
-        public const string Passport = "Pasaporte";
+        public const string Passport = "Passport";
     }
 
     public static class FishermanForm
     {
-        public const string PageTitle = "Nuevo Pescador";
-        public const string PersonalDataSection = "Datos Personales";
-        public const string AddressSection = "Dirección";
+        public const string PageTitle = "New Fisherman";
+        public const string PersonalDataSection = "Personal Data";
+        public const string AddressSection = "Address";
 
-        public const string FirstNameLabel = "Nombre *";
-        public const string FirstNamePlaceholder = "Nombre";
-        public const string LastNameLabel = "Apellidos *";
-        public const string LastNamePlaceholder = "Apellidos";
-        public const string DateOfBirthLabel = "Fecha de Nacimiento *";
-        public const string DocumentTypeLabel = "Tipo Documento *";
-        public const string DocumentNumberLabel = "Nº Documento *";
-        public const string DocumentNumberPlaceholder = "Número de documento";
-        public const string FederationLicenseLabel = "Licencia Federativa";
-        public const string FederationLicensePlaceholder = "Opcional";
+        public const string FirstNameLabel = "First Name *";
+        public const string FirstNamePlaceholder = "First name";
+        public const string LastNameLabel = "Last Name *";
+        public const string LastNamePlaceholder = "Last name";
+        public const string DateOfBirthLabel = "Date of Birth *";
+        public const string DocumentTypeLabel = "Document Type *";
+        public const string DocumentNumberLabel = "Document No. *";
+        public const string DocumentNumberPlaceholder = "Document number";
+        public const string FederationLicenseLabel = "Federation License";
+        public const string FederationLicensePlaceholder = "Optional";
 
-        public const string StreetLabel = "Calle";
-        public const string StreetPlaceholder = "Calle";
-        public const string CityLabel = "Ciudad";
-        public const string CityPlaceholder = "Ciudad";
-        public const string ZipCodeLabel = "Código Postal";
-        public const string ZipCodePlaceholder = "Código Postal";
-        public const string ProvinceLabel = "Provincia";
-        public const string ProvincePlaceholder = "Provincia";
+        public const string StreetLabel = "Street";
+        public const string StreetPlaceholder = "Street";
+        public const string CityLabel = "City";
+        public const string CityPlaceholder = "City";
+        public const string ZipCodeLabel = "Zip Code";
+        public const string ZipCodePlaceholder = "Zip code";
+        public const string ProvinceLabel = "Province";
+        public const string ProvincePlaceholder = "Province";
 
-        public const string SaveButtonText = "Guardar Pescador";
-        public const string CancelButtonText = "Cancelar";
+        public const string SaveButtonText = "Save Fisherman";
+        public const string CancelButtonText = "Cancel";
 
-        public const string CreatedTitle = "Pescador creado";
-        public const string CreatedMessage = "El pescador se ha registrado correctamente.";
-        public const string CreateErrorPrefix = "No se pudo crear el pescador: ";
+        public const string CreatedTitle = "Fisherman created";
+        public const string CreatedMessage = "The fisherman has been registered successfully.";
+        public const string CreateErrorPrefix = "Could not create the fisherman: ";
+    }
+
+    public static class UserManagement
+    {
+        public const string PageTitle = "User Management";
+        public const string NewUserButton = "New User";
+        public const string CreateDialogTitle = "Create User";
+
+        public const string EmailLabel = "Email *";
+        public const string EmailPlaceholder = "user@example.com";
+        public const string PasswordLabel = "Password *";
+        public const string PasswordPlaceholder = "Password";
+        public const string RoleLabel = "Role *";
+
+        public const string SaveButtonText = "Create";
+        public const string CancelButtonText = "Cancel";
+        public const string BlockButtonText = "Block";
+        public const string UnblockButtonText = "Unblock";
+
+        public const string ColEmail = "Email";
+        public const string ColRoles = "Roles";
+        public const string ColStatus = "Status";
+        public const string ColActions = "Actions";
+
+        public const string StatusActive = "Active";
+        public const string StatusBlocked = "Blocked";
+
+        public const string CreatedTitle = "User created";
+        public const string CreatedMessage = "The user has been created successfully.";
+        public const string CreateErrorPrefix = "Could not create the user: ";
+
+        public const string BlockedTitle = "User blocked";
+        public const string BlockedMessage = "The user has been blocked.";
+        public const string BlockErrorPrefix = "Could not block the user: ";
+
+        public const string UnblockedTitle = "User unblocked";
+        public const string UnblockedMessage = "The user has been unblocked.";
+        public const string UnblockErrorPrefix = "Could not unblock the user: ";
     }
 }

@@ -1,26 +1,29 @@
 @page "/fishermen"
+@attribute [Authorize(Roles = "Admin")]
 @using FishClubAlginet.Blazor.Constants
 @using FishClubAlginet.Contracts.Enums
 @inject HttpClient Http
 @inject NavigationManager Nav
 @inject NotificationService NotificationService
 
-<PageTitle>Pescadores</PageTitle>
+<PageTitle>Fishermen</PageTitle>
 
-<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween" class="mb-4">
+<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
+             JustifyContent="JustifyContent.SpaceBetween" class="mb-4">
     <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
         <RadzenIcon Icon="groups" Style="font-size: 2rem;" />
-        <RadzenText TextStyle="TextStyle.H4" TagName="TagName.H1" Style="margin: 0;">Pescadores</RadzenText>
+        <RadzenText TextStyle="TextStyle.H4" TagName="TagName.H1" Style="margin: 0;">Fishermen</RadzenText>
     </RadzenStack>
-    <RadzenButton Text="Nuevo Pescador" Icon="person_add" ButtonStyle="ButtonStyle.Primary"
-                  Click="@(() => Nav.NavigateTo("fishermen/add"))" />
+    <RadzenButton Text="New Fisherman" Icon="person_add" ButtonStyle="ButtonStyle.Primary"
+                  Click="@(() => Nav.NavigateTo(RoutesConstants.AddFisherman))" />
 </RadzenStack>
 
 @if (isLoading)
 {
-    <RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" class="mt-5">
+    <RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Center"
+                 JustifyContent="JustifyContent.Center" class="mt-5">
         <RadzenProgressBarCircular ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
-        <RadzenText TextStyle="TextStyle.Body1" class="mt-2">Cargando pescadores...</RadzenText>
+        <RadzenText TextStyle="TextStyle.Body1" class="mt-2">Loading fishermen...</RadzenText>
     </RadzenStack>
 }
 else if (hasError)
@@ -28,9 +31,9 @@ else if (hasError)
     <RadzenCard class="w-100">
         <RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" Gap="1rem">
             <RadzenIcon Icon="error_outline" Style="font-size: 3rem; color: var(--rz-danger);" />
-            <RadzenText TextStyle="TextStyle.H6">Error al cargar los pescadores</RadzenText>
+            <RadzenText TextStyle="TextStyle.H6">Failed to load fishermen</RadzenText>
             <RadzenText TextStyle="TextStyle.Body1">@errorMessage</RadzenText>
-            <RadzenButton Text="Reintentar" Icon="refresh" ButtonStyle="ButtonStyle.Secondary" Click="LoadFishermen" />
+            <RadzenButton Text="Retry" Icon="refresh" ButtonStyle="ButtonStyle.Secondary" Click="LoadFishermen" />
         </RadzenStack>
     </RadzenCard>
 }
@@ -42,16 +45,16 @@ else
                     AllowColumnResize="true" Style="width: 100%;">
         <Columns>
             <RadzenDataGridColumn TItem="FishermanRow" Property="Id" Title="ID" Width="80px"
-                                  Filterable="false" TextAlign="TextAlign.Center" />
-            <RadzenDataGridColumn TItem="FishermanRow" Property="FirstName" Title="Nombre" />
-            <RadzenDataGridColumn TItem="FishermanRow" Property="LastName" Title="Apellidos" />
-            <RadzenDataGridColumn TItem="FishermanRow" Property="DateOfBirth" Title="Fecha Nac."
+                                  Filterable="false" TextAlign="TextAlign.Center" Visible="false" />
+            <RadzenDataGridColumn TItem="FishermanRow" Property="FirstName" Title="First Name" />
+            <RadzenDataGridColumn TItem="FishermanRow" Property="LastName" Title="Last Name" />
+            <RadzenDataGridColumn TItem="FishermanRow" Property="DateOfBirth" Title="Date of Birth"
                                   FormatString="{0:dd/MM/yyyy}" Width="130px" />
-            <RadzenDataGridColumn TItem="FishermanRow" Property="DocumentTypeName" Title="Tipo Doc." Width="120px" />
-            <RadzenDataGridColumn TItem="FishermanRow" Property="DocumentNumber" Title="N. Documento" />
-            <RadzenDataGridColumn TItem="FishermanRow" Property="FederationLicense" Title="Licencia Fed." />
-            <RadzenDataGridColumn TItem="FishermanRow" Property="AddressCity" Title="Ciudad" />
-            <RadzenDataGridColumn TItem="FishermanRow" Property="AddressProvince" Title="Provincia" />
+            <RadzenDataGridColumn TItem="FishermanRow" Property="DocumentTypeName" Title="Doc. Type" Width="120px" />
+            <RadzenDataGridColumn TItem="FishermanRow" Property="DocumentNumber" Title="Document No." />
+            <RadzenDataGridColumn TItem="FishermanRow" Property="FederationLicense" Title="Fed. License" />
+            <RadzenDataGridColumn TItem="FishermanRow" Property="AddressCity" Title="City" />
+            <RadzenDataGridColumn TItem="FishermanRow" Property="AddressProvince" Title="Province" />
         </Columns>
     </RadzenDataGrid>
 }
@@ -62,10 +65,7 @@ else
     private bool hasError;
     private string errorMessage = string.Empty;
 
-    protected override async Task OnInitializedAsync()
-    {
-        await LoadFishermen();
-    }
+    protected override async Task OnInitializedAsync() => await LoadFishermen();
 
     private async Task LoadFishermen()
     {
@@ -80,7 +80,7 @@ else
             if (!response.IsSuccessStatusCode)
             {
                 hasError = true;
-                errorMessage = $"El servidor respondió con estado {(int)response.StatusCode} ({response.ReasonPhrase}).";
+                errorMessage = $"Server responded with {(int)response.StatusCode} ({response.ReasonPhrase}).";
                 return;
             }
 
@@ -103,7 +103,9 @@ else
         {
             hasError = true;
             errorMessage = ex.Message;
-            NotificationService.Notify(NotificationSeverity.Error, "Error", $"No se pudieron cargar los pescadores: {ex.Message}");
+            NotificationService.Notify(NotificationSeverity.Error,
+                UIConstants.Notifications.ErrorTitle,
+                $"Could not load fishermen: {ex.Message}");
         }
         finally
         {
@@ -137,9 +139,9 @@ else
 
         public string DocumentTypeName => DocumentType switch
         {
-            TypeNationalIdentifier.Dni => "DNI",
-            TypeNationalIdentifier.Nie => "NIE",
-            TypeNationalIdentifier.Passport => "Pasaporte",
+            TypeNationalIdentifier.Dni => UIConstants.DocumentTypeNames.Dni,
+            TypeNationalIdentifier.Nie => UIConstants.DocumentTypeNames.Nie,
+            TypeNationalIdentifier.Passport => UIConstants.DocumentTypeNames.Passport,
             _ => DocumentType.ToString()
         };
     }

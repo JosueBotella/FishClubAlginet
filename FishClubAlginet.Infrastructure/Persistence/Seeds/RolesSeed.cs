@@ -1,6 +1,3 @@
-using FishClubAlginet.Application.Constants;
-using Microsoft.AspNetCore.Identity;
-
 namespace FishClubAlginet.Infrastructure.Persistence.Seeds;
 
 public static class RolesSeed

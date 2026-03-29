@@ -1,7 +1,4 @@
-﻿using FishClubAlginet.Application.Constants;
-using Microsoft.AspNetCore.Identity;
-
-namespace FishClubAlginet.Infrastructure.Persistence.Seeds;
+﻿namespace FishClubAlginet.Infrastructure.Persistence.Seeds;
 
 public static class AccountsSeed
 {
@@ -21,5 +18,6 @@ public static class AccountsSeed
 
         await userManager.CreateAsync(adminUser, SeedConstants.DefaultPassword);
         await userManager.AddToRoleAsync(adminUser, ApplicationConstants.Roles.Admin);
+        await userManager.AddToRoleAsync(adminUser, ApplicationConstants.Roles.Fisherman);
     }
 }

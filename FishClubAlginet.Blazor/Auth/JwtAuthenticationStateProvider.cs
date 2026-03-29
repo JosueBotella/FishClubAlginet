@@ -4,7 +4,9 @@ public class JwtAuthenticationStateProvider : AuthenticationStateProvider
 {
     private readonly HttpClient _httpClient;
     private readonly ILocalStorageService _localStorage;
-    
+
+    private static readonly AuthenticationState _anonymous =
+        new(new ClaimsPrincipal(new ClaimsIdentity()));
 
     public JwtAuthenticationStateProvider(HttpClient httpClient, ILocalStorageService localStorage)
     {
@@ -18,19 +20,31 @@ public class JwtAuthenticationStateProvider : AuthenticationStateProvider
 
         if (string.IsNullOrEmpty(token))
         {
-            return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
+            return _anonymous;
         }
 
-        // Le ponemos el token a las cabeceras para que las futuras peticiones vayan firmadas
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        if (IsTokenExpired(token))
+        {
+            await LogoutAsync();
+            return _anonymous;
+        }
 
-        return new AuthenticationState(new ClaimsPrincipal(GetClaimsFromToken(token)));
+        _httpClient.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", token);
+
+        return new AuthenticationState(
+            new ClaimsPrincipal(GetClaimsFromToken(token)));
     }
 
     public async Task LoginAsync(string token)
     {
         await _localStorage.SetItemAsync(UIConstants.TokenKey, token);
-        var authState = await GetAuthenticationStateAsync();
+
+        _httpClient.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", token);
+
+        var authState = new AuthenticationState(
+            new ClaimsPrincipal(GetClaimsFromToken(token)));
         NotifyAuthenticationStateChanged(Task.FromResult(authState));
     }
 
@@ -38,11 +52,24 @@ public class JwtAuthenticationStateProvider : AuthenticationStateProvider
     {
         await _localStorage.RemoveItemAsync(UIConstants.TokenKey);
         _httpClient.DefaultRequestHeaders.Authorization = null;
-        var authState = new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
-        NotifyAuthenticationStateChanged(Task.FromResult(authState));
+        NotifyAuthenticationStateChanged(Task.FromResult(_anonymous));
     }
 
-    private ClaimsIdentity GetClaimsFromToken(string token)
+    private static bool IsTokenExpired(string token)
+    {
+        try
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var jwtToken = handler.ReadJwtToken(token);
+            return jwtToken.ValidTo < DateTime.UtcNow;
+        }
+        catch
+        {
+            return true;
+        }
+    }
+
+    private static ClaimsIdentity GetClaimsFromToken(string token)
     {
         var handler = new JwtSecurityTokenHandler();
         var jwtToken = handler.ReadJwtToken(token);
