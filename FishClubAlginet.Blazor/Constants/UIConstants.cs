@@ -32,6 +32,7 @@ public class UIConstants
         public const string PageTitle = "New Fisherman";
         public const string PersonalDataSection = "Personal Data";
         public const string AddressSection = "Address";
+        public const string SearchPlaceholder = "Search by name, document or license...";
 
         public const string FirstNameLabel = "First Name *";
         public const string FirstNamePlaceholder = "First name";
@@ -66,6 +67,7 @@ public class UIConstants
         public const string PageTitle = "User Management";
         public const string NewUserButton = "New User";
         public const string CreateDialogTitle = "Create User";
+        public const string SearchPlaceholder = "Search by email...";
 
         public const string EmailLabel = "Email *";
         public const string EmailPlaceholder = "user@example.com";
@@ -77,6 +79,7 @@ public class UIConstants
         public const string CancelButtonText = "Cancel";
         public const string BlockButtonText = "Block";
         public const string UnblockButtonText = "Unblock";
+        public const string ManageRolesButtonText = "Roles";
 
         public const string ColEmail = "Email";
         public const string ColRoles = "Roles";
@@ -97,5 +100,10 @@ public class UIConstants
         public const string UnblockedTitle = "User unblocked";
         public const string UnblockedMessage = "The user has been unblocked.";
         public const string UnblockErrorPrefix = "Could not unblock the user: ";
+
+        public const string RolesDialogTitle = "Manage Roles";
+        public const string RolesUpdatedTitle = "Roles updated";
+        public const string RolesUpdatedMessage = "User roles have been updated successfully.";
+        public const string RolesUpdateErrorPrefix = "Could not update roles: ";
     }
 }

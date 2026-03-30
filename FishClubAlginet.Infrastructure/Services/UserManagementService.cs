@@ -1,3 +1,4 @@
+using FishClubAlginet.Contracts.Dtos.Common;
 using FishClubAlginet.Contracts.Dtos.Responses.Users;
 
 namespace FishClubAlginet.Infrastructure.Services;
@@ -24,6 +25,34 @@ public class UserManagementService : IUserManagementService
         }
 
         return result;
+    }
+
+    public async Task<PaginatedResult<UserDto>> GetUsersPagedAsync(int skip, int take, string? search)
+    {
+        var query = _userManager.Users.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var term = search.ToUpperInvariant();
+            query = query.Where(u => u.NormalizedEmail!.Contains(term));
+        }
+
+        var totalCount = await query.CountAsync();
+        var users = await query
+            .OrderBy(u => u.Email)
+            .Skip(skip)
+            .Take(take)
+            .ToListAsync();
+
+        var result = new List<UserDto>();
+        foreach (var user in users)
+        {
+            var roles = await _userManager.GetRolesAsync(user);
+            var isLockedOut = await _userManager.IsLockedOutAsync(user);
+            result.Add(new UserDto(user.Id, user.Email!, isLockedOut, roles));
+        }
+
+        return new PaginatedResult<UserDto>(result, totalCount);
     }
 
     public async Task<IdentityResult> BlockUserAsync(string userId)
@@ -66,6 +95,22 @@ public class UserManagementService : IUserManagementService
             return IdentityResult.Success;
 
         return await _userManager.AddToRoleAsync(user, role);
+    }
+
+    public async Task<IdentityResult> RemoveRoleAsync(string userId, string role)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user is null)
+            return IdentityResult.Failed(new IdentityError
+            {
+                Code = "UserNotFound",
+                Description = $"User with id '{userId}' was not found."
+            });
+
+        if (!await _userManager.IsInRoleAsync(user, role))
+            return IdentityResult.Success;
+
+        return await _userManager.RemoveFromRoleAsync(user, role);
     }
 
     public async Task<ErrorOr<string>> CreateUserWithRoleAsync(string email, string password, string role)

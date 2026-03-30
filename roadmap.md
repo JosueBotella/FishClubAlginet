@@ -9,7 +9,7 @@
     - [x] **i18n:** All Spanish strings removed from Blazor pages and constants — full English throughout.
     - [x] **Users UI:** `RadzenDataGrid` listing Identity Users (email, roles, lock status). `RadzenDialog` to create Admin/Fisherman users. Block/Unblock row actions.
     - [x] **Fishermen UI:** `RadzenDataGrid` listing Fishermen. `[Authorize(Roles="Admin")]` enforced.
-    - [x] **Admin Layout** `RadzenDataGrid` reloads after user creation to reflect new data.
+    - [x] **Admin Layout** `RadzenDataGrid` reloads after user creation to reflect new data.   
 - [ ] ** Phase 1.75: Admin UI Enhancements**
     - [ ] Add search/filter to Users and Fishermen grids. 
     - [ ] Add pagination to grids for better performance (skip and take).

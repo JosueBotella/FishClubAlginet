@@ -13,9 +13,9 @@ public class UsersController : ApiController
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll([FromQuery] int skip = 0, [FromQuery] int take = 15, [FromQuery] string? search = null)
     {
-        var result = await _mediator.Send(new GetAllUsersQuery());
+        var result = await _mediator.Send(new GetAllUsersQuery(skip, take, search));
         return result.Match(users => Ok(users), errors => Problem(errors));
     }
 
@@ -37,6 +37,13 @@ public class UsersController : ApiController
     public async Task<IActionResult> AssignRole(string userId, [FromBody] AssignRoleRequest request)
     {
         var result = await _mediator.Send(new AssignRoleCommand(userId, request.Role));
+        return result.Match(_ => NoContent(), errors => Problem(errors));
+    }
+
+    [HttpPost("{userId}/remove-role")]
+    public async Task<IActionResult> RemoveRole(string userId, [FromBody] RemoveRoleRequest request)
+    {
+        var result = await _mediator.Send(new RemoveRoleCommand(userId, request.Role));
         return result.Match(_ => NoContent(), errors => Problem(errors));
     }
 

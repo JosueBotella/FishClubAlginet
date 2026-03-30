@@ -1,4 +1,4 @@
-using FishClubAlginet.Core.Domain.ValueObjects;
+
 using FishClubAlginet.Application.Features.Fishermen;
 
 namespace FishClubAlginet.Tests.Handlers;
@@ -54,7 +54,7 @@ public class FisherManGetAllQueriesHandlerTests
             }
         };
 
-        var query = new FisherManGetAllQuery();
+        var query = new FisherManGetAllQuery(0,10,null);
         var handler = new FisherManGetAllQueryHandler(_mockRepository.Object);
 
         _mockRepository
@@ -67,20 +67,20 @@ public class FisherManGetAllQueriesHandlerTests
         // Assert
         Assert.False(result.IsError);
         Assert.NotNull(result.Value);
-        Assert.Equal(2, result.Value.Count);
-        Assert.Equal("John", result.Value[0].FirstName);
-        Assert.Equal("Doe", result.Value[0].LastName);
-        Assert.Equal("Jane", result.Value[1].FirstName);
-        Assert.Equal("Smith", result.Value[1].LastName);
-        Assert.Equal("Madrid", result.Value[0].AddressCity);
-        Assert.Equal("Barcelona", result.Value[1].AddressCity);
+        Assert.Equal(2, result.Value.Items.Count);
+        Assert.Equal("John", result.Value.Items[0].FirstName);
+        Assert.Equal("Doe", result.Value.Items[0].LastName);
+        Assert.Equal("Jane", result.Value.Items[1].FirstName);
+        Assert.Equal("Smith", result.Value.Items[1].LastName);
+        Assert.Equal("Madrid", result.Value.Items[0].AddressCity);
+        Assert.Equal("Barcelona", result.Value.Items[1].AddressCity);
     }
 
     [Fact]
     public async Task Handle_EmptyRepository_ShouldReturnEmptyList()
     {
         // Arrange
-        var query = new FisherManGetAllQuery();
+        var query = new FisherManGetAllQuery(0, 10, null);
         var handler = new FisherManGetAllQueryHandler(_mockRepository.Object);
 
         _mockRepository
@@ -93,14 +93,14 @@ public class FisherManGetAllQueriesHandlerTests
         // Assert
         Assert.False(result.IsError);
         Assert.NotNull(result.Value);
-        Assert.Empty(result.Value);
+        Assert.Empty(result.Value.Items);
     }
 
     [Fact]
     public async Task Handle_QueryThrowsException_ShouldReturnError()
     {
         // Arrange
-        var query = new FisherManGetAllQuery();
+        var query = new FisherManGetAllQuery(0, 10, null);
         var handler = new FisherManGetAllQueryHandler(_mockRepository.Object);
 
         _mockRepository
@@ -141,7 +141,7 @@ public class FisherManGetAllQueriesHandlerTests
             }
         };
 
-        var query = new FisherManGetAllQuery();
+        var query = new FisherManGetAllQuery(0, 10, null);
         var handler = new FisherManGetAllQueryHandler(_mockRepository.Object);
 
         _mockRepository
@@ -153,8 +153,8 @@ public class FisherManGetAllQueriesHandlerTests
 
         // Assert
         Assert.False(result.IsError);
-        Assert.Single(result.Value);
-        var fisherman = result.Value[0];
+        Assert.Single(result.Value.Items);
+        var fisherman = result.Value.Items[0];
         Assert.Equal("Carlos", fisherman.FirstName);
         Assert.Equal("García", fisherman.LastName);
         Assert.Equal("Valencia", fisherman.AddressCity);

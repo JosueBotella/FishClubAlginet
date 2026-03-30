@@ -17,7 +17,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Pages\Users\" />
     <Folder Include="Shared\Components\" />
     <Folder Include="Shared\ResourceFiles\" />
   </ItemGroup>

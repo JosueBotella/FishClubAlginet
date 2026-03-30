@@ -37,9 +37,9 @@ public class FisherMenController : ApiController
     }
 
     [HttpGet("GetAll")]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll([FromQuery] int skip = 0, [FromQuery] int take = 10, [FromQuery] string? search = null)
     {
-        var query = new FisherManGetAllQuery();
+        var query = new FisherManGetAllQuery(skip, take, search);
         var result = await _mediator.Send(query, default);
 
         return result.Match(

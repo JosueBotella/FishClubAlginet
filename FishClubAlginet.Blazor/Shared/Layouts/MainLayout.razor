@@ -12,7 +12,7 @@
         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0">
             <RadzenSidebarToggle Click="@(() => sidebarExpanded = !sidebarExpanded)" />
 
-            <RadzenLabel Text="Base" Style="margin-left: 1rem; margin-right:1rem; font-weight: bold;" />
+            <RadzenLabel Text="@userName" Style="margin-left: 1rem; margin-right:1rem; font-weight: bold;" />
 
             <RadzenButton Icon="logout"
                           ButtonStyle="ButtonStyle.Secondary"
@@ -63,6 +63,21 @@
     bool sidebarExpanded = true;
     string pathToNavigate = string.Format("/{0}", "login");
     [Inject] TooltipService TooltipService { get; set; } = default!;
+    string userName = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            userName = user.Identity.Name
+                       ?? user.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value
+                       ?? user.FindFirst("name")?.Value
+                       ?? string.Empty;
+        }
+    }
 
     private async Task Logout()
     {

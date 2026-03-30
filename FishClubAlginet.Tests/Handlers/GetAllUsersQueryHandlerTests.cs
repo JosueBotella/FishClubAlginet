@@ -1,3 +1,5 @@
+using FishClubAlginet.Contracts.Dtos.Common;
+
 namespace FishClubAlginet.Tests.Handlers;
 
 public class GetAllUsersQueryHandlerTests
@@ -23,45 +25,45 @@ public class GetAllUsersQueryHandlerTests
             new UserDto("user-2", "fisherman@test.com", false, new List<string> { "Fisherman" })
         };
 
-        _userManagementServiceMock.Setup(x => x.GetAllUsersAsync())
-            .ReturnsAsync(users);
+        _userManagementServiceMock.Setup(x => x.GetUsersPagedAsync(0, 10, null))
+            .ReturnsAsync(new PaginatedResult<UserDto>(users, users.Count));
 
         // Act
-        var result = await _handler.Handle(new GetAllUsersQuery(), CancellationToken.None);
+        var result = await _handler.Handle(new GetAllUsersQuery(0, 10, null), CancellationToken.None);
 
         // Assert
         Assert.False(result.IsError);
         Assert.NotNull(result.Value);
-        Assert.Equal(2, result.Value.Count);
-        Assert.Equal("admin@test.com", result.Value[0].Email);
-        Assert.Equal("fisherman@test.com", result.Value[1].Email);
+        Assert.Equal(2, result.Value.Items.Count);
+        Assert.Equal("admin@test.com", result.Value.Items[0].Email);
+        Assert.Equal("fisherman@test.com", result.Value.Items[1].Email);
     }
 
     [Fact]
     public async Task Handle_WhenNoUsersExist_ShouldReturnEmptyList()
     {
         // Arrange
-        _userManagementServiceMock.Setup(x => x.GetAllUsersAsync())
-            .ReturnsAsync(new List<UserDto>());
+        _userManagementServiceMock.Setup(x => x.GetUsersPagedAsync(0, 10, null))
+            .ReturnsAsync(new PaginatedResult<UserDto>(new List<UserDto>(), 0));
 
         // Act
-        var result = await _handler.Handle(new GetAllUsersQuery(), CancellationToken.None);
+        var result = await _handler.Handle(new GetAllUsersQuery(0, 10, null), CancellationToken.None);
 
         // Assert
         Assert.False(result.IsError);
         Assert.NotNull(result.Value);
-        Assert.Empty(result.Value);
+        Assert.Empty(result.Value.Items);
     }
 
     [Fact]
     public async Task Handle_WhenServiceThrows_ShouldReturnFailureError()
     {
         // Arrange
-        _userManagementServiceMock.Setup(x => x.GetAllUsersAsync())
+        _userManagementServiceMock.Setup(x => x.GetUsersPagedAsync(0, 10, null))
             .ThrowsAsync(new Exception("Database connection failed"));
 
         // Act
-        var result = await _handler.Handle(new GetAllUsersQuery(), CancellationToken.None);
+        var result = await _handler.Handle(new GetAllUsersQuery(0, 10, null), CancellationToken.None);
 
         // Assert
         Assert.True(result.IsError);
@@ -77,15 +79,15 @@ public class GetAllUsersQueryHandlerTests
             new UserDto("user-1", "blocked@test.com", true, new List<string>())
         };
 
-        _userManagementServiceMock.Setup(x => x.GetAllUsersAsync())
-            .ReturnsAsync(users);
+        _userManagementServiceMock.Setup(x => x.GetUsersPagedAsync(0, 10, null))
+            .ReturnsAsync(new PaginatedResult<UserDto>(users, users.Count));
 
         // Act
-        var result = await _handler.Handle(new GetAllUsersQuery(), CancellationToken.None);
+        var result = await _handler.Handle(new GetAllUsersQuery(0, 10, null), CancellationToken.None);
 
         // Assert
         Assert.False(result.IsError);
-        Assert.Single(result.Value);
-        Assert.True(result.Value[0].IsLockedOut);
+        Assert.Single(result.Value.Items);
+        Assert.True(result.Value.Items[0].IsLockedOut);
     }
 }
