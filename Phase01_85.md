@@ -1,0 +1,11 @@
+- [ ] ** Phase 1.85: General UI Enhancements**
+	- [ ] Show next to logout button the name of the logged in user (e.g. "Admin User" or "Fisherman User").
+	- [ ] In user management must avoid that user logged can't block him or delete himself, this can be done by disabling the block and delete buttons for the logged in user.	
+	- [ ] Add a "Home" link to the navigation bar that redirects to the home page (e.g. "/").
+	- [ ] Add a "Profile" link to the navigation bar that redirects to the user's profile page (e.g. "/profile").
+		- [ ] Show readonly form that shows the Fisherman's details.
+	- [ ] Add a "Change Password" link to the navigation bar that redirects to a change password page (e.g. "/change-password").
+		- [ ] Show form that allows the user to change their password.
+		- [ ] Validate current password before allowing change.
+		- [ ] Implement notifications for successful password change or errors, this can be done using Radzen's notification service.
+	

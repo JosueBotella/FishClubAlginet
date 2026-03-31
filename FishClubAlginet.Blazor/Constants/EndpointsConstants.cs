@@ -45,4 +45,12 @@ public class EndpointsConstants
             return url;
         }
     }
+
+    public static class Users
+    {
+        public const string GetAll = "api/users";
+        public const string Create = "api/users";
+        public static string Block(string userId) => $"api/users/{userId}/block";
+        public static string Unblock(string userId) => $"api/users/{userId}/unblock";
+    }
 }

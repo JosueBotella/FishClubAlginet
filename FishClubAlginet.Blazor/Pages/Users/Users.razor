@@ -19,12 +19,19 @@
         <RadzenTextBox @bind-Value="searchTerm" Placeholder="@UserManagement.SearchPlaceholder"
                        Style="width: 260px;"
                        @oninput="OnSearchInput" />
-        <RadzenButton Text="@UserManagement.NewUserButton" Icon="person_add"
-                      ButtonStyle="ButtonStyle.Primary" Click="OpenCreateDialog" />
-    </RadzenStack>
+    <RadzenButton Text="@UserManagement.NewUserButton" Icon="person_add"
+                  ButtonStyle="ButtonStyle.Primary" Click="OpenCreateDialog" />
+</RadzenStack>
 </RadzenStack>
 
 @if (hasError)
+{
+    <RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Center"
+                 JustifyContent="JustifyContent.Center" class="mt-5">
+        <RadzenProgressBarCircular ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+    </RadzenStack>
+}
+else if (hasError)
 {
     <RadzenCard class="w-100">
         <RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" Gap="1rem">
@@ -64,18 +71,18 @@ else
                         <RadzenButton Text="@UserManagement.ManageRolesButtonText" Icon="badge"
                                       ButtonStyle="ButtonStyle.Info" Size="ButtonSize.Small"
                                       Click="@(() => OpenManageRolesDialog(row))" />
-                        @if (row.IsLockedOut)
-                        {
-                            <RadzenButton Text="@UserManagement.UnblockButtonText" Icon="lock_open"
-                                          ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small"
-                                          Click="@(() => UnblockUser(row))" />
-                        }
-                        else
-                        {
-                            <RadzenButton Text="@UserManagement.BlockButtonText" Icon="block"
-                                          ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small"
-                                          Click="@(() => BlockUser(row))" />
-                        }
+                    @if (row.IsLockedOut)
+                    {
+                        <RadzenButton Text="@UserManagement.UnblockButtonText" Icon="lock_open"
+                                      ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small"
+                                      Click="@(() => UnblockUser(row))" />
+                    }
+                    else
+                    {
+                        <RadzenButton Text="@UserManagement.BlockButtonText" Icon="block"
+                                      ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small"
+                                      Click="@(() => BlockUser(row))" />
+                    }
                     </RadzenStack>
                 </Template>
             </RadzenDataGridColumn>
