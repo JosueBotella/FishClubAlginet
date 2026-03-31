@@ -1,3 +1,5 @@
+using FishClubAlginet.Contracts.Dtos.Common;
+
 namespace FishClubAlginet.Application.Features.Fishermen;
 
 public record FisherManGetAllQueryResponse(
@@ -12,9 +14,9 @@ public record FisherManGetAllQueryResponse(
     string AddressProvince
 );
 
-public record FisherManGetAllQuery : IRequest<ErrorOr<List<FisherManGetAllQueryResponse>>>;
+public record FisherManGetAllQuery(int Skip, int Take, string? Search) : IRequest<ErrorOr<PaginatedResult<FisherManGetAllQueryResponse>>>;
 
-public class FisherManGetAllQueryHandler : IRequestHandler<FisherManGetAllQuery, ErrorOr<List<FisherManGetAllQueryResponse>>>
+public class FisherManGetAllQueryHandler : IRequestHandler<FisherManGetAllQuery, ErrorOr<PaginatedResult<FisherManGetAllQueryResponse>>>
 {
     private readonly IGenericRepository<Fisherman, int> _genericRepository;
 
@@ -23,11 +25,29 @@ public class FisherManGetAllQueryHandler : IRequestHandler<FisherManGetAllQuery,
         _genericRepository = genericRepository;
     }
 
-    public Task<ErrorOr<List<FisherManGetAllQueryResponse>>> Handle(FisherManGetAllQuery request, CancellationToken cancellationToken)
+    public Task<ErrorOr<PaginatedResult<FisherManGetAllQueryResponse>>> Handle(FisherManGetAllQuery request, CancellationToken cancellationToken)
     {
         try
         {
-            var fishermen = _genericRepository.GetAll()
+            var query = _genericRepository.GetAll();
+
+            if (!string.IsNullOrWhiteSpace(request.Search))
+            {
+                var search = request.Search.ToLower();
+                query = query.Where(f =>
+                    f.FirstName.ToLower().Contains(search) ||
+                    f.LastName.ToLower().Contains(search) ||
+                    f.DocumentNumber.ToLower().Contains(search) ||
+                    f.FederationLicense != null && f.FederationLicense.ToLower().Contains(search));
+            }
+
+            var totalCount = query.Count();
+
+            var fishermen = query
+                .OrderBy(f => f.LastName)
+                .ThenBy(f => f.FirstName)
+                .Skip(request.Skip)
+                .Take(request.Take)
                 .Select(f => new FisherManGetAllQueryResponse(
                     Id: f.Id,
                     FirstName: f.FirstName,
@@ -41,14 +61,15 @@ public class FisherManGetAllQueryHandler : IRequestHandler<FisherManGetAllQuery,
                 ))
                 .ToList();
 
-            return Task.FromResult<ErrorOr<List<FisherManGetAllQueryResponse>>>(fishermen);
+            return Task.FromResult<ErrorOr<PaginatedResult<FisherManGetAllQueryResponse>>>(
+                new PaginatedResult<FisherManGetAllQueryResponse>(fishermen, totalCount));
         }
         catch
         {
             var error = Error.Failure(
                 code: ValidatorsConstants.UnexpectedErrorCode,
                 description: ValidatorsConstants.UnexpectedErrorMessage);
-            return Task.FromResult<ErrorOr<List<FisherManGetAllQueryResponse>>>(error);
+            return Task.FromResult<ErrorOr<PaginatedResult<FisherManGetAllQueryResponse>>>(error);
         }
     }
 }

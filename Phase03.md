@@ -1,0 +1,4 @@
+- [ ] **Phase 3: Competitions & Registration**
+    - [ ] Create `Competition` and `CompetitionRegistration` entities.
+    - [ ] Create EF Core Migration and update database.
+    - [ ] **UI:** Competition Calendar and Enrollment UI for Fishermen.

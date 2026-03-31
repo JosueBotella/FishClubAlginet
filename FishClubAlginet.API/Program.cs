@@ -1,5 +1,3 @@
-
-
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString(ApplicationConstants.Database.ConnectionName)
@@ -14,7 +12,6 @@ builder.Services.AddScoped<IUserManagementService, UserManagementService>();
 
 builder.Services.AddMediatR(cfg =>
 {
-
     cfg.RegisterServicesFromAssembly(typeof(RegisterUserCommand).Assembly);
 });
 builder.Services.AddValidatorsFromAssembly(typeof(LoginUserCommand).Assembly);
@@ -32,12 +29,10 @@ builder.Services.AddIdentityCore<IdentityUser>(options => {
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 var secretKey = jwtSettings.GetValue<string>("SecretKey");
 
-// Program.cs
 builder.Services.AddHostedService<ProcessOutboxMessagesJob>();
 
 
 
-// Configurar el esquema de Autenticaci�n JWT
 builder.Services.AddAuthentication(options => {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;

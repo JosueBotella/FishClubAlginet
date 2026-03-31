@@ -1,0 +1,236 @@
+@page "/admin/users"
+@attribute [Authorize(Roles = "Admin")]
+@using FishClubAlginet.Contracts.Dtos.Common
+@inject HttpClient Http
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+
+<PageTitle>@UserManagement.PageTitle</PageTitle>
+
+<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
+             JustifyContent="JustifyContent.SpaceBetween" class="mb-4">
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+        <RadzenIcon Icon="manage_accounts" Style="font-size: 2rem;" />
+        <RadzenText TextStyle="TextStyle.H4" TagName="TagName.H1" Style="margin: 0;">
+            @UserManagement.PageTitle
+        </RadzenText>
+    </RadzenStack>
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+        <RadzenTextBox @bind-Value="searchTerm" Placeholder="@UserManagement.SearchPlaceholder"
+                       Style="width: 260px;"
+                       @oninput="OnSearchInput" />
+    <RadzenButton Text="@UserManagement.NewUserButton" Icon="person_add"
+                  ButtonStyle="ButtonStyle.Primary" Click="OpenCreateDialog" />
+</RadzenStack>
+</RadzenStack>
+
+@if (hasError)
+{
+    <RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Center"
+                 JustifyContent="JustifyContent.Center" class="mt-5">
+        <RadzenProgressBarCircular ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+    </RadzenStack>
+}
+else if (hasError)
+{
+    <RadzenCard class="w-100">
+        <RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" Gap="1rem">
+            <RadzenIcon Icon="error_outline" Style="font-size: 3rem; color: var(--rz-danger);" />
+            <RadzenText TextStyle="TextStyle.Body1">@errorMessage</RadzenText>
+            <RadzenButton Text="Retry" Icon="refresh" ButtonStyle="ButtonStyle.Secondary"
+                          Click="@(() => grid.Reload())" />
+        </RadzenStack>
+    </RadzenCard>
+}
+else
+{
+    <RadzenDataGrid @ref="grid" Data="@users" TItem="UserRow" Count="@totalCount"
+                    LoadData="@LoadData" IsLoading="@isLoading"
+                    AllowPaging="true" PageSize="15"
+                    AllowSorting="true"
+                    PagerHorizontalAlign="HorizontalAlign.Center"
+                    AllowColumnResize="true" Style="width: 100%;">
+        <Columns>
+            <RadzenDataGridColumn TItem="UserRow" Property="Email"
+                                  Title="@UserManagement.ColEmail" />
+            <RadzenDataGridColumn TItem="UserRow" Property="RolesDisplay"
+                                  Title="@UserManagement.ColRoles" Sortable="false" />
+            <RadzenDataGridColumn TItem="UserRow" Property="StatusDisplay"
+                                  Title="@UserManagement.ColStatus" Width="120px" Sortable="false">
+                <Template Context="row">
+                    <RadzenBadge Text="@row.StatusDisplay"
+                                 BadgeStyle="@(row.IsLockedOut ? BadgeStyle.Danger : BadgeStyle.Success)" />
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="UserRow" Title="@UserManagement.ColActions"
+                                  Sortable="false" Width="240px"
+                                  TextAlign="TextAlign.Center">
+                <Template Context="row">
+                    <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem"
+                                 JustifyContent="JustifyContent.Center">
+                        <RadzenButton Text="@UserManagement.ManageRolesButtonText" Icon="badge"
+                                      ButtonStyle="ButtonStyle.Info" Size="ButtonSize.Small"
+                                      Click="@(() => OpenManageRolesDialog(row))" />
+                    @if (row.IsLockedOut)
+                    {
+                        <RadzenButton Text="@UserManagement.UnblockButtonText" Icon="lock_open"
+                                      ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small"
+                                      Click="@(() => UnblockUser(row))" />
+                    }
+                    else
+                    {
+                        <RadzenButton Text="@UserManagement.BlockButtonText" Icon="block"
+                                      ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small"
+                                      Click="@(() => BlockUser(row))" />
+                    }
+                    </RadzenStack>
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+}
+
+@code {
+    private RadzenDataGrid<UserRow> grid = null!;
+    private List<UserRow> users = new();
+    private int totalCount;
+    private bool isLoading;
+    private bool hasError;
+    private string errorMessage = string.Empty;
+    private string searchTerm = string.Empty;
+    private System.Timers.Timer? debounceTimer;
+
+    private async Task LoadData(LoadDataArgs args)
+    {
+        isLoading = true;
+        hasError = false;
+        errorMessage = string.Empty;
+
+        try
+        {
+            var skip = args.Skip ?? 0;
+            var take = args.Top ?? 15;
+            var url = EndpointsConstants.Users.GetAllPaged(skip, take, searchTerm);
+            var response = await Http.GetAsync(url);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                hasError = true;
+                errorMessage = $"Server responded with {(int)response.StatusCode} ({response.ReasonPhrase}).";
+                return;
+            }
+
+            var result = await response.Content.ReadFromJsonAsync<PaginatedResult<UserResponse>>();
+            users = result?.Items.Select(u => new UserRow(u.Id, u.Email, u.IsLockedOut, u.Roles)).ToList() ?? new();
+            totalCount = result?.TotalCount ?? 0;
+        }
+        catch (Exception ex)
+        {
+            hasError = true;
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void OnSearchInput(ChangeEventArgs e)
+    {
+        searchTerm = e.Value?.ToString() ?? string.Empty;
+
+        debounceTimer?.Stop();
+        debounceTimer?.Dispose();
+        debounceTimer = new System.Timers.Timer(400);
+        debounceTimer.Elapsed += async (_, _) =>
+        {
+            debounceTimer?.Stop();
+            await InvokeAsync(async () => await grid.FirstPage(true));
+        };
+        debounceTimer.AutoReset = false;
+        debounceTimer.Start();
+    }
+
+    private async Task OpenCreateDialog()
+    {
+        var result = await DialogService.OpenAsync<CreateUserDialog>(
+            UserManagement.CreateDialogTitle,
+            options: new DialogOptions { Width = "420px", CloseDialogOnOverlayClick = false });
+
+        if (result is true)
+            await grid.Reload();
+    }
+
+    private async Task OpenManageRolesDialog(UserRow row)
+    {
+        var parameters = new Dictionary<string, object>
+        {
+            { "UserId", row.Id },
+            { "Email", row.Email },
+            { "CurrentRoles", row.Roles }
+        };
+
+        var result = await DialogService.OpenAsync<ManageRolesDialog>(
+            UserManagement.RolesDialogTitle,
+            parameters,
+            new DialogOptions { Width = "380px", CloseDialogOnOverlayClick = false });
+
+        if (result is true)
+            await grid.Reload();
+    }
+
+    private async Task BlockUser(UserRow row)
+    {
+        var confirm = await DialogService.Confirm(
+            $"Block user {row.Email}?", UserManagement.BlockButtonText,
+            new ConfirmOptions { OkButtonText = "Yes", CancelButtonText = "Cancel" });
+
+        if (confirm != true) return;
+
+        var response = await Http.PostAsync(EndpointsConstants.Users.Block(row.Id), null);
+        if (response.IsSuccessStatusCode)
+        {
+            NotificationService.Notify(NotificationSeverity.Success,
+                UserManagement.BlockedTitle, UserManagement.BlockedMessage);
+            await grid.Reload();
+        }
+        else
+        {
+            NotificationService.Notify(NotificationSeverity.Error,
+                Notifications.ErrorTitle,
+                $"{UserManagement.BlockErrorPrefix}{response.ReasonPhrase}");
+        }
+    }
+
+    private async Task UnblockUser(UserRow row)
+    {
+        var response = await Http.PostAsync(EndpointsConstants.Users.Unblock(row.Id), null);
+        if (response.IsSuccessStatusCode)
+        {
+            NotificationService.Notify(NotificationSeverity.Success,
+                UserManagement.UnblockedTitle, UserManagement.UnblockedMessage);
+            await grid.Reload();
+        }
+        else
+        {
+            NotificationService.Notify(NotificationSeverity.Error,
+                Notifications.ErrorTitle,
+                $"{UserManagement.UnblockErrorPrefix}{response.ReasonPhrase}");
+        }
+    }
+
+    public void Dispose()
+    {
+        debounceTimer?.Dispose();
+    }
+
+    private record UserResponse(string Id, string Email, bool IsLockedOut, IList<string> Roles);
+
+    private record UserRow(string Id, string Email, bool IsLockedOut, IList<string> Roles)
+    {
+        public string RolesDisplay => Roles.Count > 0 ? string.Join(", ", Roles) : "-";
+        public string StatusDisplay => IsLockedOut
+            ? UserManagement.StatusBlocked
+            : UserManagement.StatusActive;
+    }
+}

@@ -5,6 +5,15 @@
     <File Path="roadmap.md" />
     <File Path="skills.md" />
   </Folder>
+  <Folder Name="/docs/Development/">
+    <File Path="Phase01_85.md" />
+    <File Path="Phase02.md" />
+    <File Path="Phase03.md" />
+  </Folder>
+  <Folder Name="/docs/Development/Fishermen/">
+    <File Path="Softdelete.md" />
+    <File Path="ViewSoftDeletedFishermen.md" />
+  </Folder>
   <Project Path="FishClubAlginet.API/FishClubAlginet.API.csproj" />
   <Project Path="FishClubAlginet.Application/FishClubAlginet.Application.csproj" />
   <Project Path="FishClubAlginet.Blazor/FishClubAlginet.Blazor.csproj" />

@@ -1,73 +1,77 @@
 @page "/fishermen"
+@attribute [Authorize(Roles = "Admin")]
 @using FishClubAlginet.Blazor.Constants
+@using FishClubAlginet.Contracts.Dtos.Common
 @using FishClubAlginet.Contracts.Enums
 @inject HttpClient Http
 @inject NavigationManager Nav
 @inject NotificationService NotificationService
 
-<PageTitle>Pescadores</PageTitle>
+<PageTitle>Fishermen</PageTitle>
 
-<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween" class="mb-4">
+<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
+             JustifyContent="JustifyContent.SpaceBetween" class="mb-4">
     <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
         <RadzenIcon Icon="groups" Style="font-size: 2rem;" />
-        <RadzenText TextStyle="TextStyle.H4" TagName="TagName.H1" Style="margin: 0;">Pescadores</RadzenText>
+        <RadzenText TextStyle="TextStyle.H4" TagName="TagName.H1" Style="margin: 0;">Fishermen</RadzenText>
     </RadzenStack>
-    <RadzenButton Text="Nuevo Pescador" Icon="person_add" ButtonStyle="ButtonStyle.Primary"
-                  Click="@(() => Nav.NavigateTo("fishermen/add"))" />
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+        <RadzenTextBox @bind-Value="searchTerm"
+                       Placeholder="@UIConstants.FishermanForm.SearchPlaceholder"
+                       Style="width: 300px;"
+                       @oninput="OnSearchInput" />
+        <RadzenButton Text="New Fisherman" Icon="person_add" ButtonStyle="ButtonStyle.Primary"
+                      Click="@(() => Nav.NavigateTo(RoutesConstants.AddFisherman))" />
+    </RadzenStack>
 </RadzenStack>
 
-@if (isLoading)
-{
-    <RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" class="mt-5">
-        <RadzenProgressBarCircular ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
-        <RadzenText TextStyle="TextStyle.Body1" class="mt-2">Cargando pescadores...</RadzenText>
-    </RadzenStack>
-}
-else if (hasError)
+@if (hasError)
 {
     <RadzenCard class="w-100">
         <RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" Gap="1rem">
             <RadzenIcon Icon="error_outline" Style="font-size: 3rem; color: var(--rz-danger);" />
-            <RadzenText TextStyle="TextStyle.H6">Error al cargar los pescadores</RadzenText>
+            <RadzenText TextStyle="TextStyle.H6">Failed to load fishermen</RadzenText>
             <RadzenText TextStyle="TextStyle.Body1">@errorMessage</RadzenText>
-            <RadzenButton Text="Reintentar" Icon="refresh" ButtonStyle="ButtonStyle.Secondary" Click="LoadFishermen" />
+            <RadzenButton Text="Retry" Icon="refresh" ButtonStyle="ButtonStyle.Secondary"
+                          Click="@(() => grid.Reload())" />
         </RadzenStack>
     </RadzenCard>
 }
 else
 {
-    <RadzenDataGrid Data="@fishermen" TItem="FishermanRow" AllowPaging="true" PageSize="10"
-                    AllowSorting="true" AllowFiltering="true" FilterMode="FilterMode.Simple"
+    <RadzenDataGrid @ref="grid" Data="@fishermen" TItem="FishermanRow" Count="@totalCount"
+                    LoadData="@LoadData" IsLoading="@isLoading"
+                    AllowPaging="true" PageSize="10"
+                    AllowSorting="true"
                     PagerHorizontalAlign="HorizontalAlign.Center"
                     AllowColumnResize="true" Style="width: 100%;">
         <Columns>
             <RadzenDataGridColumn TItem="FishermanRow" Property="Id" Title="ID" Width="80px"
-                                  Filterable="false" TextAlign="TextAlign.Center" />
-            <RadzenDataGridColumn TItem="FishermanRow" Property="FirstName" Title="Nombre" />
-            <RadzenDataGridColumn TItem="FishermanRow" Property="LastName" Title="Apellidos" />
-            <RadzenDataGridColumn TItem="FishermanRow" Property="DateOfBirth" Title="Fecha Nac."
+                                  TextAlign="TextAlign.Center" Visible="false" />
+            <RadzenDataGridColumn TItem="FishermanRow" Property="FirstName" Title="First Name" />
+            <RadzenDataGridColumn TItem="FishermanRow" Property="LastName" Title="Last Name" />
+            <RadzenDataGridColumn TItem="FishermanRow" Property="DateOfBirth" Title="Date of Birth"
                                   FormatString="{0:dd/MM/yyyy}" Width="130px" />
-            <RadzenDataGridColumn TItem="FishermanRow" Property="DocumentTypeName" Title="Tipo Doc." Width="120px" />
-            <RadzenDataGridColumn TItem="FishermanRow" Property="DocumentNumber" Title="N. Documento" />
-            <RadzenDataGridColumn TItem="FishermanRow" Property="FederationLicense" Title="Licencia Fed." />
-            <RadzenDataGridColumn TItem="FishermanRow" Property="AddressCity" Title="Ciudad" />
-            <RadzenDataGridColumn TItem="FishermanRow" Property="AddressProvince" Title="Provincia" />
+            <RadzenDataGridColumn TItem="FishermanRow" Property="DocumentTypeName" Title="Doc. Type" Width="120px" />
+            <RadzenDataGridColumn TItem="FishermanRow" Property="DocumentNumber" Title="Document No." />
+            <RadzenDataGridColumn TItem="FishermanRow" Property="FederationLicense" Title="Fed. License" />
+            <RadzenDataGridColumn TItem="FishermanRow" Property="AddressCity" Title="City" />
+            <RadzenDataGridColumn TItem="FishermanRow" Property="AddressProvince" Title="Province" />
         </Columns>
     </RadzenDataGrid>
 }
 
 @code {
+    private RadzenDataGrid<FishermanRow> grid = null!;
     private List<FishermanRow> fishermen = new();
-    private bool isLoading = true;
+    private int totalCount;
+    private bool isLoading;
     private bool hasError;
     private string errorMessage = string.Empty;
+    private string searchTerm = string.Empty;
+    private System.Timers.Timer? debounceTimer;
 
-    protected override async Task OnInitializedAsync()
-    {
-        await LoadFishermen();
-    }
-
-    private async Task LoadFishermen()
+    private async Task LoadData(LoadDataArgs args)
     {
         isLoading = true;
         hasError = false;
@@ -75,18 +79,21 @@ else
 
         try
         {
-            var response = await Http.GetAsync(EndpointsConstants.Fishermen.GetAll);
+            var skip = args.Skip ?? 0;
+            var take = args.Top ?? 10;
+            var url = EndpointsConstants.Fishermen.GetAllPaged(skip, take, searchTerm);
+            var response = await Http.GetAsync(url);
 
             if (!response.IsSuccessStatusCode)
             {
                 hasError = true;
-                errorMessage = $"El servidor respondió con estado {(int)response.StatusCode} ({response.ReasonPhrase}).";
+                errorMessage = $"Server responded with {(int)response.StatusCode} ({response.ReasonPhrase}).";
                 return;
             }
 
-            var result = await response.Content.ReadFromJsonAsync<List<FishermanResponse>>();
+            var result = await response.Content.ReadFromJsonAsync<PaginatedResult<FishermanResponse>>();
 
-            fishermen = result?.Select(f => new FishermanRow
+            fishermen = result?.Items.Select(f => new FishermanRow
             {
                 Id = f.Id,
                 FirstName = f.FirstName,
@@ -98,17 +105,42 @@ else
                 AddressCity = f.AddressCity,
                 AddressProvince = f.AddressProvince
             }).ToList() ?? new();
+
+            totalCount = result?.TotalCount ?? 0;
         }
         catch (Exception ex)
         {
             hasError = true;
             errorMessage = ex.Message;
-            NotificationService.Notify(NotificationSeverity.Error, "Error", $"No se pudieron cargar los pescadores: {ex.Message}");
+            NotificationService.Notify(NotificationSeverity.Error,
+                UIConstants.Notifications.ErrorTitle,
+                $"Could not load fishermen: {ex.Message}");
         }
         finally
         {
             isLoading = false;
         }
+    }
+
+    private void OnSearchInput(ChangeEventArgs e)
+    {
+        searchTerm = e.Value?.ToString() ?? string.Empty;
+
+        debounceTimer?.Stop();
+        debounceTimer?.Dispose();
+        debounceTimer = new System.Timers.Timer(400);
+        debounceTimer.Elapsed += async (_, _) =>
+        {
+            debounceTimer?.Stop();
+            await InvokeAsync(async () => await grid.FirstPage(true));
+        };
+        debounceTimer.AutoReset = false;
+        debounceTimer.Start();
+    }
+
+    public void Dispose()
+    {
+        debounceTimer?.Dispose();
     }
 
     private record FishermanResponse(
@@ -137,9 +169,9 @@ else
 
         public string DocumentTypeName => DocumentType switch
         {
-            TypeNationalIdentifier.Dni => "DNI",
-            TypeNationalIdentifier.Nie => "NIE",
-            TypeNationalIdentifier.Passport => "Pasaporte",
+            TypeNationalIdentifier.Dni => UIConstants.DocumentTypeNames.Dni,
+            TypeNationalIdentifier.Nie => UIConstants.DocumentTypeNames.Nie,
+            TypeNationalIdentifier.Passport => UIConstants.DocumentTypeNames.Passport,
             _ => DocumentType.ToString()
         };
     }

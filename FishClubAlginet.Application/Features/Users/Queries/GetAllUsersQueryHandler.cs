@@ -1,10 +1,11 @@
+using FishClubAlginet.Contracts.Dtos.Common;
 using FishClubAlginet.Contracts.Dtos.Responses.Users;
 
 namespace FishClubAlginet.Application.Features.Users.Queries;
 
-public record GetAllUsersQuery() : IRequest<ErrorOr<List<UserDto>>>;
+public record GetAllUsersQuery(int Skip, int Take, string? Search) : IRequest<ErrorOr<PaginatedResult<UserDto>>>;
 
-public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, ErrorOr<List<UserDto>>>
+public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, ErrorOr<PaginatedResult<UserDto>>>
 {
     private readonly IUserManagementService _userManagementService;
     private readonly ILogger<GetAllUsersQueryHandler> _logger;
@@ -15,12 +16,12 @@ public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, ErrorOr
         _logger = logger;
     }
 
-    public async Task<ErrorOr<List<UserDto>>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
+    public async Task<ErrorOr<PaginatedResult<UserDto>>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
     {
         try
         {
-            var users = await _userManagementService.GetAllUsersAsync();
-            return users.ToList();
+            var result = await _userManagementService.GetUsersPagedAsync(request.Skip, request.Take, request.Search);
+            return result;
         }
         catch (Exception ex)
         {

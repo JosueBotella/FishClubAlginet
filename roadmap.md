@@ -1,30 +1,26 @@
 # Development Roadmap
 
-- [x] Base Solution Structure (Clean Architecture).
-- [x] Fisherman Implementation (Basic CRUD).
-- [x] **i18n Foundation:** `ErrorMessages.resx` in Application layer; all error codes are stable i18n keys; no hardcoded Spanish in production code.
-- [ ] **Phase 1: Identity, Security & User Management**
-    - [x] Configure Identity Roles (`Admin`, `Fisherman`).
-    - [x] **User Administration Area (Admin only):**
-        - [x] User Management Dashboard (List/Block/Unblock users) — `GET /api/users`, `POST /api/users/{id}/block`, `POST /api/users/{id}/unblock`.
-        - [x] Role assignment logic — `POST /api/users/{id}/assign-role`.
-        - [x] Unit tests for user management features (GetAllUsers, BlockUser, UnblockUser, AssignRole, RolesSeed, ApplicationConstants).
-        - [x] i18n refactor — all user-facing strings moved to `ErrorMessages.resx`; tests assert on codes not descriptions.
-    - [ ] **Fisherman Personal Area:**
-        - [ ] "My Profile" view.
-        - [ ] Dashboard: View current League Position (Ranking).
-        - [ ] Dashboard: View enrolled Competitions and "Validated/Confirmed" status.
-    - [ ] Protect API Endpoints with Authorization attributes.
-- [ ] **Phase 2: League Management**
-    - [ ] Create `League` entity in Core project.
-    - [ ] Implement Commands/Queries for Leagues.
-    - [ ] **Ranking Logic:** Implementation of point calculation for the Leaderboard.
-- [ ] **Phase 3: Competitions & Fishing Spots**
-    - [ ] Create `Competition` entity.
-    - [ ] **Registration System:** - [ ] Logic for a Fisherman to sign up for a Competition.
-        - [ ] Validation flag (Admin must confirm the entry).
-    - [ ] Automatic `FishingSpots` generation logic.
-- [ ] **Phase 4: Blazor UI**
-    - [ ] Admin Dashboard for Leagues and Competitions.
-    - [ ] Public/Fisherman Ranking table.
-    - [ ] Competition Enrollment UI for Fishermen.
+- [x] Base Solution Structure & Fisherman Implementation (CRUD).
+- [x] Phase 1: Identity, Security & Backend User Management.
+
+- [x] **Phase 1.5: Blazor Admin MVP (The "Showcase")**
+    - [x] Install and configure Radzen Blazor (NuGet, CSS/JS in `index.html`, `_Imports.razor`).
+    - [x] **Admin Layout:** Side nav with `<AuthorizeView Roles="Admin">` for Users & Fishermen links.
+    - [x] **i18n:** All Spanish strings removed from Blazor pages and constants — full English throughout.
+    - [x] **Users UI:** `RadzenDataGrid` listing Identity Users (email, roles, lock status). `RadzenDialog` to create Admin/Fisherman users. Block/Unblock row actions.
+    - [x] **Fishermen UI:** `RadzenDataGrid` listing Fishermen. `[Authorize(Roles="Admin")]` enforced.
+    - [x] **Admin Layout** `RadzenDataGrid` reloads after user creation to reflect new data.   
+- [ ] ** Phase 1.75: Admin UI Enhancements**
+    - [ ] Add search/filter to Users and Fishermen grids. 
+    - [ ] Add pagination to grids for better performance (skip and take).
+    - [ ] Implement role management (assign/remove roles from users).
+
+- [ ] **Phase 2: League Management (Backend & Frontend)**
+    - [ ] Create `League` entity and MediatR logic.
+    - [ ] Create EF Core Migration and update database.
+    - [ ] **UI:** League Management Dashboard (RadzenDataGrid).
+    
+- [ ] **Phase 3: Competitions & Registration**
+    - [ ] Create `Competition` and `CompetitionRegistration` entities.
+    - [ ] Create EF Core Migration and update database.
+    - [ ] **UI:** Competition Calendar and Enrollment UI for Fishermen.

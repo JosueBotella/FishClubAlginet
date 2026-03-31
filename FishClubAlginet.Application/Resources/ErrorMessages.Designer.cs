@@ -374,5 +374,14 @@ namespace FishClubAlginet.Application.Resources {
                 return ResourceManager.GetString("User_UnblockFailed", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to remove the role from the user..
+        /// </summary>
+        internal static string User_RoleRemoveFailed {
+            get {
+                return ResourceManager.GetString("User_RoleRemoveFailed", resourceCulture);
+            }
+        }
     }
 }

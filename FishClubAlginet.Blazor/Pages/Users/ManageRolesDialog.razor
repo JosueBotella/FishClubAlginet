@@ -1,0 +1,101 @@
+@inject HttpClient Http
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+
+<RadzenStack Gap="1rem">
+    <RadzenText TextStyle="TextStyle.Body1">
+        <strong>User:</strong> @Email
+    </RadzenText>
+
+    <RadzenStack Gap="0.5rem">
+        @foreach (var role in availableRoles)
+        {
+            <RadzenCheckBox @bind-Value="selectedRoles[role]" TValue="bool" Name="@role" />
+            <RadzenLabel Text="@role" Component="@role" Style="margin-left: 0.5rem;" />
+        }
+    </RadzenStack>
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <RadzenAlert AlertStyle="AlertStyle.Danger" ShowIcon="true" Variant="Variant.Flat">
+            @errorMessage
+        </RadzenAlert>
+    }
+
+    <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
+        <RadzenButton Text="@UserManagement.CancelButtonText" ButtonStyle="ButtonStyle.Light"
+                      Click="@(() => DialogService.Close(false))" />
+        <RadzenButton Text="Save" ButtonStyle="ButtonStyle.Primary"
+                      IsBusy="@isBusy" Click="Submit" />
+    </RadzenStack>
+</RadzenStack>
+
+@code {
+    [Parameter] public string UserId { get; set; } = string.Empty;
+    [Parameter] public string Email { get; set; } = string.Empty;
+    [Parameter] public IList<string> CurrentRoles { get; set; } = [];
+
+    private readonly List<string> availableRoles = ["Admin", "Fisherman"];
+    private Dictionary<string, bool> selectedRoles = new();
+    private bool isBusy;
+    private string errorMessage = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        foreach (var role in availableRoles)
+        {
+            selectedRoles[role] = CurrentRoles.Contains(role);
+        }
+    }
+
+    private async Task Submit()
+    {
+        errorMessage = string.Empty;
+        isBusy = true;
+
+        try
+        {
+            var rolesToAdd = availableRoles
+                .Where(r => selectedRoles[r] && !CurrentRoles.Contains(r))
+                .ToList();
+
+            var rolesToRemove = availableRoles
+                .Where(r => !selectedRoles[r] && CurrentRoles.Contains(r))
+                .ToList();
+
+            foreach (var role in rolesToAdd)
+            {
+                var payload = new { Role = role };
+                var response = await Http.PostAsJsonAsync(EndpointsConstants.Users.AssignRole(UserId), payload);
+                if (!response.IsSuccessStatusCode)
+                {
+                    errorMessage = $"{UserManagement.RolesUpdateErrorPrefix}{response.ReasonPhrase}";
+                    return;
+                }
+            }
+
+            foreach (var role in rolesToRemove)
+            {
+                var payload = new { Role = role };
+                var response = await Http.PostAsJsonAsync(EndpointsConstants.Users.RemoveRole(UserId), payload);
+                if (!response.IsSuccessStatusCode)
+                {
+                    errorMessage = $"{UserManagement.RolesUpdateErrorPrefix}{response.ReasonPhrase}";
+                    return;
+                }
+            }
+
+            NotificationService.Notify(NotificationSeverity.Success,
+                UserManagement.RolesUpdatedTitle, UserManagement.RolesUpdatedMessage);
+            DialogService.Close(true);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            isBusy = false;
+        }
+    }
+}

@@ -1,0 +1,4 @@
+- [ ] **Phase 2: League Management (Backend & Frontend)**
+    - [ ] Create `League` entity and MediatR logic.
+    - [ ] Create EF Core Migration and update database.
+    - [ ] **UI:** League Management Dashboard (RadzenDataGrid).

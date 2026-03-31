@@ -1,0 +1,8 @@
+- [ ] Task ** Soft Delete for Fishermen in Radzen Blazor Application**
+- [ ] In the Fishermen grid, add a buttom to soft delete a fisherman, this can be done by adding a new column with a delete button that calls a method to set the "IsDeleted" property of the fisherman to true instead of actually deleting the record from the database.
+		- [ ] Implement handler to set the "IsDeleted" property of the fisherman to true when the delete button is clicked, this can be done by creating a new method in the code-behind that takes the fisherman ID as a parameter and updates the corresponding record in the database.
+		- [ ] Modify filter `RadzenDataGrid` to hide deleted fishermen from the grid, this can be done by adding a condition to the query that retrieves the fishermen to only include those where "IsDeleted" is false.
+		- [ ] Add a confirmation dialog before soft deleting a fisherman, this can be done using Radzen's dialog service to show a confirmation message before calling the delete method.
+		- [ ] Implement notifications for successful soft delete or errors, this can be done using Radzen's notification service to show a message after the delete method is called indicating whether the operation was successful or if there were any errors.
+		- [ ] Ensure that only users with the "Admin" role can see the delete button and perform the soft delete action, this can be done by adding an `[Authorize(Roles = "Admin")]` attribute to the delete method.
+		- [ ] Implement tests for the soft delete functionality, this can be done by creating unit tests that verify that the "IsDeleted" property is set to true when the delete method is called and that deleted fishermen are not included in the grid results.

@@ -1,0 +1,3 @@
+-[ ] ** View Soft Deleted Fishermen**
+	- [ ] We need historical view to show the deleted fishermen, this can be done by creating a new page that retrieves and displays the fishermen where "IsDeleted" is true.
+	- [ ] Button to access the page with soft deleted fishermen, this can be done by adding a new link in the navigation bar that redirects to the new page.

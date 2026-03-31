@@ -1,0 +1,73 @@
+@inject HttpClient Http
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+
+<RadzenStack Gap="1rem">
+    <RadzenFormField Text="@UserManagement.EmailLabel" Variant="Variant.Outlined">
+        <RadzenTextBox @bind-Value="email" Placeholder="@UserManagement.EmailPlaceholder" Style="width: 100%;" />
+    </RadzenFormField>
+
+    <RadzenFormField Text="@UserManagement.PasswordLabel" Variant="Variant.Outlined">
+        <RadzenPassword @bind-Value="password" Placeholder="@UserManagement.PasswordPlaceholder" Style="width: 100%;" />
+    </RadzenFormField>
+
+    <RadzenFormField Text="@UserManagement.RoleLabel" Variant="Variant.Outlined">
+        <RadzenDropDown @bind-Value="role" Data="@roles" Style="width: 100%;" />
+    </RadzenFormField>
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <RadzenAlert AlertStyle="AlertStyle.Danger" ShowIcon="true" Variant="Variant.Flat">
+            @errorMessage
+        </RadzenAlert>
+    }
+
+    <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
+        <RadzenButton Text="@UserManagement.CancelButtonText" ButtonStyle="ButtonStyle.Light"
+                      Click="@(() => DialogService.Close(false))" />
+        <RadzenButton Text="@UserManagement.SaveButtonText" ButtonStyle="ButtonStyle.Primary"
+                      IsBusy="@isBusy" Click="Submit" />
+    </RadzenStack>
+</RadzenStack>
+
+@code {
+    private string email = string.Empty;
+    private string password = string.Empty;
+    private string role = "Fisherman";
+    private bool isBusy;
+    private string errorMessage = string.Empty;
+
+    private readonly List<string> roles = ["Admin", "Fisherman"];
+
+    private async Task Submit()
+    {
+        errorMessage = string.Empty;
+        isBusy = true;
+
+        try
+        {
+            var payload = new { Email = email, Password = password, Role = role };
+            var response = await Http.PostAsJsonAsync(EndpointsConstants.Users.Create, payload);
+
+            if (response.IsSuccessStatusCode)
+            {
+                NotificationService.Notify(NotificationSeverity.Success,
+                    UserManagement.CreatedTitle, UserManagement.CreatedMessage);
+                DialogService.Close(true);
+            }
+            else
+            {
+                var body = await response.Content.ReadAsStringAsync();
+                errorMessage = $"{UserManagement.CreateErrorPrefix}{response.ReasonPhrase}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            isBusy = false;
+        }
+    }
+}
