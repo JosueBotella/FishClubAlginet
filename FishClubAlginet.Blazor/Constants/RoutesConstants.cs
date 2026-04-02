@@ -6,4 +6,6 @@ public static class RoutesConstants
     public const string Login = "/login";
     public const string AddFisherman = "/fishermen/add";
     public const string Users = "/admin/users";
+    public const string Profile = "/profile";
+    public const string ChangePassword = "/change-password";
 }

@@ -1,4 +1,5 @@
 ﻿using FishClubAlginet.Application.Features.Auth.Commands;
+using System.Security.Claims;
 
 namespace FishClubAlginet.API.Controllers;
 
@@ -40,6 +41,23 @@ public class AccountController : ApiController
 
         return result.Match(
             token => Ok(new { Token = token }),
+            errors => Problem(errors)
+        );
+    }
+
+    [HttpPost("change-password")]
+    [Authorize]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto request)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized();
+
+        var command = new ChangePasswordCommand(userId, request.CurrentPassword, request.NewPassword);
+        var result = await _mediator.Send(command, default);
+
+        return result.Match(
+            _ => NoContent(),
             errors => Problem(errors)
         );
     }

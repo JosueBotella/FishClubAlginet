@@ -1,9 +1,11 @@
 @page "/admin/users"
 @attribute [Authorize(Roles = "Admin")]
 @using FishClubAlginet.Contracts.Dtos.Common
+@using Microsoft.AspNetCore.Components.Authorization
 @inject HttpClient Http
 @inject DialogService DialogService
 @inject NotificationService NotificationService
+@inject AuthenticationStateProvider AuthStateProvider
 
 <PageTitle>@UserManagement.PageTitle</PageTitle>
 
@@ -75,13 +77,15 @@ else
                     {
                         <RadzenButton Text="@UserManagement.UnblockButtonText" Icon="lock_open"
                                       ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small"
-                                      Click="@(() => UnblockUser(row))" />
+                                      Click="@(() => UnblockUser(row))"
+                                      Disabled="@(row.Id == currentUserId)" />
                     }
                     else
                     {
                         <RadzenButton Text="@UserManagement.BlockButtonText" Icon="block"
                                       ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small"
-                                      Click="@(() => BlockUser(row))" />
+                                      Click="@(() => BlockUser(row))"
+                                      Disabled="@(row.Id == currentUserId)" />
                     }
                     </RadzenStack>
                 </Template>
@@ -99,6 +103,14 @@ else
     private string errorMessage = string.Empty;
     private string searchTerm = string.Empty;
     private System.Timers.Timer? debounceTimer;
+    private string currentUserId = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        currentUserId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+    }
 
     private async Task LoadData(LoadDataArgs args)
     {

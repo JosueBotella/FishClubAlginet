@@ -1,4 +1,6 @@
-﻿namespace FishClubAlginet.API.Controllers;
+﻿using System.Security.Claims;
+
+namespace FishClubAlginet.API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -48,4 +50,19 @@ public class FisherMenController : ApiController
         );
     }
 
+    [HttpGet("my-profile")]
+    public async Task<IActionResult> MyProfile()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized();
+
+        var query = new GetFishermanByUserIdQuery(userId);
+        var result = await _mediator.Send(query, default);
+
+        return result.Match(
+            profile => Ok(profile),
+            errors => Problem(errors)
+        );
+    }
 }
