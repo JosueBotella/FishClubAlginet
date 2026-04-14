@@ -110,8 +110,10 @@ public async Task Handle_WhenValidRequest_ShouldCreateFisherman()
 
 ### 🔲 TAREA ACTIVA — Migración Frontend Blazor → React+TypeScript
 Rehacer desde cero todo el frontend en React+TypeScript manteniendo la misma funcionalidad ya implementada en Blazor:
+
 **Nueva Rama react-migration**
   - [] Crear nueva rama `react-migration` desde `master`
+
 **Auth**
 - [ ] Login (muro de login)
 - [ ] Logout
