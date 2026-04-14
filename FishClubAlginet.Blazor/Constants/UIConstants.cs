@@ -18,6 +18,7 @@ public class UIConstants
     {
         public const string ErrorTitle = "Error";
         public const string ConnectionErrorTitle = "Connection Error";
+        public const string SuccessTitle = "Success";
     }
 
     public static class DocumentTypeNames
@@ -105,5 +106,43 @@ public class UIConstants
         public const string RolesUpdatedTitle = "Roles updated";
         public const string RolesUpdatedMessage = "User roles have been updated successfully.";
         public const string RolesUpdateErrorPrefix = "Could not update roles: ";
+    }
+
+    public static class ProfilePage
+    {
+        public const string PageTitle = "My Profile";
+        public const string PersonalDataSection = "Personal Data";
+        public const string AddressSection = "Address";
+        public const string FirstNameLabel = "First Name";
+        public const string LastNameLabel = "Last Name";
+        public const string DateOfBirthLabel = "Date of Birth";
+        public const string DocumentTypeLabel = "Document Type";
+        public const string DocumentNumberLabel = "Document No.";
+        public const string FederationLicenseLabel = "Federation License";
+        public const string RegionalLicenseLabel = "Regional License";
+        public const string StreetLabel = "Street";
+        public const string NumberLabel = "Number";
+        public const string FloorDoorLabel = "Floor/Door";
+        public const string ZipCodeLabel = "Zip Code";
+        public const string CityLabel = "City";
+        public const string ProvinceLabel = "Province";
+        public const string NoProfileMessage = "No fisherman profile linked to your account.";
+        public const string LoadErrorPrefix = "Could not load profile: ";
+    }
+
+    public static class ChangePasswordPage
+    {
+        public const string PageTitle = "Change Password";
+        public const string CurrentPasswordLabel = "Current Password *";
+        public const string CurrentPasswordPlaceholder = "Enter current password";
+        public const string NewPasswordLabel = "New Password *";
+        public const string NewPasswordPlaceholder = "Enter new password";
+        public const string ConfirmNewPasswordLabel = "Confirm New Password *";
+        public const string ConfirmNewPasswordPlaceholder = "Confirm new password";
+        public const string SubmitButtonText = "Change Password";
+        public const string PasswordChangedTitle = "Password changed";
+        public const string PasswordChangedMessage = "Your password has been changed successfully.";
+        public const string PasswordChangeErrorPrefix = "Could not change password: ";
+        public const string PasswordMismatchError = "New password and confirmation do not match.";
     }
 }

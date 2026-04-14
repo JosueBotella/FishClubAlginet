@@ -1,0 +1,172 @@
+@page "/profile"
+@inject HttpClient Http
+@inject NotificationService NotificationService
+
+<PageTitle>@ProfilePage.PageTitle</PageTitle>
+
+<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem" class="mb-4">
+    <RadzenIcon Icon="person" Style="font-size: 2rem;" />
+    <RadzenText TextStyle="TextStyle.H4" TagName="TagName.H1" Style="margin: 0;">
+        @ProfilePage.PageTitle
+    </RadzenText>
+</RadzenStack>
+
+@if (isLoading)
+{
+    <RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Center"
+                 JustifyContent="JustifyContent.Center" class="mt-5">
+        <RadzenProgressBarCircular ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+    </RadzenStack>
+}
+else if (profile is null)
+{
+    <RadzenCard class="w-100">
+        <RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" Gap="1rem">
+            <RadzenIcon Icon="info_outline" Style="font-size: 3rem; color: var(--rz-info);" />
+            <RadzenText TextStyle="TextStyle.Body1">@ProfilePage.NoProfileMessage</RadzenText>
+        </RadzenStack>
+    </RadzenCard>
+}
+else
+{
+    <RadzenCard class="w-100">
+        <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H2" class="mb-3">
+            @ProfilePage.PersonalDataSection
+        </RadzenText>
+
+        <RadzenRow Gap="1rem">
+            <RadzenColumn Size="12" SizeMD="6">
+                <RadzenFormField Text="@ProfilePage.FirstNameLabel" Style="width: 100%;">
+                    <RadzenTextBox Value="@profile.FirstName" ReadOnly="true" />
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="6">
+                <RadzenFormField Text="@ProfilePage.LastNameLabel" Style="width: 100%;">
+                    <RadzenTextBox Value="@profile.LastName" ReadOnly="true" />
+                </RadzenFormField>
+            </RadzenColumn>
+        </RadzenRow>
+
+        <RadzenRow Gap="1rem" class="mt-3">
+            <RadzenColumn Size="12" SizeMD="4">
+                <RadzenFormField Text="@ProfilePage.DateOfBirthLabel" Style="width: 100%;">
+                    <RadzenTextBox Value="@profile.DateOfBirth.ToString(Formats.ShortDate)" ReadOnly="true" />
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="4">
+                <RadzenFormField Text="@ProfilePage.DocumentTypeLabel" Style="width: 100%;">
+                    <RadzenTextBox Value="@profile.DocumentType" ReadOnly="true" />
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="4">
+                <RadzenFormField Text="@ProfilePage.DocumentNumberLabel" Style="width: 100%;">
+                    <RadzenTextBox Value="@profile.DocumentNumber" ReadOnly="true" />
+                </RadzenFormField>
+            </RadzenColumn>
+        </RadzenRow>
+
+        <RadzenRow Gap="1rem" class="mt-3">
+            <RadzenColumn Size="12" SizeMD="6">
+                <RadzenFormField Text="@ProfilePage.FederationLicenseLabel" Style="width: 100%;">
+                    <RadzenTextBox Value="@(profile.FederationLicense ?? "-")" ReadOnly="true" />
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="6">
+                <RadzenFormField Text="@ProfilePage.RegionalLicenseLabel" Style="width: 100%;">
+                    <RadzenTextBox Value="@(profile.RegionalLicense ?? "-")" ReadOnly="true" />
+                </RadzenFormField>
+            </RadzenColumn>
+        </RadzenRow>
+    </RadzenCard>
+
+    <RadzenCard class="w-100 mt-4">
+        <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H2" class="mb-3">
+            @ProfilePage.AddressSection
+        </RadzenText>
+
+        <RadzenRow Gap="1rem">
+            <RadzenColumn Size="12" SizeMD="6">
+                <RadzenFormField Text="@ProfilePage.StreetLabel" Style="width: 100%;">
+                    <RadzenTextBox Value="@profile.Street" ReadOnly="true" />
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="3">
+                <RadzenFormField Text="@ProfilePage.NumberLabel" Style="width: 100%;">
+                    <RadzenTextBox Value="@profile.Number" ReadOnly="true" />
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="3">
+                <RadzenFormField Text="@ProfilePage.FloorDoorLabel" Style="width: 100%;">
+                    <RadzenTextBox Value="@profile.FloorDoor" ReadOnly="true" />
+                </RadzenFormField>
+            </RadzenColumn>
+        </RadzenRow>
+
+        <RadzenRow Gap="1rem" class="mt-3">
+            <RadzenColumn Size="12" SizeMD="4">
+                <RadzenFormField Text="@ProfilePage.ZipCodeLabel" Style="width: 100%;">
+                    <RadzenTextBox Value="@profile.ZipCode" ReadOnly="true" />
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="4">
+                <RadzenFormField Text="@ProfilePage.CityLabel" Style="width: 100%;">
+                    <RadzenTextBox Value="@profile.City" ReadOnly="true" />
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="4">
+                <RadzenFormField Text="@ProfilePage.ProvinceLabel" Style="width: 100%;">
+                    <RadzenTextBox Value="@profile.Province" ReadOnly="true" />
+                </RadzenFormField>
+            </RadzenColumn>
+        </RadzenRow>
+    </RadzenCard>
+}
+
+@code {
+    private bool isLoading = true;
+    private FishermanProfileResponse? profile;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var response = await Http.GetAsync(EndpointsConstants.Fishermen.MyProfile);
+
+            if (response.IsSuccessStatusCode)
+            {
+                profile = await response.Content.ReadFromJsonAsync<FishermanProfileResponse>();
+            }
+            else if (response.StatusCode != System.Net.HttpStatusCode.NotFound)
+            {
+                NotificationService.Notify(NotificationSeverity.Error,
+                    Notifications.ErrorTitle,
+                    $"{ProfilePage.LoadErrorPrefix}{response.ReasonPhrase}");
+            }
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(NotificationSeverity.Error,
+                Notifications.ConnectionErrorTitle, ex.Message);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private record FishermanProfileResponse(
+        int Id,
+        string FirstName,
+        string LastName,
+        DateTime DateOfBirth,
+        string DocumentType,
+        string DocumentNumber,
+        string? FederationLicense,
+        string? RegionalLicense,
+        string Street,
+        string Number,
+        string FloorDoor,
+        string ZipCode,
+        string City,
+        string Province);
+}

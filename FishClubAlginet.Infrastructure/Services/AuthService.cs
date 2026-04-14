@@ -29,6 +29,21 @@ public class AuthService : IAuthService
         return null;
     }
 
+    public async Task<IdentityResult> ChangePasswordAsync(string userId, string currentPassword, string newPassword)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user is null)
+        {
+            return IdentityResult.Failed(new IdentityError
+            {
+                Code = "UserNotFound",
+                Description = "User not found."
+            });
+        }
+
+        return await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
+    }
+
     private async Task<string> GenerateJwtTokenAsync(IdentityUser user)
     {
         var jwtSettings = _configuration.GetSection(ApplicationConstants.Authentication.JwtSection);
