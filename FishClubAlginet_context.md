@@ -6,7 +6,7 @@ Plataforma de gestión para club de pesca local (Alginet). Gestiona socios (Fish
 ## Stack Técnico
 - **Backend:** .NET 9, Clean Architecture
 - **Frontend:** React + TypeScript (migración desde Blazor WebAssembly)
-- **UI:** TBD — sustituye Radzen Blazor
+- **UI:** Mantine v7 + @tabler/icons-react — sustituye Radzen Blazor
 - **ORM:** Entity Framework Core + SQL Server Express
 - **CQRS:** MediatR
 - **Auth:** ASP.NET Core Identity (roles: Admin, Fisherman) + JWT
@@ -114,18 +114,28 @@ Rehacer desde cero todo el frontend en React+TypeScript manteniendo la misma fun
 **Nueva Rama react-migration**
   - [x] Crear nueva rama `react-migration` desde `master`
   - [x] Cambiar acceso a datos de PostgreSQL a SQL Server Express
-  - [ ] Revisar tests unitarios backend para asegurar compatibilidad con cambios en infraestructura 
-  - [ ] Generar commit con la fase de migración completa del backend (sin cambios funcionales, solo infraestructura)
-  - [ ] Generar pull request a master para integrar cambios backend
+  - [x] Revisar tests unitarios backend para asegurar compatibilidad con cambios en infraestructura 
+  - [x] Generar commit con la fase de migración completa del backend (sin cambios funcionales, solo infraestructura)
+  - [x] Generar pull request a master para integrar cambios backend
+  - [ ] Marcar con check los items completados a medida que se avanza.
+
+**Integración Mantine UI**
+- [x] Instalar dependencias Mantine (`@mantine/core`, `@mantine/hooks`, `@mantine/form`, `@mantine/notifications`, `@tabler/icons-react`, PostCSS)
+- [x] Configurar `MantineProvider` con tema personalizado (colores club, fuente, border-radius)
+- [x] Configurar `postcss.config.cjs` con `postcss-preset-mantine`
+- [x] Importar CSS base de Mantine en `main.tsx`
+- [x] Configurar `Notifications` provider global
+- [x] Crear tema base en `src/theme/theme.ts` (overrides de colores, fuente, etc.)
+
 **Auth**
-- [ ] Login (muro de login)
-- [ ] Logout
-- [ ] Gestión de JWT (almacenamiento, refresh, interceptor HTTP)
-- [ ] Rutas protegidas por rol (Admin / Fisherman)
+- [x] Login (muro de login)
+- [x] Logout
+- [x] Gestión de JWT (almacenamiento, refresh, interceptor HTTP)
+- [x] Rutas protegidas por rol (Admin / Fisherman)
 - [ ] Revisar tests unitarios backend para asegurar compatibilidad con cambios en infraestructura 
 - [ ] Generar commit con la fase de migración completa del backend (sin cambios funcionales, solo infraestructura)
 - [ ] Generar pull request a master para integrar cambios backend con mensaje "feat: Auth"
-
+- [ ] Marcar con check los items completados a medida que se avanza.
 **Layout y navegación**
 - [ ] Layout con sidebar diferenciado por rol
 - [ ] Mostrar nombre del usuario logado junto al logout
@@ -133,7 +143,7 @@ Rehacer desde cero todo el frontend en React+TypeScript manteniendo la misma fun
 - [ ] Revisar tests unitarios backend para asegurar compatibilidad con cambios en infraestructura 
 - [ ] Generar commit con la fase de migración completa del backend (sin cambios funcionales, solo infraestructura)
 - [ ] Generar pull request a master para integrar cambios backend con mensaje "feat: Layout y navegación"
-- [ ] 
+- [ ] Marcar con check los items completados a medida que se avanza.
 **Admin — Users**
 - [ ] Grid de usuarios (email, roles, estado bloqueo)
 - [ ] Crear usuario Admin/Fisherman (modal/dialog)
@@ -144,7 +154,7 @@ Rehacer desde cero todo el frontend en React+TypeScript manteniendo la misma fun
 - [ ] Revisar tests unitarios backend para asegurar compatibilidad con cambios en infraestructura 
 - [ ] Generar commit con la fase de migración completa del backend (sin cambios funcionales, solo infraestructura)
 - [ ] Generar pull request a master para integrar cambios backend con mensaje "feat: Admin — Users"
-
+- [ ] Marcar con check los items completados a medida que se avanza.
 **Admin — Fishermen**
 - [ ] Grid de pescadores
 - [ ] Soft Delete (botón → IsDeleted=true, confirmación, notificación)
@@ -178,7 +188,7 @@ Rehacer desde cero todo el frontend en React+TypeScript manteniendo la misma fun
 
 ## URLs de desarrollo
 - **API:** https://localhost:7179
-- **React:** TBD (Vite dev server, puerto por definir)
+- **React:** http://localhost:5173 (Vite dev server, proxy → API)
 - **Repo:** https://github.com/JosueBotella/FishClubAlginet
 
 ## Ejecutar proyecto
