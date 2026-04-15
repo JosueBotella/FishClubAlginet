@@ -5,7 +5,7 @@ public static class ApplicationConstants
     public static class ConfigurationProgram
     {
         public const string AddCors_MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
-        public const string AddCors_WithOrigins = "https://localhost:7230";
+        public const string AddCors_WithOrigins = "http://localhost:5173";
     }
 
     public static class Database

@@ -1,4 +1,4 @@
-# FishClubAlginet — Contexto del Proyecto
+# FishClubAlginet_context.md — Contexto del Proyecto
 
 ## Objetivo
 Plataforma de gestión para club de pesca local (Alginet). Gestiona socios (Fishermen), Ligas anuales y Competiciones.
@@ -7,7 +7,7 @@ Plataforma de gestión para club de pesca local (Alginet). Gestiona socios (Fish
 - **Backend:** .NET 9, Clean Architecture
 - **Frontend:** React + TypeScript (migración desde Blazor WebAssembly)
 - **UI:** TBD — sustituye Radzen Blazor
-- **ORM:** Entity Framework Core + SQL Server
+- **ORM:** Entity Framework Core + SQL Server Express
 - **CQRS:** MediatR
 - **Auth:** ASP.NET Core Identity (roles: Admin, Fisherman) + JWT
 - **Testing backend:** xUnit, Moq, FluentAssertions
@@ -112,19 +112,28 @@ public async Task Handle_WhenValidRequest_ShouldCreateFisherman()
 Rehacer desde cero todo el frontend en React+TypeScript manteniendo la misma funcionalidad ya implementada en Blazor:
 
 **Nueva Rama react-migration**
-  - [] Crear nueva rama `react-migration` desde `master`
-
+  - [x] Crear nueva rama `react-migration` desde `master`
+  - [x] Cambiar acceso a datos de PostgreSQL a SQL Server Express
+  - [ ] Revisar tests unitarios backend para asegurar compatibilidad con cambios en infraestructura 
+  - [ ] Generar commit con la fase de migración completa del backend (sin cambios funcionales, solo infraestructura)
+  - [ ] Generar pull request a master para integrar cambios backend
 **Auth**
 - [ ] Login (muro de login)
 - [ ] Logout
 - [ ] Gestión de JWT (almacenamiento, refresh, interceptor HTTP)
 - [ ] Rutas protegidas por rol (Admin / Fisherman)
+- [ ] Revisar tests unitarios backend para asegurar compatibilidad con cambios en infraestructura 
+- [ ] Generar commit con la fase de migración completa del backend (sin cambios funcionales, solo infraestructura)
+- [ ] Generar pull request a master para integrar cambios backend con mensaje "feat: Auth"
 
 **Layout y navegación**
 - [ ] Layout con sidebar diferenciado por rol
 - [ ] Mostrar nombre del usuario logado junto al logout
 - [ ] Enlace Home y enlace Perfil en navegación
-
+- [ ] Revisar tests unitarios backend para asegurar compatibilidad con cambios en infraestructura 
+- [ ] Generar commit con la fase de migración completa del backend (sin cambios funcionales, solo infraestructura)
+- [ ] Generar pull request a master para integrar cambios backend con mensaje "feat: Layout y navegación"
+- [ ] 
 **Admin — Users**
 - [ ] Grid de usuarios (email, roles, estado bloqueo)
 - [ ] Crear usuario Admin/Fisherman (modal/dialog)
@@ -132,6 +141,9 @@ Rehacer desde cero todo el frontend en React+TypeScript manteniendo la misma fun
 - [ ] Deshabilitar acciones sobre el propio usuario logado
 - [ ] Search/filter en grid
 - [ ] Paginación
+- [ ] Revisar tests unitarios backend para asegurar compatibilidad con cambios en infraestructura 
+- [ ] Generar commit con la fase de migración completa del backend (sin cambios funcionales, solo infraestructura)
+- [ ] Generar pull request a master para integrar cambios backend con mensaje "feat: Admin — Users"
 
 **Admin — Fishermen**
 - [ ] Grid de pescadores
@@ -140,6 +152,9 @@ Rehacer desde cero todo el frontend en React+TypeScript manteniendo la misma fun
 - [ ] Vista histórico de pescadores eliminados
 - [ ] Search/filter en grid
 - [ ] Paginación
+- [ ] Revisar tests unitarios backend para asegurar compatibilidad con cambios en infraestructura 
+- [ ] Generar commit con la fase de migración completa del backend (sin cambios funcionales, solo infraestructura)
+- [ ] Generar pull request a master para integrar cambios backend con mensaje "feat: Admin — Fishermen"
 
 **Perfil de usuario**
 - [ ] Vista readonly con datos del Fisherman
