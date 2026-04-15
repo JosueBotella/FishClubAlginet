@@ -18,7 +18,6 @@ global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.IdentityModel.Tokens;
 global using ErrorOr;
-global using Npgsql;
 global using System.Reflection;
 global using System.IdentityModel.Tokens.Jwt;
 global using System.Security.Claims;

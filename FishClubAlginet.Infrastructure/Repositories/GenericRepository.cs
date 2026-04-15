@@ -21,7 +21,8 @@ public class GenericRepository<T, TId> : IGenericRepository<T, TId>
         }
         catch (DbUpdateException ex)
         {
-            if (ex.InnerException is PostgresException pgEx && pgEx.SqlState == "23505")
+            if (ex.InnerException is Microsoft.Data.SqlClient.SqlException sqlEx
+                && (sqlEx.Number == 2627 || sqlEx.Number == 2601)) // UNIQUE constraint violation
             {
                 return Error.Conflict(
                     code: $"{typeof(T).Name}.Duplicate",

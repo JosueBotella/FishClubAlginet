@@ -4,7 +4,7 @@ var connectionString = builder.Configuration.GetConnectionString(ApplicationCons
     ?? throw new InvalidOperationException(ApplicationConstants.Database.MigrationErrorMessage);
 var configuration = builder.Configuration;
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(connectionString));
+    options.UseSqlServer(connectionString));
 builder.Services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericRepository<,>));
 builder.Services.AddScoped<IUnitOfWork, UnitOfWorkService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -92,8 +92,8 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
-app.UseHttpsRedirection();
 app.UseCors(ApplicationConstants.ConfigurationProgram.AddCors_MyAllowSpecificOrigins);
+app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
