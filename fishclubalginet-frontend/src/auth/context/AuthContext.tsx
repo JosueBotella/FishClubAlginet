@@ -10,15 +10,9 @@ import { jwtDecode } from 'jwt-decode';
 import { StorageKeys } from '../../constants';
 import type { AuthState, AuthUser, JwtPayload } from '../../types';
 
-/* ------------------------------------------------------------------ */
-/*  Helpers (equivalente a GetClaimsFromToken / IsTokenExpired)        */
-/* ------------------------------------------------------------------ */
-
 function parseUserFromToken(token: string): AuthUser | null {
   try {
     const decoded = jwtDecode<JwtPayload>(token);
-
-    // Verificar expiración
     if (decoded.exp * 1000 < Date.now()) return null;
 
     const roles = Array.isArray(decoded.role)
@@ -27,11 +21,7 @@ function parseUserFromToken(token: string): AuthUser | null {
         ? [decoded.role]
         : [];
 
-    return {
-      id: decoded.sub,
-      email: decoded.email,
-      roles,
-    };
+    return { id: decoded.sub, email: decoded.email, roles };
   } catch {
     return null;
   }
@@ -40,8 +30,6 @@ function parseUserFromToken(token: string): AuthUser | null {
 function readTokenFromStorage(): string | null {
   const raw = localStorage.getItem(StorageKeys.Token);
   if (!raw) return null;
-
-  // Compatibilidad con Blazor: el token puede estar serializado como JSON string
   try {
     const parsed = JSON.parse(raw);
     return typeof parsed === 'string' ? parsed : null;
@@ -49,10 +37,6 @@ function readTokenFromStorage(): string | null {
     return raw;
   }
 }
-
-/* ------------------------------------------------------------------ */
-/*  Context                                                            */
-/* ------------------------------------------------------------------ */
 
 export interface AuthContextValue extends AuthState {
   login: (token: string) => void;
@@ -72,10 +56,6 @@ const defaultContext: AuthContextValue = {
 
 export const AuthContext = createContext<AuthContextValue>(defaultContext);
 
-/* ------------------------------------------------------------------ */
-/*  Provider                                                           */
-/* ------------------------------------------------------------------ */
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AuthState>({
     user: null,
@@ -84,7 +64,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isLoading: true,
   });
 
-  // Al montar: leer token de localStorage (equivalente a GetAuthenticationStateAsync)
   useEffect(() => {
     const token = readTokenFromStorage();
     if (token) {
@@ -93,33 +72,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setState({ user, token, isAuthenticated: true, isLoading: false });
         return;
       }
-      // Token expirado o inválido → limpiar
       localStorage.removeItem(StorageKeys.Token);
     }
     setState((prev) => ({ ...prev, isLoading: false }));
   }, []);
 
-  // Equivalente a LoginAsync
   const login = useCallback((token: string) => {
     localStorage.setItem(StorageKeys.Token, JSON.stringify(token));
     const user = parseUserFromToken(token);
-    setState({
-      user,
-      token,
-      isAuthenticated: !!user,
-      isLoading: false,
-    });
+    setState({ user, token, isAuthenticated: !!user, isLoading: false });
   }, []);
 
-  // Equivalente a LogoutAsync
   const logout = useCallback(() => {
     localStorage.removeItem(StorageKeys.Token);
-    setState({
-      user: null,
-      token: null,
-      isAuthenticated: false,
-      isLoading: false,
-    });
+    setState({ user: null, token: null, isAuthenticated: false, isLoading: false });
   }, []);
 
   const hasRole = useCallback(
@@ -128,12 +94,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const value = useMemo<AuthContextValue>(
-    () => ({
-      ...state,
-      login,
-      logout,
-      hasRole,
-    }),
+    () => ({ ...state, login, logout, hasRole }),
     [state, login, logout, hasRole]
   );
 

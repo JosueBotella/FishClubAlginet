@@ -157,6 +157,8 @@ Senior full-stack developer focused on building production-grade APIs and React 
     - For Success: Assert `.IsSuccess` is true and check the `.Value`.
     - For Failure: Assert `.IsFailure` is true and verify the specific `Error` (e.g., `result.Errors.Should().Contain(Errors.User.DuplicateEmail)`).
 - **Fixtures:** Proactively use and extend existing fixtures (like `FisherManFixture`) to generate test data.
+- ** Strings Hardcodeadas:** Evitar strings hardcodeadas en los tests, usar constantes o fixtures para mantener la consistencia y facilitar cambios futuros.
+
 
 ### Multi-language (i18n) Pattern
 - When creating errors in `Errors.cs`, the `description` should ideally be a localization key or a generic English message that will be translated by an `IStringLocalizer`.

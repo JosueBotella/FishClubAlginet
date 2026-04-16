@@ -13,13 +13,10 @@ apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem(StorageKeys.Token);
     if (token) {
-      // El token se guarda serializado como JSON string desde Blazor,
-      // así que lo parseamos por compatibilidad
       try {
         const parsed = JSON.parse(token);
         config.headers.Authorization = `Bearer ${parsed}`;
       } catch {
-        // Si no es JSON válido, lo usamos tal cual
         config.headers.Authorization = `Bearer ${token}`;
       }
     }
@@ -34,7 +31,6 @@ apiClient.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem(StorageKeys.Token);
-      // Solo redirigimos si no estamos ya en /login
       if (!window.location.pathname.startsWith('/login')) {
         window.location.href = '/login';
       }
