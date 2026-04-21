@@ -162,10 +162,10 @@ Rehacer desde cero todo el frontend en React+TypeScript manteniendo la misma fun
 - [x] Mostrar nombre del usuario logado junto al logout (header con Avatar + email + roles + logout)
 - [x] Enlace Home y enlace Perfil en navegación (+ Usuarios y Pescadores solo para Admin)
 - [x] Pagina 404 con navegacion de vuelta
-- [ ] Revisar tests unitarios backend para asegurar compatibilidad con cambios en infraestructura 
-- [ ] Generar commit con la fase de migración completa del backend (sin cambios funcionales, solo infraestructura)
-- [ ] Generar pull request a master para integrar cambios backend con mensaje "feat: Layout y navegación"
-- [ ] Marcar con check los items completados a medida que se avanza.
+- [x] Revisar tests unitarios backend — no aplica, sin cambios backend en esta fase (solo frontend)
+- [x] Generar commit con mensaje "feat: add layout with role-based sidebar and navigation"
+- [x] Generar pull request a master para integrar cambios con mensaje "feat: Layout y navegación"
+- [x] Marcar con check los items completados a medida que se avanza.
 **Admin — Users**
 - [ ] Grid de usuarios (email, roles, estado bloqueo)
 - [ ] Crear usuario Admin/Fisherman (modal/dialog)
