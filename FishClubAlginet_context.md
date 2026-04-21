@@ -172,15 +172,15 @@ Rehacer desde cero todo el frontend en React+TypeScript manteniendo la misma fun
 - [x] Marcar con check los items completados a medida que se avanza.
 
 **Admin — Users**
-- [ ] Grid de usuarios (email, roles, estado bloqueo)
-- [ ] Crear usuario Admin/Fisherman (modal/dialog)
-- [ ] Bloquear/Desbloquear usuario
-- [ ] Deshabilitar acciones sobre el propio usuario logado
-- [ ] Search/filter en grid
-- [ ] Paginación
-- [ ] Revisar tests unitarios backend para asegurar compatibilidad con cambios en infraestructura 
-- [ ] Generar commit con la fase de migración completa del backend (sin cambios funcionales, solo infraestructura)
-- [ ] Generar pull request a master para integrar cambios backend con mensaje "feat: Admin — Users"
+- [x] Grid de usuarios (email, roles, estado bloqueo) — Mantine Table con badges de rol y estado
+- [x] Crear usuario Admin/Fisherman (modal/dialog) — CreateUserModal con form validado
+- [x] Bloquear/Desbloquear usuario — ActionIcon con toggle y notificaciones
+- [x] Deshabilitar acciones sobre el propio usuario logado — isSelf check, disabled en ActionIcon
+- [x] Search/filter en grid — TextInput con busqueda por email, Enter y boton
+- [x] Paginación — server-side con Pagination de Mantine, PAGE_SIZE=15
+- [x] Revisar tests unitarios backend — no aplica, sin cambios backend (solo frontend)
+- [ ] Generar commit con mensaje "feat: admin users management page"
+- [ ] Generar pull request a master para integrar cambios con mensaje "feat: Admin — Users"
 - [ ] Marcar con check los items completados a medida que se avanza.
 **Admin — Fishermen**
 - [ ] Grid de pescadores

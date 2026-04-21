@@ -5,6 +5,7 @@ import LoginPage from './pages/Login/LoginPage';
 import HomePage from './pages/Home/HomePage';
 import AppLayout from './layout/AppLayout';
 import NotFoundPage from './pages/NotFound/NotFoundPage';
+import AdminUsersPage from './pages/AdminUsers/AdminUsersPage';
 
 function App() {
   return (
@@ -24,7 +25,14 @@ function App() {
           >
             <Route path={AppRoutes.Home} element={<HomePage />} />
             <Route path={AppRoutes.Profile} element={<ProfilePlaceholder />} />
-            <Route path={AppRoutes.Users} element={<AdminUsersPlaceholder />} />
+            <Route
+              path={AppRoutes.Users}
+              element={
+                <ProtectedRoute requiredRoles={['Admin']}>
+                  <AdminUsersPage />
+                </ProtectedRoute>
+              }
+            />
             <Route path={AppRoutes.Fishermen} element={<AdminFishermenPlaceholder />} />
             <Route path="*" element={<NotFoundPage />} />
           </Route>
@@ -37,10 +45,6 @@ function App() {
 /* Placeholders temporales - se reemplazaran en futuras fases */
 function ProfilePlaceholder() {
   return <div><h2>Mi perfil</h2><p>Pendiente de implementacion.</p></div>;
-}
-
-function AdminUsersPlaceholder() {
-  return <div><h2>Gestion de usuarios</h2><p>Pendiente de implementacion.</p></div>;
 }
 
 function AdminFishermenPlaceholder() {

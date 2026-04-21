@@ -7,3 +7,11 @@ export type {
   AuthUser,
   AuthState,
 } from './auth';
+
+export type {
+  UserDto,
+  PaginatedResult,
+  CreateUserRequest,
+  AssignRoleRequest,
+  RemoveRoleRequest,
+} from './user';
