@@ -1,0 +1,150 @@
+import { useState } from 'react';
+import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import {
+  AppShell,
+  Burger,
+  Group,
+  NavLink,
+  Text,
+  UnstyledButton,
+  Divider,
+  Box,
+  Avatar,
+} from '@mantine/core';
+import {
+  IconHome,
+  IconUsers,
+  IconFish,
+  IconUser,
+  IconLogout,
+} from '@tabler/icons-react';
+import { useAuth } from '../hooks';
+import { Routes } from '../constants';
+
+interface NavItem {
+  label: string;
+  icon: React.ReactNode;
+  to: string;
+  roles?: string[];
+}
+
+const navItems: NavItem[] = [
+  {
+    label: 'Inicio',
+    icon: <IconHome size={20} />,
+    to: Routes.Home,
+  },
+  {
+    label: 'Usuarios',
+    icon: <IconUsers size={20} />,
+    to: Routes.Users,
+    roles: ['Admin'],
+  },
+  {
+    label: 'Pescadores',
+    icon: <IconFish size={20} />,
+    to: Routes.Fishermen,
+    roles: ['Admin'],
+  },
+  {
+    label: 'Mi perfil',
+    icon: <IconUser size={20} />,
+    to: Routes.Profile,
+  },
+];
+
+export default function AppLayout() {
+  const [opened, setOpened] = useState(false);
+  const { user, logout, hasRole } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const visibleItems = navItems.filter(
+    (item) => !item.roles || item.roles.some((r) => hasRole(r))
+  );
+
+  const handleNav = (to: string) => {
+    navigate(to);
+    setOpened(false);
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate(Routes.Login);
+  };
+
+  return (
+    <AppShell
+      header={{ height: 56 }}
+      navbar={{
+        width: 260,
+        breakpoint: 'sm',
+        collapsed: { mobile: !opened },
+      }}
+      padding="md"
+    >
+      {/* Header */}
+      <AppShell.Header>
+        <Group h="100%" px="md" justify="space-between">
+          <Group>
+            <Burger
+              opened={opened}
+              onClick={() => setOpened((o) => !o)}
+              hiddenFrom="sm"
+              size="sm"
+            />
+            <Text fw={700} size="lg">
+              Fish Club Alginet
+            </Text>
+          </Group>
+
+          <Group gap="sm">
+            <Avatar color="blue" radius="xl" size="sm">
+              {user?.email?.charAt(0).toUpperCase()}
+            </Avatar>
+            <Box visibleFrom="sm">
+              <Text size="sm" fw={500} lh={1}>
+                {user?.email}
+              </Text>
+              <Text size="xs" c="dimmed" lh={1.2}>
+                {user?.roles.join(', ')}
+              </Text>
+            </Box>
+            <UnstyledButton onClick={handleLogout} title="Cerrar sesion">
+              <IconLogout size={20} color="var(--mantine-color-red-6)" />
+            </UnstyledButton>
+          </Group>
+        </Group>
+      </AppShell.Header>
+
+      {/* Navbar / Sidebar */}
+      <AppShell.Navbar p="xs">
+        {visibleItems.map((item) => (
+          <NavLink
+            key={item.to}
+            label={item.label}
+            leftSection={item.icon}
+            active={location.pathname === item.to}
+            onClick={() => handleNav(item.to)}
+            variant="light"
+          />
+        ))}
+
+        <Divider my="sm" />
+
+        <NavLink
+          label="Cerrar sesion"
+          leftSection={<IconLogout size={20} />}
+          onClick={handleLogout}
+          color="red"
+          variant="subtle"
+        />
+      </AppShell.Navbar>
+
+      {/* Contenido principal */}
+      <AppShell.Main>
+        <Outlet />
+      </AppShell.Main>
+    </AppShell>
+  );
+}
