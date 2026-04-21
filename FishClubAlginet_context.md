@@ -179,10 +179,11 @@ Rehacer desde cero todo el frontend en React+TypeScript manteniendo la misma fun
 - [x] Search/filter en grid — TextInput con busqueda por email, Enter y boton
 - [x] Paginación — server-side con Pagination de Mantine, PAGE_SIZE=15
 - [x] Revisar tests unitarios backend — no aplica, sin cambios backend (solo frontend)
-- [ ] Generar commit con mensaje "feat: admin users management page"
-- [ ] Generar pull request a master para integrar cambios con mensaje "feat: Admin — Users"
-- [ ] Marcar con check los items completados a medida que se avanza.
+- [x] Generar commit con mensaje "feat: admin users management page"
+- [x] Generar pull request a master para integrar cambios con mensaje "feat: Admin — Users"
+- [x] Marcar con check los items completados a medida que se avanza.
 **Admin — Fishermen**
+- [ ] Crear rama: branch_fishermen
 - [ ] Grid de pescadores
 - [ ] Soft Delete (botón → IsDeleted=true, confirmación, notificación)
 - [ ] Filtrar eliminados del grid
