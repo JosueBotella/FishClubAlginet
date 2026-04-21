@@ -166,6 +166,11 @@ Rehacer desde cero todo el frontend en React+TypeScript manteniendo la misma fun
 - [x] Generar commit con mensaje "feat: add layout with role-based sidebar and navigation"
 - [x] Generar pull request a master para integrar cambios con mensaje "feat: Layout y navegación"
 - [x] Marcar con check los items completados a medida que se avanza.
+- [x] Revisar tests unitarios backend para asegurar compatibilidad con cambios en infraestructura 
+- [x] Generar commit con la fase de migración completa del backend (sin cambios funcionales, solo infraestructura)
+- [x] Generar pull request a master para integrar cambios backend con mensaje "feat: Layout y navegación"
+- [x] Marcar con check los items completados a medida que se avanza.
+
 **Admin — Users**
 - [ ] Grid de usuarios (email, roles, estado bloqueo)
 - [ ] Crear usuario Admin/Fisherman (modal/dialog)
