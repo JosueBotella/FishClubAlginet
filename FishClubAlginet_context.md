@@ -222,4 +222,5 @@ Rehacer desde cero todo el frontend en React+TypeScript manteniendo la misma fun
 ## Ejecutar proyecto
 ```bash
 dotnet ef database update --project FishClubAlginet.Infrastructure --startup-project FishClubAlginet.API
-# Luego arrancar API + React dev se
+# Luego arrancar API + React dev server simultáneamente
+```
