@@ -8,6 +8,7 @@ export const Endpoints = {
     Add: 'api/fishermen/Add',
     GetAll: 'api/fishermen/GetAll',
     MyProfile: 'api/fishermen/my-profile',
+    Delete: (id: number) => `api/fishermen/${id}`,
     GetAllPaged: (skip: number, take: number, search?: string) => {
       let url = `api/fishermen/GetAll?skip=${skip}&take=${take}`;
       if (search) url += `&search=${encodeURIComponent(search)}`;
