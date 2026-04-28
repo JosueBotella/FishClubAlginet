@@ -6,6 +6,7 @@ import HomePage from './pages/Home/HomePage';
 import AppLayout from './layout/AppLayout';
 import NotFoundPage from './pages/NotFound/NotFoundPage';
 import AdminUsersPage from './pages/AdminUsers/AdminUsersPage';
+import AdminFishermenPage from './pages/AdminFishermen/AdminFishermenPage';
 
 function App() {
   return (
@@ -33,7 +34,14 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            <Route path={AppRoutes.Fishermen} element={<AdminFishermenPlaceholder />} />
+            <Route
+              path={AppRoutes.Fishermen}
+              element={
+                <ProtectedRoute requiredRoles={['Admin']}>
+                  <AdminFishermenPage />
+                </ProtectedRoute>
+              }
+            />
             <Route path="*" element={<NotFoundPage />} />
           </Route>
         </Routes>
@@ -42,13 +50,9 @@ function App() {
   );
 }
 
-/* Placeholders temporales - se reemplazaran en futuras fases */
+/* Placeholder temporal - se reemplazara en futuras fases */
 function ProfilePlaceholder() {
   return <div><h2>Mi perfil</h2><p>Pendiente de implementacion.</p></div>;
-}
-
-function AdminFishermenPlaceholder() {
-  return <div><h2>Gestion de pescadores</h2><p>Pendiente de implementacion.</p></div>;
 }
 
 export default App;

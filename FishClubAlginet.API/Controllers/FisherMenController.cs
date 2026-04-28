@@ -50,6 +50,19 @@ public class FisherMenController : ApiController
         );
     }
 
+    [HttpDelete("{id:int}")]
+    [Authorize(Roles = ApplicationConstants.Roles.Admin)]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var command = new SoftDeleteFishermanCommand(id);
+        var result = await _mediator.Send(command, default);
+
+        return result.Match(
+            _ => NoContent(),
+            errors => Problem(errors)
+        );
+    }
+
     [HttpGet("my-profile")]
     public async Task<IActionResult> MyProfile()
     {
