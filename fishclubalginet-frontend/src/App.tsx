@@ -50,7 +50,7 @@ function App() {
   );
 }
 
-/* Placeholders temporales - se reemplazaran en futuras fases */
+/* Placeholder temporal - se reemplazara en futuras fases */
 function ProfilePlaceholder() {
   return <div><h2>Mi perfil</h2><p>Pendiente de implementacion.</p></div>;
 }

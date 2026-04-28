@@ -24,9 +24,4 @@ export const Endpoints = {
     AssignRole: (userId: string) => `api/users/${userId}/assign-role`,
     RemoveRole: (userId: string) => `api/users/${userId}/remove-role`,
     GetAllPaged: (skip: number, take: number, search?: string) => {
-      let url = `api/users?skip=${skip}&take=${take}`;
-      if (search) url += `&search=${encodeURIComponent(search)}`;
-      return url;
-    },
-  },
-} as const;
+      let url = `api/users?sk

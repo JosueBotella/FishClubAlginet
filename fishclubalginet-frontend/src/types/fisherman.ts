@@ -11,8 +11,4 @@ export interface FishermanDto {
   isDeleted: boolean;
 }
 
-export const DocumentTypeLabels: Record<number, string> = {
-  1: 'DNI',
-  2: 'NIE',
-  3: 'Pasaporte',
-};
+export const DocumentTypeLabels: Record<number, strin

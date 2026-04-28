@@ -183,16 +183,16 @@ Rehacer desde cero todo el frontend en React+TypeScript manteniendo la misma fun
 - [x] Generar pull request a master para integrar cambios con mensaje "feat: Admin — Users"
 - [x] Marcar con check los items completados a medida que se avanza.
 **Admin — Fishermen**
-- [ ] Seguir en la rama de git: updateNugets
-- [ ] Grid de pescadores
-- [ ] Soft Delete (botón → IsDeleted=true, confirmación, notificación)
-- [ ] Filtrar eliminados del grid
-- [ ] Vista histórico de pescadores eliminados
-- [ ] Search/filter en grid
-- [ ] Paginación
-- [ ] Revisar tests unitarios backend para asegurar compatibilidad con cambios en infraestructura 
-- [ ] Generar commit con la fase de migración completa del backend (sin cambios funcionales, solo infraestructura)
-- [ ] Generar pull request a master para integrar cambios backend con mensaje "feat: Admin — Fishermen"
+- [x] Crear endpoint backend DELETE /api/fishermen/{id} (SoftDeleteFishermanCommand + handler)
+- [x] Grid de pescadores (Mantine Table con nombre, documento, licencia, fecha nac., ciudad)
+- [x] Soft Delete (botón con modal de confirmación + notificación)
+- [x] Filtrar eliminados del grid (backend: parámetro ShowDeleted en GetAll)
+- [x] Vista histórico de pescadores eliminados (toggle activa vista histórico con badge y título dinámico)
+- [x] Search/filter en grid (por nombre, documento, licencia)
+- [x] Paginación server-side (PAGE_SIZE=15, Pagination de Mantine)
+- [x] Tests unitarios backend para ShowDeleted (3 nuevos casos con FluentAssertions)
+- [ ] Generar commit con mensaje "feat: Admin — Fishermen"
+- [ ] Generar pull request a master con mensaje "feat: Admin — Fishermen"
 
 **Perfil de usuario**
 - [ ] Vista readonly con datos del Fisherman
