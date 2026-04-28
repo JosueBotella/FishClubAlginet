@@ -4,7 +4,7 @@
 Plataforma de gestión para club de pesca local (Alginet). Gestiona socios (Fishermen), Ligas anuales y Competiciones.
 
 ## Stack Técnico
-- **Backend:** .NET 9, Clean Architecture
+- **Backend:** .NET 10, Clean Architecture
 - **Frontend:** React + TypeScript (migración desde Blazor WebAssembly)
 - **UI:** Mantine v7 + @tabler/icons-react — sustituye Radzen Blazor
 - **ORM:** Entity Framework Core + SQL Server Express
@@ -183,7 +183,7 @@ Rehacer desde cero todo el frontend en React+TypeScript manteniendo la misma fun
 - [x] Generar pull request a master para integrar cambios con mensaje "feat: Admin — Users"
 - [x] Marcar con check los items completados a medida que se avanza.
 **Admin — Fishermen**
-- [ ] Crear rama: branch_fishermen
+- [ ] Seguir en la rama de git: updateNugets
 - [ ] Grid de pescadores
 - [ ] Soft Delete (botón → IsDeleted=true, confirmación, notificación)
 - [ ] Filtrar eliminados del grid
@@ -202,6 +202,10 @@ Rehacer desde cero todo el frontend en React+TypeScript manteniendo la misma fun
 **Gestión de roles**
 - [ ] Asignar/quitar roles a usuarios
 
+**Dockerización**
+- [ ] Dockerfile para API
+- [ ] Dockerfile para React
+- [ ] docker-compose para desarrollo local (API + React + SQL Server Express)
 ### 🔲 Pendiente — Phase 2: League Management
 - Entidad `League` (con MinPoints, WorstResultsToDiscard) + handlers MediatR (backend)
 - Añadir campo `FederationNumber` a entidad Fisherman existente + migración
