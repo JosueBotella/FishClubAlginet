@@ -1,3 +1,4 @@
+using FluentAssertions;
 
 using FishClubAlginet.Application.Features.Fishermen;
 
@@ -162,4 +163,148 @@ public class FisherManGetAllQueriesHandlerTests
         Assert.Equal(TypeNationalIdentifier.Dni, fisherman.DocumentType);
         Assert.Equal("11223344C", fisherman.DocumentNumber);
     }
+
+    [Fact]
+    public async Task Handle_WhenShowDeletedFalse_ShouldExcludeDeletedFishermen()
+    {
+        // Arrange
+        var fishermen = new List<Fisherman>
+        {
+            new Fisherman
+            {
+                Id = 1,
+                FirstName = "Active",
+                LastName = "Fisher",
+                DateOfBirth = new(1990, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                DocumentType = TypeNationalIdentifier.Dni,
+                DocumentNumber = "11111111A",
+                Address = new Address { City = "Valencia", Province = "Valencia", Street = "Calle A", ZipCode = "46001" },
+                IsDeleted = false
+            },
+            new Fisherman
+            {
+                Id = 2,
+                FirstName = "Deleted",
+                LastName = "Fisher",
+                DateOfBirth = new(1985, 6, 15, 0, 0, 0, DateTimeKind.Utc),
+                DocumentType = TypeNationalIdentifier.Dni,
+                DocumentNumber = "22222222B",
+                Address = new Address { City = "Madrid", Province = "Madrid", Street = "Calle B", ZipCode = "28001" },
+                IsDeleted = true,
+                DeletedTimeUtc = DateTime.UtcNow
+            }
+        };
+
+        var query = new FisherManGetAllQuery(0, 10, null, ShowDeleted: false);
+        var handler = new FisherManGetAllQueryHandler(_mockRepository.Object);
+
+        _mockRepository
+            .Setup(repo => repo.GetAll())
+            .Returns(fishermen.AsQueryable());
+
+        // Act
+        var result = await handler.Handle(query, CancellationToken.None);
+
+        // Assert
+        result.IsError.Should().BeFalse();
+        result.Value.Items.Should().HaveCount(1);
+        result.Value.Items[0].FirstName.Should().Be("Active");
+        result.Value.Items[0].IsDeleted.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task Handle_WhenShowDeletedTrue_ShouldReturnOnlyDeletedFishermen()
+    {
+        // Arrange
+        var fishermen = new List<Fisherman>
+        {
+            new Fisherman
+            {
+                Id = 1,
+                FirstName = "Active",
+                LastName = "Fisher",
+                DateOfBirth = new(1990, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                DocumentType = TypeNationalIdentifier.Dni,
+                DocumentNumber = "11111111A",
+                Address = new Address { City = "Valencia", Province = "Valencia", Street = "Calle A", ZipCode = "46001" },
+                IsDeleted = false
+            },
+            new Fisherman
+            {
+                Id = 2,
+                FirstName = "Deleted",
+                LastName = "Fisher",
+                DateOfBirth = new(1985, 6, 15, 0, 0, 0, DateTimeKind.Utc),
+                DocumentType = TypeNationalIdentifier.Dni,
+                DocumentNumber = "22222222B",
+                Address = new Address { City = "Madrid", Province = "Madrid", Street = "Calle B", ZipCode = "28001" },
+                IsDeleted = true,
+                DeletedTimeUtc = DateTime.UtcNow
+            }
+        };
+
+        var query = new FisherManGetAllQuery(0, 10, null, ShowDeleted: true);
+        var handler = new FisherManGetAllQueryHandler(_mockRepository.Object);
+
+        _mockRepository
+            .Setup(repo => repo.GetAll())
+            .Returns(fishermen.AsQueryable());
+
+        // Act
+        var result = await handler.Handle(query, CancellationToken.None);
+
+        // Assert
+        result.IsError.Should().BeFalse();
+        result.Value.Items.Should().HaveCount(1);
+        result.Value.Items[0].FirstName.Should().Be("Deleted");
+        result.Value.Items[0].IsDeleted.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task Handle_WhenShowDeletedFalse_ShouldDefaultToActiveOnlyView()
+    {
+        // Arrange — ShowDeleted no especificado, debe ser false por defecto
+        var fishermen = new List<Fisherman>
+        {
+            new Fisherman
+            {
+                Id = 1,
+                FirstName = "Active",
+                LastName = "Fisher",
+                DateOfBirth = new(1990, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                DocumentType = TypeNationalIdentifier.Dni,
+                DocumentNumber = "33333333C",
+                Address = new Address { City = "Alginet", Province = "Valencia", Street = "Calle C", ZipCode = "46250" },
+                IsDeleted = false
+            },
+            new Fisherman
+            {
+                Id = 2,
+                FirstName = "Hidden",
+                LastName = "Deleted",
+                DateOfBirth = new(1988, 3, 20, 0, 0, 0, DateTimeKind.Utc),
+                DocumentType = TypeNationalIdentifier.Dni,
+                DocumentNumber = "44444444D",
+                Address = new Address { City = "Alginet", Province = "Valencia", Street = "Calle D", ZipCode = "46250" },
+                IsDeleted = true,
+                DeletedTimeUtc = DateTime.UtcNow
+            }
+        };
+
+        var query = new FisherManGetAllQuery(0, 10, null); // ShowDeleted = false por defecto
+        var handler = new FisherManGetAllQueryHandler(_mockRepository.Object);
+
+        _mockRepository
+            .Setup(repo => repo.GetAll())
+            .Returns(fishermen.AsQueryable());
+
+        // Act
+        var result = await handler.Handle(query, CancellationToken.None);
+
+        // Assert
+        result.IsError.Should().BeFalse();
+        result.Value.TotalCount.Should().Be(1);
+        result.Value.Items.Should().NotContain(f => f.IsDeleted);
+    }
+
 }
