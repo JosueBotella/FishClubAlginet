@@ -9,4 +9,10 @@ export async function getFishermen(
   showDeleted?: boolean
 ): Promise<PaginatedResult<FishermanDto>> {
   const url = Endpoints.Fishermen.GetAllPaged(skip, take, search, showDeleted);
-  const { data } = await apiClient.get<
+  const { data } = await apiClient.get<PaginatedResult<FishermanDto>>(url);
+  return data;
+}
+
+export async function deleteFisherman(id: number): Promise<void> {
+  await apiClient.delete(Endpoints.Fishermen.Delete(id));
+}

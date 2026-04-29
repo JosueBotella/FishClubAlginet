@@ -1,0 +1,82 @@
+# =============================================================
+# docker-compose.yml — Entorno de DESARROLLO
+#
+# Arranque:
+#   1) Copia .env.example a .env y rellena los valores
+#   2) docker compose up --build
+#
+# Servicios:
+#   - db:       SQL Server 2022
+#   - api:      ASP.NET Core 10 (HTTP plano en :5000)
+#   - frontend: Vite dev server con HMR (:5173)
+# =============================================================
+
+services:
+
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: fishclub-db
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${SA_PASSWORD}
+      MSSQL_PID: "Developer"
+    ports:
+      - "1433:1433"   # expuesto al host por si quieres conectar con SSMS / Azure Data Studio
+    volumes:
+      - mssql_data:/var/opt/mssql
+    healthcheck:
+      # Comprueba que SQL Server acepta conexiones antes de marcar el servicio como "healthy"
+      test:
+        [
+          "CMD-SHELL",
+          "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -C -Q 'SELECT 1' || exit 1"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: FishClubAlginet.API/Dockerfile
+    container_name: fishclub-api
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      # .NET interpreta el doble guión bajo como separador de secciones de configuración
+      ConnectionStrings__LocalConnectionString: "Server=db,1433;Database=FishClubAlginetDb;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True;Encrypt=False;"
+      JwtSettings__SecretKey: ${JWT_SECRET_KEY}
+      JwtSettings__Issuer: ${JWT_ISSUER:-FishClubAlginetAPI}
+      JwtSettings__Audience: ${JWT_AUDIENCE:-FishClubAlginetUsers}
+      JwtSettings__DurationInMinutes: ${JWT_DURATION_MINUTES:-60}
+    ports:
+      - "5000:8080"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./fishclubalginet-frontend
+      dockerfile: Dockerfile.dev
+    container_name: fishclub-frontend
+    depends_on:
+      - api
+    environment:
+      # El proxy de Vite redirige /api/* a este target dentro de la red de Docker
+      VITE_PROXY_TARGET: http://api:8080
+    volumes:
+      # Bind mount del código para HMR
+      - ./fishclubalginet-frontend:/app
+      # Volumen anónimo para node_modules, así el bind mount no pisa la instalación de la imagen
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    restart: unless-stopped
+
+volumes:
+  mssql_data:
+    driver: local

@@ -97,7 +97,18 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors(ApplicationConstants.ConfigurationProgram.AddCors_MyAllowSpecificOrigins);
-app.UseHttpsRedirection();
+
+// HTTPS redirection sólo cuando no estamos dentro de un contenedor:
+// en Docker la API expone HTTP plano (8080) y el TLS lo gestiona el proxy/host externo.
+var runningInContainer = string.Equals(
+    Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER"),
+    "true",
+    StringComparison.OrdinalIgnoreCase);
+
+if (!runningInContainer)
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseAuthentication();
 app.UseAuthorization();

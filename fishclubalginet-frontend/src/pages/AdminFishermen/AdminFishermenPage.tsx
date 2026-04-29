@@ -243,4 +243,41 @@ export default function AdminFishermenPage() {
                 onChange={setPage}
                 size="sm"
               />
-     
+              <Text size="xs" c="dimmed">
+                {totalCount} pescador{totalCount !== 1 ? 'es' : ''} en total
+              </Text>
+            </Group>
+          )}
+        </>
+      )}
+
+      {/* Modal confirmacion eliminar */}
+      <Modal
+        opened={deleteTarget !== null}
+        onClose={() => setDeleteTarget(null)}
+        title="Confirmar eliminacion"
+        centered
+      >
+        <Text size="sm">
+          Vas a eliminar a{' '}
+          <Text span fw={700}>
+            {deleteTarget?.firstName} {deleteTarget?.lastName}
+          </Text>
+          . Esta accion marca al pescador como eliminado (soft delete).
+        </Text>
+        <Group justify="flex-end" mt="lg">
+          <Button variant="default" onClick={() => setDeleteTarget(null)}>
+            Cancelar
+          </Button>
+          <Button
+            color="red"
+            loading={deleting}
+            onClick={handleConfirmDelete}
+          >
+            Eliminar
+          </Button>
+        </Group>
+      </Modal>
+    </Container>
+  );
+}
