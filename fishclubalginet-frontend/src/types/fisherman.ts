@@ -11,4 +11,13 @@ export interface FishermanDto {
   isDeleted: boolean;
 }
 
-export const DocumentTypeLabels: Record<number, strin
+// Mapea el valor numérico del enum TypeNationalIdentifier (backend)
+// a una etiqueta legible para mostrar en la UI.
+//   1 -> Dni
+//   2 -> Nie
+//   3 -> Passport
+export const DocumentTypeLabels: Record<number, string> = {
+  1: 'DNI',
+  2: 'NIE',
+  3: 'Pasaporte',
+};

@@ -1,0 +1,57 @@
+# =====================================================
+# .dockerignore raíz: aplica a TODOS los builds de docker
+# (contexto = raíz del proyecto en docker-compose).
+#
+# IMPORTANTE: NO copiar bin/ ni obj/ — sus project.assets.json
+# llevan rutas de Windows como
+#   C:\Program Files (x86)\Microsoft Visual Studio\Shared\NuGetPackages
+# y rompen el restore en contenedores Linux.
+# =====================================================
+
+# Build artefacts .NET
+**/bin
+**/obj
+**/out
+**/publish
+**/TestResults
+**/*.user
+**/*.suo
+
+# IDE
+**/.vs
+**/.vscode
+**/.idea
+
+# Frontend
+**/node_modules
+**/dist
+**/.vite
+**/.cache
+
+# Docker (no entran en las imágenes)
+**/Dockerfile*
+**/docker-compose*
+**/.dockerignore
+**/.env
+**/.env.*
+!**/.env.example
+
+# Git / OS
+**/.git
+**/.gitignore
+**/.gitattributes
+**/.DS_Store
+**/Thumbs.db
+
+# Tests (no se publican en la imagen de producción)
+**/FishClubAlginet.Tests
+
+# Logs
+**/*.log
+**/npm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
+
+# Documentación
+**/README.md
+**/LICENSE*

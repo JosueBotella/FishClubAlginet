@@ -39,7 +39,15 @@ builder.Services.AddAuthentication(options => {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 })
-.AddJwtBearer(options => 
+.AddJwtBearer(options =>
+{
+    // Desactiva el mapeo automático de claims entrantes que convierte nombres
+    // cortos del JWT ("role", "sub", "email") a sus versiones legacy con
+    // namespace (ClaimTypes.Role, etc.). Sin esto, RoleClaimType="role" no
+    // casa con los claims y [Authorize(Roles="Admin")] devuelve 403 aunque
+    // el JWT lleve role: ["Admin","Fisherman"].
+    options.MapInboundClaims = false;
+
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
@@ -51,8 +59,8 @@ builder.Services.AddAuthentication(options => {
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey!)),
         RoleClaimType = "role",
         NameClaimType = JwtRegisteredClaimNames.Email
-    }
-);
+    };
+});
 
 
 builder.Services.AddCors(options =>
