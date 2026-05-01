@@ -272,6 +272,7 @@ export default function AdminFishermenPage() {
           <Button
             color="red"
             loading={deleting}
+            disabled={deleting}
             onClick={handleConfirmDelete}
           >
             Eliminar

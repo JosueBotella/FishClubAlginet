@@ -1,4 +1,7 @@
-﻿namespace FishClubAlginet.Infrastructure.Services;
+using ErrorOr;
+using Microsoft.Data.SqlClient;
+
+namespace FishClubAlginet.Infrastructure.Services;
 
 public class UnitOfWorkService : IUnitOfWork
 {
@@ -9,19 +12,38 @@ public class UnitOfWorkService : IUnitOfWork
     public UnitOfWorkService(AppDbContext context)
     {
         _context = context;
-    }   
+    }
 
-    public async Task<int> Save()
+    public async Task<ErrorOr<int>> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         try
         {
-            await _context.SaveChangesAsync();
+            return await _context.SaveChangesAsync(cancellationToken);
         }
-        catch (DbUpdateConcurrencyException concurrencyException)
+        catch (DbUpdateException ex)
+            when (ex.InnerException is SqlException sqlEx
+                  && (sqlEx.Number == 2627 || sqlEx.Number == 2601))
         {
-            Console.WriteLine($"Error de concurrencia{concurrencyException.Message}");            
+            // 2627 = Violation of UNIQUE KEY constraint
+            // 2601 = Cannot insert duplicate key row in object with unique index
+            return Error.Conflict(
+                code: "Database.UniqueConstraintViolation",
+                description: "A record with these unique values already exists.");
         }
-        return 0;
+        catch (DbUpdateConcurrencyException)
+        {
+            return Error.Conflict(
+                code: "Database.Concurrency",
+                description: "The record was modified by another process. Reload and try again.");
+        }
+        catch (DbUpdateException)
+        {
+            return Error.Failure(
+                code: "Database.SaveFailure",
+                description: "Failed to save the record. Please try again.");
+        }
+        // Otras excepciones (errores de programación, fallos de red, etc.) se
+        // propagan: las captura el ExceptionHandler global de la API.
     }
 
     public void Dispose()
@@ -37,7 +59,7 @@ public class UnitOfWorkService : IUnitOfWork
             if (disposing)
             {
                 _context?.Dispose();
-                
+
                 foreach (var repository in _repositories.Values)
                 {
                     if (repository is IDisposable disposable)

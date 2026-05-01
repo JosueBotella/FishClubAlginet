@@ -1,7 +1,12 @@
-﻿
+
 
 namespace FishClubAlginet.Infrastructure.Repositories;
 
+/// <summary>
+/// Repositorio genérico. Solo "stagea" los cambios en el DbContext (Add/Update/Remove).
+/// La persistencia real (SaveChangesAsync) se delega al IUnitOfWork desde el handler,
+/// para mantener un patrón Unit of Work consistente y permitir transacciones por caso de uso.
+/// </summary>
 public class GenericRepository<T, TId> : IGenericRepository<T, TId>
     where T : BaseEntity<TId>
 {
@@ -10,35 +15,10 @@ public class GenericRepository<T, TId> : IGenericRepository<T, TId>
     public GenericRepository(AppDbContext context) => _context = context;
 
 
-    public async Task<ErrorOr<T>> AddAsync(T entity)
+    public async Task<T> AddAsync(T entity)
     {
-        try
-        {
-            await _context.AddAsync(entity);
-            await _context.SaveChangesAsync();
-
-            return entity; 
-        }
-        catch (DbUpdateException ex)
-        {
-            if (ex.InnerException is Microsoft.Data.SqlClient.SqlException sqlEx
-                && (sqlEx.Number == 2627 || sqlEx.Number == 2601)) // UNIQUE constraint violation
-            {
-                return Error.Conflict(
-                    code: $"{typeof(T).Name}.Duplicate",
-                    description: "A record with these unique values already exists.");
-            }
-
-            return Error.Failure(
-                code: "Database.SaveFailure",
-                description: "Failed to save the record. Please try again.");
-        }
-        catch (Exception ex)
-        {
-            return Error.Unexpected(
-                code: "System.Unexpected",
-                description: ex.Message);
-        }
+        await _context.AddAsync(entity);
+        return entity;
     }
 
     public virtual async Task<T?> GetById(TId id)
