@@ -191,11 +191,11 @@ Rehacer desde cero todo el frontend en React+TypeScript manteniendo la misma fun
 - [x] Search/filter en grid (por nombre, documento, licencia)
 - [x] Paginación server-side (PAGE_SIZE=15, Pagination de Mantine)
 - [x] Tests unitarios backend para ShowDeleted (3 nuevos casos con FluentAssertions)
-- [ ] Generar commit con mensaje "feat: Admin — Fishermen"
-- [ ] Generar pull request a master con mensaje "feat: Admin — Fishermen"
+- [X] Generar commit con mensaje "feat: Admin — Fishermen"
+- [X] Generar pull request a master con mensaje "feat: Admin — Fishermen"
 
 **Perfil de usuario**
-- [ ] Vista readonly con datos del Fisherman
+- [ ] Vista readonly con datos del usuario (nombre, email, roles, datos personales)
 - [ ] Cambio de contraseña (validar contraseña actual)
 - [ ] Notificaciones de éxito/error
 
@@ -207,21 +207,21 @@ Rehacer desde cero todo el frontend en React+TypeScript manteniendo la misma fun
 - [ ] Dockerfile para React
 - [ ] docker-compose para desarrollo local (API + React + SQL Server Express)
 ### 🔲 Pendiente — Phase 2: League Management
-- Entidad `League` (con MinPoints, WorstResultsToDiscard) + handlers MediatR (backend)
-- Añadir campo `FederationNumber` a entidad Fisherman existente + migración
-- Migración EF Core
-- UI React: League Management Dashboard (CRUD ligas, configuración puntuación)
+-[ ] Entidad `League` (con MinPoints, WorstResultsToDiscard) + handlers MediatR (backend)
+-[ ] Añadir campo `FederationNumber` a entidad Fisherman existente + migración
+-[ ] Migración EF Core
+-[ ] UI React: League Management Dashboard (CRUD ligas, configuración puntuación)
 
 ### 🔲 Pendiente — Phase 3: Competitions & Results
-- Entidad `Competition` (con CompetitionNumber, Venue, Zone, Subspecialty, Category, ParticipantCount) + handlers MediatR (backend)
-- Entidad `CompetitionResult` (con AssignedSpotNumber, WeightInGrams, BiggestCatchWeight, Points, Ranking) + handlers MediatR (backend)
-- Lógica de cálculo automático de puntos (ranking inverso, empates, mínimo 5)
-- Migración EF Core
-- UI React: Calendario de competiciones + inscripción para Fishermen
-- UI React: Entrada de resultados por concurso (peso, pieza mayor, asignación de puestos)
-- UI React: Clasificación de liga en tiempo real (por peso y por puntos/resta)
-- UI React: Premio Pieza Mayor (por concurso y por temporada)
-- Generación de Acta oficial (PDF) para FPCV — formato federativo
+-[ ] Entidad `Competition` (con CompetitionNumber, Venue, Zone, Subspecialty, Category, ParticipantCount) + handlers MediatR (backend)
+-[ ] Entidad `CompetitionResult` (con AssignedSpotNumber, WeightInGrams, BiggestCatchWeight, Points, Ranking) + handlers MediatR (backend)
+-[ ] Lógica de cálculo automático de puntos (ranking inverso, empates, mínimo 5)
+-[ ] Migración EF Core
+-[ ] UI React: Calendario de competiciones + inscripción para Fishermen
+-[ ] UI React: Entrada de resultados por concurso (peso, pieza mayor, asignación de puestos)
+-[ ] UI React: Clasificación de liga en tiempo real (por peso y por puntos/resta)
+-[ ] UI React: Premio Pieza Mayor (por concurso y por temporada)
+-[ ] Generación de Acta oficial (PDF) para FPCV — formato federativo
 
 ---
 
