@@ -1,0 +1,16 @@
+# Imagen para desarrollo: Vite con HMR
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Instalar dependencias primero para aprovechar caché de capas
+COPY package*.json ./
+RUN npm install
+
+# El código fuente se monta como volumen desde docker-compose,
+# así no copiamos nada más aquí y los cambios se reflejan en caliente.
+
+EXPOSE 5173
+
+# --host 0.0.0.0 para que Vite acepte conexiones desde fuera del contenedor
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]

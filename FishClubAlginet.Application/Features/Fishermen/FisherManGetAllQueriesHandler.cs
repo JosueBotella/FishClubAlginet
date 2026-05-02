@@ -11,10 +11,11 @@ public record FisherManGetAllQueryResponse(
     string DocumentNumber,
     string? FederationLicense,
     string AddressCity,
-    string AddressProvince
+    string AddressProvince,
+    bool IsDeleted
 );
 
-public record FisherManGetAllQuery(int Skip, int Take, string? Search) : IRequest<ErrorOr<PaginatedResult<FisherManGetAllQueryResponse>>>;
+public record FisherManGetAllQuery(int Skip, int Take, string? Search, bool ShowDeleted = false) : IRequest<ErrorOr<PaginatedResult<FisherManGetAllQueryResponse>>>;
 
 public class FisherManGetAllQueryHandler : IRequestHandler<FisherManGetAllQuery, ErrorOr<PaginatedResult<FisherManGetAllQueryResponse>>>
 {
@@ -29,7 +30,8 @@ public class FisherManGetAllQueryHandler : IRequestHandler<FisherManGetAllQuery,
     {
         try
         {
-            var query = _genericRepository.GetAll();
+            var query = _genericRepository.GetAll()
+                .Where(f => f.IsDeleted == request.ShowDeleted);
 
             if (!string.IsNullOrWhiteSpace(request.Search))
             {
@@ -57,7 +59,8 @@ public class FisherManGetAllQueryHandler : IRequestHandler<FisherManGetAllQuery,
                     DocumentNumber: f.DocumentNumber,
                     FederationLicense: f.FederationLicense,
                     AddressCity: f.Address.City,
-                    AddressProvince: f.Address.Province
+                    AddressProvince: f.Address.Province,
+                    IsDeleted: f.IsDeleted
                 ))
                 .ToList();
 

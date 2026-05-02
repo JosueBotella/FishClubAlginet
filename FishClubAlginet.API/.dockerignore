@@ -1,0 +1,33 @@
+# Build artefacts
+**/bin
+**/obj
+**/out
+**/publish
+
+# IDE
+**/.vs
+**/.vscode
+**/.idea
+**/*.user
+**/*.suo
+
+# Frontend (no entra en la imagen del backend)
+**/fishclubalginet-frontend
+**/node_modules
+
+# Docker (evita meter Dockerfiles dentro de la imagen)
+**/Dockerfile*
+**/docker-compose*
+**/.dockerignore
+**/.env
+**/.env.*
+
+# Git / OS
+**/.git
+**/.gitignore
+**/.DS_Store
+**/Thumbs.db
+
+# Tests (no se publican en la imagen de producción)
+**/FishClubAlginet.Tests
+**/TestResults

@@ -4,7 +4,7 @@
 Plataforma de gestión para club de pesca local (Alginet). Gestiona socios (Fishermen), Ligas anuales y Competiciones.
 
 ## Stack Técnico
-- **Backend:** .NET 9, Clean Architecture
+- **Backend:** .NET 10, Clean Architecture
 - **Frontend:** React + TypeScript (migración desde Blazor WebAssembly)
 - **UI:** Mantine v7 + @tabler/icons-react — sustituye Radzen Blazor
 - **ORM:** Entity Framework Core + SQL Server Express
@@ -185,12 +185,14 @@ Rehacer desde cero todo el frontend en React+TypeScript manteniendo la misma fun
 **Admin — Fishermen**
 - [x] Crear endpoint backend DELETE /api/fishermen/{id} (SoftDeleteFishermanCommand + handler)
 - [x] Grid de pescadores (Mantine Table con nombre, documento, licencia, fecha nac., ciudad)
-- [x] Soft Delete (boton con modal de confirmacion + notificacion)
-- [x] Toggle "Mostrar eliminados" (Switch de Mantine)
+- [x] Soft Delete (botón con modal de confirmación + notificación)
+- [x] Filtrar eliminados del grid (backend: parámetro ShowDeleted en GetAll)
+- [x] Vista histórico de pescadores eliminados (toggle activa vista histórico con badge y título dinámico)
 - [x] Search/filter en grid (por nombre, documento, licencia)
-- [x] Paginacion server-side (PAGE_SIZE=15, Pagination de Mantine)
-- [ ] Generar commit con mensaje "feat: admin fishermen management page"
-- [ ] Generar pull request a master para integrar cambios con mensaje "feat: Admin — Fishermen"
+- [x] Paginación server-side (PAGE_SIZE=15, Pagination de Mantine)
+- [x] Tests unitarios backend para ShowDeleted (3 nuevos casos con FluentAssertions)
+- [ ] Generar commit con mensaje "feat: Admin — Fishermen"
+- [ ] Generar pull request a master con mensaje "feat: Admin — Fishermen"
 
 **Perfil de usuario**
 - [ ] Vista readonly con datos del Fisherman
@@ -200,6 +202,10 @@ Rehacer desde cero todo el frontend en React+TypeScript manteniendo la misma fun
 **Gestión de roles**
 - [ ] Asignar/quitar roles a usuarios
 
+**Dockerización**
+- [ ] Dockerfile para API
+- [ ] Dockerfile para React
+- [ ] docker-compose para desarrollo local (API + React + SQL Server Express)
 ### 🔲 Pendiente — Phase 2: League Management
 - Entidad `League` (con MinPoints, WorstResultsToDiscard) + handlers MediatR (backend)
 - Añadir campo `FederationNumber` a entidad Fisherman existente + migración

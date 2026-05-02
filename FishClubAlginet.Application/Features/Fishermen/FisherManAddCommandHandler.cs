@@ -20,68 +20,74 @@ public record FisherManCommand(
 public class FisherManAddCommandHandler : IRequestHandler<FisherManCommand, ErrorOr<int>>
 {
     private readonly IGenericRepository<Fisherman,int> _genericRepository;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<FisherManAddCommandHandler> _logger;
 
     public FisherManAddCommandHandler(
         IGenericRepository<Fisherman, int> genericRepository,
+        IUnitOfWork unitOfWork,
         ILogger<FisherManAddCommandHandler> logger)
     {
         _genericRepository = genericRepository;
+        _unitOfWork = unitOfWork;
         _logger = logger;
     }
 
     public async Task<ErrorOr<int>> Handle(FisherManCommand command, CancellationToken cancellationToken)
     {
-        try
-        {
-            // Use the factory method to create the fisherman
-            var fisherman = Fisherman.Create(
-                command.FirstName,
-                command.LastName,
-                command.DateOfBirth,
-                command.DocumentType,
-                command.DocumentNumber,
-                command.FederationLicense,
-                new Address
-                {
-                    Street = command.AddressStreet ?? string.Empty,
-                    City = command.AddressCity ?? string.Empty,
-                    ZipCode = command.AddressZipCode ?? string.Empty,
-                    Province = command.AddressProvince ?? string.Empty
-                }
-            );
-
-            // Raise the domain event BEFORE saving to ensure it's captured by the interceptor
-            fisherman.RaiseDomainEvent(new FishermanAddedDomainEvent
+        // Use the factory method to create the fisherman
+        var fisherman = Fisherman.Create(
+            command.FirstName,
+            command.LastName,
+            command.DateOfBirth,
+            command.DocumentType,
+            command.DocumentNumber,
+            command.FederationLicense,
+            new Address
             {
-                Id = 0, // Will be set by the database
-                FirstName = fisherman.FirstName,
-                LastName = fisherman.LastName,
-                DocumentNumber = fisherman.DocumentNumber
-            });
-
-            // SaveChangesAsync will capture the domain event and convert it to OutboxMessage (ACID transaction)
-            var result = await _genericRepository.AddAsync(fisherman);
-
-            if (result.IsError)
-            {
-                _logger.LogError("Error creating Fisherman: {Errors}", string.Join(", ", result.Errors.Select(e => e.Description)));
-                return result.Errors;
+                Street = command.AddressStreet ?? string.Empty,
+                City = command.AddressCity ?? string.Empty,
+                ZipCode = command.AddressZipCode ?? string.Empty,
+                Province = command.AddressProvince ?? string.Empty
             }
+        );
 
-            _logger.LogInformation("Fisherman created successfully with ID: {FishermanId}", result.Value.Id);
-            return result.Value.Id;
-        }
-        catch (Exception ex)
+        // Raise the domain event BEFORE saving to ensure it's captured by the interceptor
+        fisherman.RaiseDomainEvent(new FishermanAddedDomainEvent
         {
-            // If SaveChanges fails, the entire transaction is rolled back (Fisherman + OutboxMessage)
-            _logger.LogError(ex, "Critical error while saving Fisherman and domain event");
+            Id = 0, // Will be set by the database
+            FirstName = fisherman.FirstName,
+            LastName = fisherman.LastName,
+            DocumentNumber = fisherman.DocumentNumber
+        });
+
+        // El repositorio sólo "stagea" en el ChangeTracker; el UoW persiste todo
+        // junto en una transacción ACID, capturando también los OutboxMessages
+        // generados por el ConvertDomainEventsToOutboxMessagesInterceptor.
+        await _genericRepository.AddAsync(fisherman);
+
+        var saveResult = await _unitOfWork.SaveChangesAsync(cancellationToken);
+        if (saveResult.IsError)
+        {
+            _logger.LogError(
+                "Error creating Fisherman: {Errors}",
+                string.Join(", ", saveResult.Errors.Select(e => e.Description)));
+
+            // Si la causa es un duplicado, lo refinamos a un error específico de Fisherman.
+            if (saveResult.FirstError.Code == "Database.UniqueConstraintViolation")
+            {
+                return Error.Conflict(
+                    code: $"{nameof(Fisherman)}.Duplicate",
+                    description: "A fisherman with these unique values already exists.");
+            }
 
             return Error.Failure(
                 code: "FISHERMAN_SAVE_FAILED",
-                description: "Could not create the fisherman. Please try again."
-            );
+                description: "Could not create the fisherman. Please try again.");
         }
+
+        _logger.LogInformation("Fisherman created successfully with ID: {FishermanId}", fisherman.Id);
+        return fisherman.Id;
     }
 
   

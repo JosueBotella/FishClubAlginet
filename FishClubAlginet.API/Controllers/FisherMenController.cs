@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 
 namespace FishClubAlginet.API.Controllers;
 
@@ -39,9 +39,9 @@ public class FisherMenController : ApiController
     }
 
     [HttpGet("GetAll")]
-    public async Task<IActionResult> GetAll([FromQuery] int skip = 0, [FromQuery] int take = 10, [FromQuery] string? search = null)
+    public async Task<IActionResult> GetAll([FromQuery] int skip = 0, [FromQuery] int take = 10, [FromQuery] string? search = null, [FromQuery] bool showDeleted = false)
     {
-        var query = new FisherManGetAllQuery(skip, take, search);
+        var query = new FisherManGetAllQuery(skip, take, search, showDeleted);
         var result = await _mediator.Send(query, default);
 
         return result.Match(

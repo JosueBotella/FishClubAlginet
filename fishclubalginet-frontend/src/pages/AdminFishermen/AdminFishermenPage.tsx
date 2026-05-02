@@ -21,6 +21,7 @@ import {
   IconSearch,
   IconTrash,
   IconRefresh,
+  IconHistory,
 } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import { getFishermen, deleteFisherman } from '../../api/fishermenApi';
@@ -52,7 +53,7 @@ export default function AdminFishermenPage() {
     setError(null);
     try {
       const skip = (page - 1) * PAGE_SIZE;
-      const result = await getFishermen(skip, PAGE_SIZE, search || undefined);
+      const result = await getFishermen(skip, PAGE_SIZE, search || undefined, showDeleted);
       setFishermen(result.items);
       setTotalCount(result.totalCount);
     } catch {
@@ -110,9 +111,18 @@ export default function AdminFishermenPage() {
   return (
     <Container size="lg" py="md">
       <Group justify="space-between" mb="md">
-        <Title order={3}>Gestion de pescadores</Title>
+        <Title order={3}>
+          {showDeleted ? (
+            <Group gap={6} component="span">
+              <IconHistory size={20} />
+              Histórico de pescadores eliminados
+            </Group>
+          ) : (
+            'Gestión de pescadores'
+          )}
+        </Title>
         <Switch
-          label="Mostrar eliminados"
+          label={showDeleted ? "Ver activos" : "Ver eliminados"}
           checked={showDeleted}
           onChange={(e) => {
             setShowDeleted(e.currentTarget.checked);
@@ -171,6 +181,7 @@ export default function AdminFishermenPage() {
                 <Table.Th>Licencia Fed.</Table.Th>
                 <Table.Th>Fecha nac.</Table.Th>
                 <Table.Th>Ciudad</Table.Th>
+                {showDeleted && <Table.Th>Eliminado</Table.Th>}
                 <Table.Th style={{ width: 80 }}>Acciones</Table.Th>
               </Table.Tr>
             </Table.Thead>
@@ -199,16 +210,25 @@ export default function AdminFishermenPage() {
                   <Table.Td>
                     <Text size="sm">{f.addressCity}</Text>
                   </Table.Td>
+                  {showDeleted && (
+                    <Table.Td>
+                      <Badge size="sm" color="red" variant="light">
+                        Eliminado
+                      </Badge>
+                    </Table.Td>
+                  )}
                   <Table.Td>
-                    <Tooltip label="Eliminar pescador">
-                      <ActionIcon
-                        variant="subtle"
-                        color="red"
-                        onClick={() => setDeleteTarget(f)}
-                      >
-                        <IconTrash size={18} />
-                      </ActionIcon>
-                    </Tooltip>
+                    {!f.isDeleted && (
+                      <Tooltip label="Eliminar pescador">
+                        <ActionIcon
+                          variant="subtle"
+                          color="red"
+                          onClick={() => setDeleteTarget(f)}
+                        >
+                          <IconTrash size={18} />
+                        </ActionIcon>
+                      </Tooltip>
+                    )}
                   </Table.Td>
                 </Table.Tr>
               ))}
@@ -252,6 +272,7 @@ export default function AdminFishermenPage() {
           <Button
             color="red"
             loading={deleting}
+            disabled={deleting}
             onClick={handleConfirmDelete}
           >
             Eliminar
