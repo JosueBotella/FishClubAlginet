@@ -195,17 +195,27 @@ Rehacer desde cero todo el frontend en React+TypeScript manteniendo la misma fun
 - [X] Generar pull request a master con mensaje "feat: Admin — Fishermen"
 
 **Perfil de usuario**
-- [ ] Vista readonly con datos del usuario (nombre, email, roles, datos personales)
-- [ ] Cambio de contraseña (validar contraseña actual)
-- [ ] Notificaciones de éxito/error
+- [x] Vista readonly con datos del usuario (email/roles desde JWT + datos personales del Fisherman vía `GET /api/fishermen/my-profile`)
+- [x] Cambio de contraseña (validar contraseña actual, sección dentro de `/profile`, integrado con `POST /api/account/change-password`)
+- [x] Notificaciones de éxito/error con `@mantine/notifications`
+- [x] Soporte para usuarios sin ficha de Fisherman (Admins puros): se oculta el bloque "Datos personales" si el endpoint devuelve 404
 
 **Gestión de roles**
-- [ ] Asignar/quitar roles a usuarios
+- [x] Asignar/quitar roles a usuarios — modal "Editar usuario" con checkboxes (Admin/Fisherman), preseleccionados según el estado actual; calcula el diff y llama a `assignRole`/`removeRole` solo para los cambios; bloquea acción si el usuario quedaría sin roles o si es el propio usuario logado
 
 **Dockerización**
-- [ ] Dockerfile para API
-- [ ] Dockerfile para React
-- [ ] docker-compose para desarrollo local (API + React + SQL Server Express)
+- [x] Dockerfile multi-stage para API (.NET 10 SDK build → ASP.NET runtime, expone HTTP plano en 8080)
+- [x] Dockerfile dev para React (Node 20 alpine + Vite con HMR) y Dockerfile prod (build estático + Nginx con SPA fallback y proxy `/api/*` → `api:8080`)
+- [x] `docker-compose.yml` (dev) con db (SQL Server 2022) + api + frontend, healthcheck en db, bind mount del código del front para HMR
+- [x] `docker-compose.prod.yml` con builds optimizados, sin bind mounts, restart policies, sin exponer puerto de DB
+- [x] `.env.example` raíz con `SA_PASSWORD`, `JWT_SECRET_KEY`, `JWT_ISSUER`, `JWT_AUDIENCE`, `JWT_DURATION_MINUTES`, `PUBLIC_HTTP_PORT`
+- [x] `.dockerignore` raíz (excluye `bin/`, `obj/`, `node_modules/`, `.env`, `.git`)
+- [x] Ajustes en `Program.cs`: `UseHttpsRedirection` solo fuera de container; `MapInboundClaims = false` en JwtBearer (fix de 403 por mapping legacy de claims)
+- [x] `appsettings.json` y `appsettings.Development.json` con secrets vacíos (se inyectan vía env vars `ConnectionStrings__LocalConnectionString` y `JwtSettings__SecretKey`)
+- [x] `vite.config.ts` con `VITE_PROXY_TARGET` configurable (Docker → `http://api:8080`, local → `https://localhost:7179`)
+- [x] README actualizado con sección "🚢 Arranque rápido con Docker" + tabla de comandos
+- [x] Refactor a patrón Unit of Work consistente: `IUnitOfWork.SaveChangesAsync` devuelve `ErrorOr<int>`, mapeo de excepciones EF (`DbUpdateException` con `SqlException 2627/2601` → `Error.Conflict`) centralizado en `UnitOfWorkService` (Infrastructure); handlers de Application sin dependencias de EF
+- [x] Tests unitarios actualizados al nuevo patrón UoW (`SoftDeleteFishermanCommandHandlerTests` y `FisherManAddCommanHandlerTests`) con verificación explícita de `SaveChangesAsync` invocado/no invocado según flujo
 ### 🔲 Pendiente — Phase 2: League Management
 -[ ] Entidad `League` (con MinPoints, WorstResultsToDiscard) + handlers MediatR (backend)
 -[ ] Añadir campo `FederationNumber` a entidad Fisherman existente + migración
