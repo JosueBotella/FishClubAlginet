@@ -16,5 +16,5 @@ export type {
   RemoveRoleRequest,
 } from './user';
 
-export type { FishermanDto } from './fisherman';
+export type { FishermanDto, FishermanProfileDto } from './fisherman';
 export { DocumentTypeLabels } from './fisherman';

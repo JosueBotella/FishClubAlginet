@@ -21,12 +21,14 @@ import {
   IconLock,
   IconLockOpen,
   IconRefresh,
+  IconEdit,
 } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import { useAuth } from '../../hooks';
 import { getUsers, blockUser, unblockUser } from '../../api/usersApi';
 import type { UserDto } from '../../types';
 import CreateUserModal from './CreateUserModal';
+import EditUserModal from './EditUserModal';
 
 const PAGE_SIZE = 15;
 
@@ -41,6 +43,7 @@ export default function AdminUsersPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState<UserDto | null>(null);
 
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
@@ -107,6 +110,11 @@ export default function AdminUsersPage() {
     fetchUsers();
   };
 
+  const handleUserUpdated = () => {
+    setEditTarget(null);
+    fetchUsers();
+  };
+
   const isSelf = (u: UserDto) => u.id === currentUser?.id;
 
   return (
@@ -169,7 +177,7 @@ export default function AdminUsersPage() {
                 <Table.Th>Email</Table.Th>
                 <Table.Th>Roles</Table.Th>
                 <Table.Th>Estado</Table.Th>
-                <Table.Th style={{ width: 100 }}>Acciones</Table.Th>
+                <Table.Th style={{ width: 140 }}>Acciones</Table.Th>
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
@@ -209,28 +217,46 @@ export default function AdminUsersPage() {
                     </Badge>
                   </Table.Td>
                   <Table.Td>
-                    <Tooltip
-                      label={
-                        isSelf(u)
-                          ? 'No puedes bloquearte a ti mismo'
-                          : u.isLockedOut
-                            ? 'Desbloquear'
-                            : 'Bloquear'
-                      }
-                    >
-                      <ActionIcon
-                        variant="subtle"
-                        color={u.isLockedOut ? 'green' : 'red'}
-                        onClick={() => handleToggleBlock(u)}
-                        disabled={isSelf(u)}
+                    <Group gap={4}>
+                      <Tooltip
+                        label={
+                          isSelf(u)
+                            ? 'No puedes editar tus propios roles'
+                            : 'Editar roles'
+                        }
                       >
-                        {u.isLockedOut ? (
-                          <IconLockOpen size={18} />
-                        ) : (
-                          <IconLock size={18} />
-                        )}
-                      </ActionIcon>
-                    </Tooltip>
+                        <ActionIcon
+                          variant="subtle"
+                          color="blue"
+                          onClick={() => setEditTarget(u)}
+                          disabled={isSelf(u)}
+                        >
+                          <IconEdit size={18} />
+                        </ActionIcon>
+                      </Tooltip>
+                      <Tooltip
+                        label={
+                          isSelf(u)
+                            ? 'No puedes bloquearte a ti mismo'
+                            : u.isLockedOut
+                              ? 'Desbloquear'
+                              : 'Bloquear'
+                        }
+                      >
+                        <ActionIcon
+                          variant="subtle"
+                          color={u.isLockedOut ? 'green' : 'red'}
+                          onClick={() => handleToggleBlock(u)}
+                          disabled={isSelf(u)}
+                        >
+                          {u.isLockedOut ? (
+                            <IconLockOpen size={18} />
+                          ) : (
+                            <IconLock size={18} />
+                          )}
+                        </ActionIcon>
+                      </Tooltip>
+                    </Group>
                   </Table.Td>
                 </Table.Tr>
               ))}
@@ -257,6 +283,12 @@ export default function AdminUsersPage() {
         opened={createModalOpen}
         onClose={() => setCreateModalOpen(false)}
         onCreated={handleUserCreated}
+      />
+
+      <EditUserModal
+        user={editTarget}
+        onClose={() => setEditTarget(null)}
+        onUpdated={handleUserUpdated}
       />
     </Container>
   );

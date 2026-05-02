@@ -11,6 +11,25 @@ export interface FishermanDto {
   isDeleted: boolean;
 }
 
+// Devuelto por GET /api/fishermen/my-profile.
+// Nota: documentType viene como string ("Dni", "Nie", "Passport"), no como número.
+export interface FishermanProfileDto {
+  id: number;
+  firstName: string;
+  lastName: string;
+  dateOfBirth: string;
+  documentType: string;
+  documentNumber: string;
+  federationLicense: string | null;
+  regionalLicense: string | null;
+  street: string;
+  number: string;
+  floorDoor: string;
+  zipCode: string;
+  city: string;
+  province: string;
+}
+
 // Mapea el valor numérico del enum TypeNationalIdentifier (backend)
 // a una etiqueta legible para mostrar en la UI.
 //   1 -> Dni

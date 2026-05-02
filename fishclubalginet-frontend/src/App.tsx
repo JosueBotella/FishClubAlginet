@@ -7,6 +7,7 @@ import AppLayout from './layout/AppLayout';
 import NotFoundPage from './pages/NotFound/NotFoundPage';
 import AdminUsersPage from './pages/AdminUsers/AdminUsersPage';
 import AdminFishermenPage from './pages/AdminFishermen/AdminFishermenPage';
+import ProfilePage from './pages/Profile/ProfilePage';
 
 function App() {
   return (
@@ -25,7 +26,7 @@ function App() {
             }
           >
             <Route path={AppRoutes.Home} element={<HomePage />} />
-            <Route path={AppRoutes.Profile} element={<ProfilePlaceholder />} />
+            <Route path={AppRoutes.Profile} element={<ProfilePage />} />
             <Route
               path={AppRoutes.Users}
               element={
@@ -48,11 +49,6 @@ function App() {
       </AuthProvider>
     </BrowserRouter>
   );
-}
-
-/* Placeholder temporal - se reemplazara en futuras fases */
-function ProfilePlaceholder() {
-  return <div><h2>Mi perfil</h2><p>Pendiente de implementacion.</p></div>;
 }
 
 export default App;

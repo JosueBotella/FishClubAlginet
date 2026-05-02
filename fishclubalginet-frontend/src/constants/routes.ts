@@ -5,5 +5,4 @@ export const Routes = {
   AddFisherman: '/fishermen/add',
   Users: '/admin/users',
   Profile: '/profile',
-  ChangePassword: '/change-password',
 } as const;
