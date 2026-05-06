@@ -38,6 +38,7 @@ public class GetFishermanByUserIdQueryHandler : IRequestHandler<GetFishermanByUs
                 DocumentType: fisherman.DocumentType.ToString(),
                 DocumentNumber: fisherman.DocumentNumber,
                 FederationLicense: fisherman.FederationLicense,
+                FederationNumber: fisherman.FederationNumber,
                 RegionalLicense: fisherman.RegionalLicense,
                 Street: fisherman.Address.Street,
                 Number: fisherman.Address.Number,

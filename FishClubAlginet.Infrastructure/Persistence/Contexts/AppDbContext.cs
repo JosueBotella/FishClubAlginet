@@ -3,6 +3,8 @@
 public class AppDbContext : IdentityDbContext
 {
     public DbSet<Fisherman> Fishermen { get; set; }
+    public DbSet<League> Leagues { get; set; }
+    public DbSet<Competition> Competitions { get; set; }
     public DbSet<OutboxMessage> OutboxMessages { get; set; }
     public AppDbContext(DbContextOptions<AppDbContext> context)
         : base(context)

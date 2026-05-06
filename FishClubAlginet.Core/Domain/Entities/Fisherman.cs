@@ -12,6 +12,7 @@ public class Fisherman : BaseEntity<int>
 
     // Licenses
     public string? FederationLicense { get; set; } = string.Empty; // Core ID for the Federation
+    public string? FederationNumber { get; set; } // Unique federative identifier, e.g. "V-552"
     public string? RegionalLicense { get; set; } // GVA License (Optional)
 
     // Contact & Location
@@ -96,5 +97,6 @@ public static class  FisherManConstraints
     public const int DocumentNumberMaxLength = 20;
     public const int DocumentNumberMinLength = 10;
     public const int FederationLicenseMaxLength = 20;
+    public const int FederationNumberMaxLength = 20;
     public const int MinimumAge = 16;
 }

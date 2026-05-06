@@ -17,6 +17,29 @@ public static partial class Errors
             description: "The document number is not valid for the selected document type.");
     }
 
+    public static class League
+    {
+        public static Error NotFound => Error.NotFound(
+            code: "League.NotFound",
+            description: "The requested league does not exist.");
+
+        public static Error DuplicateYear => Error.Conflict(
+            code: "League.DuplicateYear",
+            description: "A league for this year already exists.");
+
+        public static Error AlreadyActive => Error.Conflict(
+            code: "League.AlreadyActive",
+            description: "The league is already active.");
+
+        public static Error AlreadyArchived => Error.Conflict(
+            code: "League.AlreadyArchived",
+            description: "The league is already archived.");
+
+        public static Error CannotModifyArchived => Error.Validation(
+            code: "League.CannotModifyArchived",
+            description: "Cannot modify an archived league.");
+    }
+
     public static class Auth
     {
         public static Error InvalidCredentials => Error.Validation(

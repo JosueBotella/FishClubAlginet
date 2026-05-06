@@ -7,6 +7,7 @@ import AppLayout from './layout/AppLayout';
 import NotFoundPage from './pages/NotFound/NotFoundPage';
 import AdminUsersPage from './pages/AdminUsers/AdminUsersPage';
 import AdminFishermenPage from './pages/AdminFishermen/AdminFishermenPage';
+import AdminLeaguesPage from './pages/AdminLeagues/AdminLeaguesPage';
 import ProfilePage from './pages/Profile/ProfilePage';
 
 function App() {
@@ -40,6 +41,14 @@ function App() {
               element={
                 <ProtectedRoute requiredRoles={['Admin']}>
                   <AdminFishermenPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path={AppRoutes.Leagues}
+              element={
+                <ProtectedRoute requiredRoles={['Admin']}>
+                  <AdminLeaguesPage />
                 </ProtectedRoute>
               }
             />
