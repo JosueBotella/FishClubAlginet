@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
   AppShell,
@@ -10,16 +10,20 @@ import {
   Divider,
   Box,
   Avatar,
+  Badge,
 } from '@mantine/core';
 import {
   IconHome,
   IconUsers,
   IconFish,
+  IconTrophy,
   IconUser,
   IconLogout,
 } from '@tabler/icons-react';
 import { useAuth } from '../hooks';
 import { Routes } from '../constants';
+import { leaguesApi } from '../api';
+import type { LeagueDto } from '../types';
 
 interface NavItem {
   label: string;
@@ -47,6 +51,12 @@ const navItems: NavItem[] = [
     roles: ['Admin'],
   },
   {
+    label: 'Ligas',
+    icon: <IconTrophy size={20} />,
+    to: Routes.Leagues,
+    roles: ['Admin'],
+  },
+  {
     label: 'Mi perfil',
     icon: <IconUser size={20} />,
     to: Routes.Profile,
@@ -55,9 +65,14 @@ const navItems: NavItem[] = [
 
 export default function AppLayout() {
   const [opened, setOpened] = useState(false);
+  const [activeLeague, setActiveLeague] = useState<LeagueDto | null>(null);
   const { user, logout, hasRole } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  useEffect(() => {
+    leaguesApi.getActiveLeague().then((l) => setActiveLeague(l));
+  }, []);
 
   const visibleItems = navItems.filter(
     (item) => !item.roles || item.roles.some((r) => hasRole(r))
@@ -93,9 +108,16 @@ export default function AppLayout() {
               hiddenFrom="sm"
               size="sm"
             />
-            <Text fw={700} size="lg">
-              Fish Club Alginet
-            </Text>
+            <Group gap="xs">
+              <Text fw={700} size="lg">
+                Fish Club Alginet
+              </Text>
+              {activeLeague && (
+                <Badge size="sm" color="green" variant="light">
+                  {activeLeague.name}
+                </Badge>
+              )}
+            </Group>
           </Group>
 
           <Group gap="sm">

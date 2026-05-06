@@ -29,4 +29,16 @@ export const Endpoints = {
       return url;
     },
   },
+  Leagues: {
+    Base: 'api/leagues',
+    GetActive: 'api/leagues/active',
+    ById: (id: string) => `api/leagues/${id}`,
+    Activate: (id: string) => `api/leagues/${id}/activate`,
+    Archive: (id: string) => `api/leagues/${id}/archive`,
+    GetAllPaged: (skip: number, take: number, year?: number) => {
+      let url = `api/leagues?skip=${skip}&take=${take}`;
+      if (year !== undefined) url += `&year=${year}`;
+      return url;
+    },
+  },
 } as const;

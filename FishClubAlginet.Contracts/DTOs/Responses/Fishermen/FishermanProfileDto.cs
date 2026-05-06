@@ -8,6 +8,7 @@ public record FishermanProfileDto(
     string DocumentType,
     string DocumentNumber,
     string? FederationLicense,
+    string? FederationNumber,
     string? RegionalLicense,
     string Street,
     string Number,

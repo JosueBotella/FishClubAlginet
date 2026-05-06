@@ -23,6 +23,15 @@ public class FishermanConfiguration : IEntityTypeConfiguration<Fisherman>
         builder.HasIndex(x => x.FederationLicense)
             .IsUnique();
 
+        builder.Property(x => x.FederationNumber)
+            .IsRequired(false)
+            .HasMaxLength(FisherManConstraints.FederationNumberMaxLength);
+
+        builder.HasIndex(x => x.FederationNumber)
+            .IsUnique()
+            .HasFilter("[FederationNumber] IS NOT NULL")
+            .HasDatabaseName("IX_Fishermen_FederationNumber");
+
         builder.Property(x => x.DocumentType)
             .HasConversion<string>() 
             .HasMaxLength(FisherManConstraints.DocumentTypeMaxLength);
