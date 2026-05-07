@@ -1,0 +1,9 @@
+# .clineignore
+bin/
+obj/
+.vs/
+Migrations/
+node_modules/
+*.exe
+*.pdb
+appsettings.Development.json
