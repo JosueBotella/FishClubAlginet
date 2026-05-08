@@ -5,7 +5,7 @@ public class CompetitionResult : BaseEntity<Guid>
     public Guid CompetitionId { get; set; }
     public Competition Competition { get; set; } = null!;
 
-    public Guid FishermanId { get; set; }
+    public int FishermanId { get; set; }
     public Fisherman Fisherman { get; set; } = null!;
 
     public int? AssignedSpotNumber { get; set; }
@@ -22,7 +22,7 @@ public class CompetitionResult : BaseEntity<Guid>
     /// <summary>
     /// Registers a fisherman for a competition (no spot, no results yet).
     /// </summary>
-    public static CompetitionResult Register(Guid competitionId, Guid fishermanId) => new CompetitionResult
+    public static CompetitionResult Register(Guid competitionId, int fishermanId) => new CompetitionResult
     {
         Id = Guid.NewGuid(),
         CompetitionId = competitionId,

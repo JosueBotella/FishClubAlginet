@@ -3,7 +3,7 @@
 ## Capa 1: Dominio (Core)
 - [x] Crear Enums: `Subspecialty`, `Category`, `CompetitionStatus`.
 - [x] Crear Entidad `Competition` (con reglas de negocio y estados).
-- [ ] Crear Entidad `CompetitionResult` (vinculación pescador-concurso y lógica de puntos).
+- [x] Crear Entidad `CompetitionResult` (vinculación pescador-concurso y lógica de puntos).
 
 ## Capa 2: Infraestructura (Infrastructure)
 - [x] Configuración Fluent API para `Competition` (Índice único: LeagueId + Number).
