@@ -1,18 +1,19 @@
-#### Backend — Entidades
+# Contexto Activo: Fase 3 completada
 
-- [ ] Entidad `Competition` (Domain):
-  - Campos: `Id` (Guid), `LeagueId` (FK), `CompetitionNumber` (int, ordinal en la liga: 1º, 2º, ... 18º), `Name` (opcional), `Date`, `StartTime`, `EndTime`, `Venue` (string libre: "BELLUS", "PINEDO", "FORTALENY"...), `Zone` (string libre: "C", "B", "SUR", "NORTE", "A1-A2-A3", "B1-B2-B3", "E1-E2-E3"...), `Subspecialty` (enum: `Mar`, `AguaDulce`), `Category` (enum: `Seniors`, `Juvenil`), `MaxSpots` (int), `Status` (enum: `Planned`, `RegistrationOpen`, `Closed`, `ResultsDraft`, `ResultsValidated`)
-    - **Decisión**: `Venue` y `Zone` son **strings libres**, no entidades catálogo. El club los introduce manualmente al crear cada concurso. Se podría sugerir autocompletado en el frontend leyendo valores ya usados, pero sin forzar el modelo.
-  - Reglas:
-    - `CompetitionNumber` único dentro de la misma liga
-    - `Date` debe estar dentro del año de la `League`
-    - `MaxSpots` > 0
-    - El paso a `ResultsValidated` requiere que TODOS los inscritos tengan `CompetitionResult` registrado
-- [ ] Entidad `CompetitionResult` (Domain) — combina inscripción + resultado:
-  - Campos: `Id` (Guid), `CompetitionId` (FK), `FishermanId` (FK), `AssignedSpotNumber` (int? — null hasta el sorteo), `DidAttend` (bool), `WeightInGrams` (int — 0 si asistió pero no pescó), `BiggestCatchWeight` (int? — peso de la pieza mayor del concurso si la presentó), `Points` (decimal — calculado), `Ranking` (int — calculado), `RegistrationDate`, `IsValidated` (bool)
-  - Reglas:
-    - Un pescador solo puede tener un `CompetitionResult` por `Competition` (índice único compuesto)
-    - `AssignedSpotNumber` único dentro de la misma `Competition`
-    - Si `DidAttend = false`, `WeightInGrams` y `Points` deben ser 0 (vacío en planilla)
-    - Si `DidAttend = true` y `WeightInGrams = 0`, recibe `MinPoints` (default 5)
-- [ ] DTOs: `RegisterToCompetitionRequest`, `AssignSpotsRequest`, `EnterResultsRequest` (bulk), `CompetitionDto`, `CompetitionDetailDto` (con resultados), `MyRegistrationDto` (vista pescador)
+## Estado
+Fase 3 (Concursos y Resultados) completamente implementada — backend + frontend.
+
+## Lo que funciona
+- CRUD de concursos dentro de una liga (Admin).
+- Inscripción de pescadores a concursos abiertos.
+- Consulta de resultados con ranking en tiempo real (ties compartidos).
+- Navegación: Ligas → Concursos → Resultados/Inscripciones.
+
+## Pendiente para Fase 3 extendida
+- **AssignSpotsCommand**: asignar puesto de sorteo a cada inscrito.
+- **EnterResultsCommand**: entrada bulk de pesos (DidAttend, WeightInGrams, BiggestCatchWeight).
+- **Transiciones de estado**: RegistrationOpen → Closed → ResultsDraft → ResultsValidated.
+- **Clasificación general**: suma de puntos por liga descartando los N peores resultados (`worstResultsToDiscard`).
+
+## Rama activa
+`branch_phase_three`

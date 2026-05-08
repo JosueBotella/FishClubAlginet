@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Container,
   Title,
@@ -14,7 +15,6 @@ import {
   Loader,
   Center,
   Alert,
-  NumberInput,
 } from '@mantine/core';
 import {
   IconSearch,
@@ -24,6 +24,7 @@ import {
   IconArchive,
   IconPlayerPlay,
   IconEdit,
+  IconCalendarEvent,
 } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import {
@@ -32,6 +33,7 @@ import {
   archiveLeague,
 } from '../../api/leaguesApi';
 import type { LeagueDto } from '../../types';
+import { Routes } from '../../constants';
 import CreateEditLeagueModal from './CreateEditLeagueModal';
 
 const PAGE_SIZE = 15;
@@ -56,6 +58,7 @@ export default function AdminLeaguesPage() {
   const [error, setError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [editLeague, setEditLeague] = useState<LeagueDto | null>(null);
+  const navigate = useNavigate();
 
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
@@ -149,7 +152,6 @@ export default function AdminLeaguesPage() {
         </Button>
       </Group>
 
-      {/* Barra de busqueda por ano */}
       <Group mb="md">
         <TextInput
           placeholder="Filtrar por año..."
@@ -200,7 +202,7 @@ export default function AdminLeaguesPage() {
                 <Table.Th>Concursos</Table.Th>
                 <Table.Th>Min. puntos</Table.Th>
                 <Table.Th>Descartes</Table.Th>
-                <Table.Th style={{ width: 160 }}>Acciones</Table.Th>
+                <Table.Th style={{ width: 200 }}>Acciones</Table.Th>
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
@@ -226,6 +228,15 @@ export default function AdminLeaguesPage() {
                   </Table.Td>
                   <Table.Td>
                     <Group gap={4}>
+                      <Tooltip label="Ver concursos">
+                        <ActionIcon
+                          variant="subtle"
+                          color="teal"
+                          onClick={() => navigate(Routes.competitionsFor(l.id))}
+                        >
+                          <IconCalendarEvent size={18} />
+                        </ActionIcon>
+                      </Tooltip>
                       {!l.isArchived && (
                         <Tooltip label="Editar">
                           <ActionIcon

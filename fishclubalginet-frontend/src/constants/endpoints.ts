@@ -41,4 +41,10 @@ export const Endpoints = {
       return url;
     },
   },
+  Competitions: {
+    Base: 'api/competitions',
+    ByLeague: (leagueId: string) => `api/competitions?leagueId=${leagueId}`,
+    Register: (id: string) => `api/competitions/${id}/register`,
+    Results: (id: string) => `api/competitions/${id}/results`,
+  },
 } as const;
