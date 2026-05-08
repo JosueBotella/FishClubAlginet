@@ -26,11 +26,19 @@ public class CompetitionConfiguration : IEntityTypeConfiguration<Competition>
 
         builder.Property(x => x.Subspecialty)
             .IsRequired()
-            .HasMaxLength(50);
+            .HasConversion<string>()
+            .HasMaxLength(20);
 
         builder.Property(x => x.Category)
             .IsRequired()
-            .HasMaxLength(50);
+            .HasConversion<string>()
+            .HasMaxLength(20);
+
+        builder.Property(x => x.Status)
+            .IsRequired()
+            .HasConversion<string>()
+            .HasMaxLength(30)
+            .HasDefaultValue(CompetitionStatus.Planned);
 
         builder.Property(x => x.MaxSpots)
             .IsRequired();
@@ -42,5 +50,10 @@ public class CompetitionConfiguration : IEntityTypeConfiguration<Competition>
             .WithMany(l => l.Competitions)
             .HasForeignKey(x => x.LeagueId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // Unique: a competition number must be unique within a league
+        builder.HasIndex(x => new { x.LeagueId, x.CompetitionNumber })
+            .IsUnique()
+            .HasDatabaseName("IX_Competitions_LeagueId_CompetitionNumber");
     }
 }

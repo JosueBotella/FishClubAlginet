@@ -1,6 +1,7 @@
 ﻿global using FishClubAlginet.Application.Abstractions;
 global using FishClubAlginet.Application.Constants;
 global using FishClubAlginet.Contracts.Dtos.Requests.Identity;
+global using FishClubAlginet.Contracts.Enums;
 global using FishClubAlginet.Core.Abstractions;
 global using FishClubAlginet.Core.Domain.Entities;
 global using FishClubAlginet.Infrastructure.Persistence.Constants;
