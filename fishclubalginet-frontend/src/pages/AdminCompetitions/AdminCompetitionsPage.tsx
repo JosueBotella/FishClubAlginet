@@ -19,8 +19,11 @@ import {
   IconChevronLeft,
   IconEye,
   IconCalendarEvent,
+  IconLockOpen,
+  IconLock,
 } from '@tabler/icons-react';
-import { getCompetitionsByLeague } from '../../api/competitionsApi';
+import { getCompetitionsByLeague, openRegistration, closeRegistration } from '../../api/competitionsApi';
+import { notifications } from '@mantine/notifications';
 import type { CompetitionDto } from '../../types';
 import { Routes } from '../../constants';
 import CreateCompetitionModal from './CreateCompetitionModal';
@@ -67,6 +70,42 @@ export default function AdminCompetitionsPage() {
   useEffect(() => {
     fetchCompetitions();
   }, [fetchCompetitions]);
+
+  const handleOpenRegistration = async (c: CompetitionDto) => {
+    try {
+      await openRegistration(c.id);
+      notifications.show({
+        title: 'Inscripción abierta',
+        message: `Concurso #${c.competitionNumber}`,
+        color: 'blue',
+      });
+      fetchCompetitions();
+    } catch {
+      notifications.show({
+        title: 'Error',
+        message: 'No se pudo abrir la inscripción.',
+        color: 'red',
+      });
+    }
+  };
+
+  const handleCloseRegistration = async (c: CompetitionDto) => {
+    try {
+      await closeRegistration(c.id);
+      notifications.show({
+        title: 'Inscripción cerrada',
+        message: `Concurso #${c.competitionNumber}`,
+        color: 'orange',
+      });
+      fetchCompetitions();
+    } catch {
+      notifications.show({
+        title: 'Error',
+        message: 'No se pudo cerrar la inscripción.',
+        color: 'red',
+      });
+    }
+  };
 
   const handleModalSuccess = () => {
     setModalOpen(false);
@@ -160,10 +199,32 @@ export default function AdminCompetitionsPage() {
                 </Table.Td>
                 <Table.Td>{statusBadge(c.status)}</Table.Td>
                 <Table.Td>
+                  {c.status === 'Planned' && (
+                    <Tooltip label="Abrir inscripción">
+                      <ActionIcon
+                        variant="subtle"
+                        color="blue"
+                        onClick={() => handleOpenRegistration(c)}
+                      >
+                        <IconLockOpen size={18} />
+                      </ActionIcon>
+                    </Tooltip>
+                  )}
+                  {c.status === 'RegistrationOpen' && (
+                    <Tooltip label="Cerrar inscripción">
+                      <ActionIcon
+                        variant="subtle"
+                        color="orange"
+                        onClick={() => handleCloseRegistration(c)}
+                      >
+                        <IconLock size={18} />
+                      </ActionIcon>
+                    </Tooltip>
+                  )}
                   <Tooltip label="Ver resultados / inscripciones">
                     <ActionIcon
                       variant="subtle"
-                      color="blue"
+                      color="teal"
                       onClick={() =>
                         navigate(Routes.competitionResultsFor(c.id))
                       }

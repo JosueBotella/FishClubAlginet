@@ -18,6 +18,8 @@ import {
   Checkbox,
   Pagination,
   Divider,
+  NumberInput,
+  Switch,
 } from '@mantine/core';
 import {
   IconChevronLeft,
@@ -25,23 +27,50 @@ import {
   IconMedal,
   IconUserPlus,
   IconSearch,
+  IconTrash,
+  IconPencil,
 } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
-import { getCompetitionResults, registerFisherman } from '../../api/competitionsApi';
+import {
+  getCompetitionResults,
+  registerFisherman,
+  removeRegistration,
+  updateCompetitionResult,
+} from '../../api/competitionsApi';
 import { getFishermen } from '../../api/fishermenApi';
 import type { CompetitionResultDto, FishermanDto } from '../../types';
 
 const PAGE_SIZE = 10;
+const RESULTS_PAGE_SIZE = 10;
+
+// ── Edit modal state ────────────────────────────────────────────────────────
+interface EditState {
+  resultId: string;
+  fishermanId: number;
+  didAttend: boolean;
+  weightInGrams: number;
+  biggestCatchWeight: number | null;
+}
 
 export default function CompetitionResultsPage() {
   const { competitionId } = useParams<{ competitionId: string }>();
   const navigate = useNavigate();
 
+  // Results + pagination
   const [results, setResults] = useState<CompetitionResultDto[]>([]);
+  const [resultsPage, setResultsPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Modal state
+  // Delete confirmation
+  const [deleteResultId, setDeleteResultId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  // Edit modal
+  const [editState, setEditState] = useState<EditState | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  // Register modal
   const [registerOpen, setRegisterOpen] = useState(false);
   const [fishermen, setFishermen] = useState<FishermanDto[]>([]);
   const [fishermenTotal, setFishermenTotal] = useState(0);
@@ -55,7 +84,14 @@ export default function CompetitionResultsPage() {
   const alreadyRegistered = new Set(results.map((r) => r.fishermanId));
   const fishermenPages = Math.ceil(fishermenTotal / PAGE_SIZE);
 
-  // ── Results ──────────────────────────────────────────────────────────────
+  // Paginated results slice
+  const totalResultsPages = Math.ceil(results.length / RESULTS_PAGE_SIZE);
+  const pagedResults = results.slice(
+    (resultsPage - 1) * RESULTS_PAGE_SIZE,
+    resultsPage * RESULTS_PAGE_SIZE
+  );
+
+  // ── Fetch results ─────────────────────────────────────────────────────────
   const fetchResults = useCallback(async () => {
     if (!competitionId) return;
     setLoading(true);
@@ -73,6 +109,53 @@ export default function CompetitionResultsPage() {
   useEffect(() => {
     fetchResults();
   }, [fetchResults]);
+
+  // ── Delete ────────────────────────────────────────────────────────────────
+  const handleDelete = async () => {
+    if (!deleteResultId) return;
+    setDeleting(true);
+    try {
+      await removeRegistration(deleteResultId);
+      notifications.show({ title: 'Inscripción eliminada', message: '', color: 'orange' });
+      setDeleteResultId(null);
+      fetchResults();
+    } catch {
+      notifications.show({ title: 'Error', message: 'No se pudo eliminar la inscripción.', color: 'red' });
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  // ── Edit ──────────────────────────────────────────────────────────────────
+  const openEdit = (r: CompetitionResultDto) => {
+    setEditState({
+      resultId: r.id,
+      fishermanId: r.fishermanId,
+      didAttend: r.didAttend,
+      weightInGrams: r.weightInGrams,
+      biggestCatchWeight: r.biggestCatchWeight ?? null,
+    });
+  };
+
+  const handleSave = async () => {
+    if (!editState) return;
+    setSaving(true);
+    try {
+      await updateCompetitionResult(
+        editState.resultId,
+        editState.didAttend,
+        editState.weightInGrams,
+        editState.biggestCatchWeight
+      );
+      notifications.show({ title: 'Resultado actualizado', message: '', color: 'green' });
+      setEditState(null);
+      fetchResults();
+    } catch {
+      notifications.show({ title: 'Error', message: 'No se pudo actualizar el resultado.', color: 'red' });
+    } finally {
+      setSaving(false);
+    }
+  };
 
   // ── Fishermen list ────────────────────────────────────────────────────────
   const fetchFishermen = useCallback(async () => {
@@ -122,11 +205,8 @@ export default function CompetitionResultsPage() {
   const toggleSelectAll = () => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
-      if (allPageSelected) {
-        selectablePage.forEach((f) => next.delete(f.id));
-      } else {
-        selectablePage.forEach((f) => next.add(f.id));
-      }
+      if (allPageSelected) selectablePage.forEach((f) => next.delete(f.id));
+      else selectablePage.forEach((f) => next.add(f.id));
       return next;
     });
   };
@@ -148,8 +228,8 @@ export default function CompetitionResultsPage() {
     if (ok > 0) {
       notifications.show({
         title: `${ok} pescador${ok > 1 ? 'es' : ''} inscrito${ok > 1 ? 's' : ''}`,
-        message: fail > 0 ? `${fail} no pudieron inscribirse (ya inscritos o concurso cerrado).` : '',
-        color: ok > 0 ? 'green' : 'red',
+        message: fail > 0 ? `${fail} no pudieron inscribirse.` : '',
+        color: 'green',
       });
     } else {
       notifications.show({ title: 'Error', message: 'Ningún pescador pudo inscribirse.', color: 'red' });
@@ -190,48 +270,143 @@ export default function CompetitionResultsPage() {
       ) : results.length === 0 ? (
         <Text c="dimmed" ta="center" py="xl">No hay inscripciones en este concurso.</Text>
       ) : (
-        <Table striped highlightOnHover withTableBorder>
-          <Table.Thead>
-            <Table.Tr>
-              <Table.Th style={{ width: 70 }}>Posición</Table.Th>
-              <Table.Th>Pescador</Table.Th>
-              <Table.Th>Puesto sorteo</Table.Th>
-              <Table.Th>Asistió</Table.Th>
-              <Table.Th>Peso total (g)</Table.Th>
-              <Table.Th>Mayor captura (g)</Table.Th>
-              <Table.Th>Puntos</Table.Th>
-              <Table.Th>Validado</Table.Th>
-            </Table.Tr>
-          </Table.Thead>
-          <Table.Tbody>
-            {results.map((r) => (
-              <Table.Tr key={r.id}>
-                <Table.Td>{rankBadge(r.ranking)}</Table.Td>
-                <Table.Td>
-                  <Group gap={4}>
-                    <IconFish size={14} />
-                    <Text size="sm">#{r.fishermanId}</Text>
-                  </Group>
-                </Table.Td>
-                <Table.Td><Text size="sm">{r.assignedSpotNumber ?? '—'}</Text></Table.Td>
-                <Table.Td>
-                  <Badge color={r.didAttend ? 'green' : 'red'} variant="light">
-                    {r.didAttend ? 'Sí' : 'No'}
-                  </Badge>
-                </Table.Td>
-                <Table.Td><Text size="sm">{r.weightInGrams}</Text></Table.Td>
-                <Table.Td><Text size="sm">{r.biggestCatchWeight ?? '—'}</Text></Table.Td>
-                <Table.Td><Text size="sm" fw={600}>{r.points}</Text></Table.Td>
-                <Table.Td>
-                  <Badge color={r.isValidated ? 'green' : 'gray'} variant="light">
-                    {r.isValidated ? 'Sí' : 'No'}
-                  </Badge>
-                </Table.Td>
+        <>
+          <Table striped highlightOnHover withTableBorder>
+            <Table.Thead>
+              <Table.Tr>
+                <Table.Th style={{ width: 70 }}>Pos.</Table.Th>
+                <Table.Th>Pescador</Table.Th>
+                <Table.Th>Puesto</Table.Th>
+                <Table.Th>Asistió</Table.Th>
+                <Table.Th>Peso (g)</Table.Th>
+                <Table.Th>Mayor (g)</Table.Th>
+                <Table.Th>Puntos</Table.Th>
+                <Table.Th>Validado</Table.Th>
+                <Table.Th style={{ width: 80 }}>Acciones</Table.Th>
               </Table.Tr>
-            ))}
-          </Table.Tbody>
-        </Table>
+            </Table.Thead>
+            <Table.Tbody>
+              {pagedResults.map((r) => (
+                <Table.Tr key={r.id}>
+                  <Table.Td>{rankBadge(r.ranking)}</Table.Td>
+                  <Table.Td>
+                    <Group gap={4}>
+                      <IconFish size={14} />
+                      <Text size="sm">#{r.fishermanId}</Text>
+                    </Group>
+                  </Table.Td>
+                  <Table.Td><Text size="sm">{r.assignedSpotNumber ?? '—'}</Text></Table.Td>
+                  <Table.Td>
+                    <Badge color={r.didAttend ? 'green' : 'red'} variant="light">
+                      {r.didAttend ? 'Sí' : 'No'}
+                    </Badge>
+                  </Table.Td>
+                  <Table.Td><Text size="sm">{r.weightInGrams}</Text></Table.Td>
+                  <Table.Td><Text size="sm">{r.biggestCatchWeight ?? '—'}</Text></Table.Td>
+                  <Table.Td><Text size="sm" fw={600}>{r.points}</Text></Table.Td>
+                  <Table.Td>
+                    <Badge color={r.isValidated ? 'green' : 'gray'} variant="light">
+                      {r.isValidated ? 'Sí' : 'No'}
+                    </Badge>
+                  </Table.Td>
+                  <Table.Td>
+                    <Group gap={4}>
+                      <ActionIcon
+                        variant="subtle"
+                        color="blue"
+                        title="Editar resultado"
+                        onClick={() => openEdit(r)}
+                      >
+                        <IconPencil size={16} />
+                      </ActionIcon>
+                      <ActionIcon
+                        variant="subtle"
+                        color="red"
+                        title="Desinscribir"
+                        onClick={() => setDeleteResultId(r.id)}
+                      >
+                        <IconTrash size={16} />
+                      </ActionIcon>
+                    </Group>
+                  </Table.Td>
+                </Table.Tr>
+              ))}
+            </Table.Tbody>
+          </Table>
+
+          {totalResultsPages > 1 && (
+            <Group justify="center" mt="md">
+              <Pagination
+                total={totalResultsPages}
+                value={resultsPage}
+                onChange={setResultsPage}
+                size="sm"
+              />
+            </Group>
+          )}
+        </>
       )}
+
+      {/* ── Modal confirmación eliminar ── */}
+      <Modal
+        opened={deleteResultId !== null}
+        onClose={() => setDeleteResultId(null)}
+        title="Confirmar desinscripción"
+        centered
+        size="sm"
+      >
+        <Stack gap="md">
+          <Text size="sm">¿Seguro que quieres eliminar esta inscripción? Esta acción no se puede deshacer.</Text>
+          <Group justify="flex-end">
+            <Button variant="default" onClick={() => setDeleteResultId(null)}>Cancelar</Button>
+            <Button color="red" loading={deleting} onClick={handleDelete}>Eliminar</Button>
+          </Group>
+        </Stack>
+      </Modal>
+
+      {/* ── Modal editar resultado ── */}
+      <Modal
+        opened={editState !== null}
+        onClose={() => setEditState(null)}
+        title={editState ? `Editar resultado — Pescador #${editState.fishermanId}` : ''}
+        centered
+        size="sm"
+      >
+        {editState && (
+          <Stack gap="md">
+            <Switch
+              label="Asistió al concurso"
+              checked={editState.didAttend}
+              onChange={(e) =>
+                setEditState((prev) => prev && { ...prev, didAttend: e.currentTarget.checked })
+              }
+            />
+            <NumberInput
+              label="Peso total (gramos)"
+              min={0}
+              value={editState.weightInGrams}
+              onChange={(v) =>
+                setEditState((prev) => prev && { ...prev, weightInGrams: typeof v === 'number' ? v : 0 })
+              }
+            />
+            <NumberInput
+              label="Mayor captura (gramos)"
+              description="Déjalo vacío si no aplica"
+              min={0}
+              value={editState.biggestCatchWeight ?? ''}
+              onChange={(v) =>
+                setEditState((prev) =>
+                  prev && { ...prev, biggestCatchWeight: typeof v === 'number' ? v : null }
+                )
+              }
+            />
+            <Group justify="flex-end">
+              <Button variant="default" onClick={() => setEditState(null)}>Cancelar</Button>
+              <Button loading={saving} onClick={handleSave}>Guardar</Button>
+            </Group>
+          </Stack>
+        )}
+      </Modal>
 
       {/* ── Modal inscripción masiva ── */}
       <Modal
@@ -242,7 +417,6 @@ export default function CompetitionResultsPage() {
         size="lg"
       >
         <Stack gap="sm">
-          {/* Buscador */}
           <Group>
             <TextInput
               placeholder="Buscar por nombre..."
@@ -255,7 +429,6 @@ export default function CompetitionResultsPage() {
             <Button variant="light" onClick={handleSearch}>Buscar</Button>
           </Group>
 
-          {/* Toolbar selección */}
           <Group justify="space-between">
             <Group gap="xs">
               <Button
@@ -264,7 +437,7 @@ export default function CompetitionResultsPage() {
                 disabled={selectablePage.length === 0}
                 onClick={toggleSelectAll}
               >
-                {allPageSelected ? 'Deseleccionar pescadores' : 'Seleccionar pescadores'}
+                {allPageSelected ? 'Deseleccionar página' : 'Seleccionar página'}
               </Button>
               {selectedIds.size > 0 && (
                 <Button size="xs" variant="subtle" color="gray" onClick={() => setSelectedIds(new Set())}>
@@ -281,7 +454,6 @@ export default function CompetitionResultsPage() {
 
           <Divider />
 
-          {/* Lista */}
           {loadingFishermen ? (
             <Center py="md"><Loader size="sm" /></Center>
           ) : fishermen.length === 0 ? (
@@ -337,7 +509,6 @@ export default function CompetitionResultsPage() {
             </Table>
           )}
 
-          {/* Paginación */}
           {fishermenPages > 1 && (
             <Group justify="center">
               <Pagination
@@ -353,11 +524,7 @@ export default function CompetitionResultsPage() {
 
           <Group justify="flex-end">
             <Button variant="default" onClick={() => setRegisterOpen(false)}>Cancelar</Button>
-            <Button
-              onClick={handleRegister}
-              loading={registering}
-              disabled={selectedIds.size === 0}
-            >
+            <Button onClick={handleRegister} loading={registering} disabled={selectedIds.size === 0}>
               Inscribir {selectedIds.size > 0 ? `(${selectedIds.size})` : ''}
             </Button>
           </Group>

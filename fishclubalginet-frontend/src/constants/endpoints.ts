@@ -46,5 +46,10 @@ export const Endpoints = {
     ByLeague: (leagueId: string) => `api/competitions?leagueId=${leagueId}`,
     Register: (id: string) => `api/competitions/${id}/register`,
     Results: (id: string) => `api/competitions/${id}/results`,
+    OpenRegistration: (id: string) => `api/competitions/${id}/open-registration`,
+    CloseRegistration: (id: string) => `api/competitions/${id}/close-registration`,
+    RemoveResult: (resultId: string) => `api/competitions/results/${resultId}`,
+    UpdateResult: (resultId: string) => `api/competitions/results/${resultId}`,
   },
 } as const;
+

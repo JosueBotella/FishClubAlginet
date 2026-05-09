@@ -16,3 +16,5 @@ public record CreateCompetitionRequest(
 public record RegisterFishermanRequest(
     Guid CompetitionId,
     int FishermanId);
+
+public record UpdateCompetitionResultRequest(bool DidAttend, int WeightInGrams, int? BiggestCatchWeight);
