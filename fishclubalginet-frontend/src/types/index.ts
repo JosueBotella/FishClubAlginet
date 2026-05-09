@@ -19,3 +19,10 @@ export type {
 export type { FishermanDto, FishermanProfileDto } from './fisherman';
 export { DocumentTypeLabels } from './fisherman';
 export type { LeagueDto, CreateLeagueRequest, UpdateLeagueRequest, LeagueFormData } from './league';
+export type {
+  CompetitionDto,
+  CompetitionResultDto,
+  CreateCompetitionRequest,
+  RegisterFishermanRequest,
+  CreateCompetitionFormData,
+} from './competition';

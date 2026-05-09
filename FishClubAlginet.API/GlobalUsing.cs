@@ -30,3 +30,5 @@ global using FishClubAlginet.Infrastructure.Persistence.Contexts;
 global using FishClubAlginet.Infrastructure.Persistence.DbInitializer;
 global using FishClubAlginet.Infrastructure.Repositories;
 global using FishClubAlginet.Infrastructure.Services;
+global using FishClubAlginet.Application.Features.Competitions;
+global using FishClubAlginet.Contracts.Dtos.Requests.Competition;

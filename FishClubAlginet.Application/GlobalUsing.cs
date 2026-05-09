@@ -18,3 +18,5 @@ global using FishClubAlginet.Core.Domain.Common.Errors;
 global using MediatR;
 global using FishClubAlginet.Application.Features.Events.Commands.Fishermen;
 global using Microsoft.Extensions.Logging;
+global using FishClubAlginet.Contracts.Dtos.Requests.Competition;
+global using FishClubAlginet.Contracts.Dtos.Responses.Competition;

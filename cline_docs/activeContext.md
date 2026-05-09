@@ -1,14 +1,19 @@
-# Contexto Activo: Persistencia Fase 3
+# Contexto Activo: Fase 3 completada
 
-Estamos moviendo la lógica de Dominio a la base de datos.
+## Estado
+Fase 3 (Concursos y Resultados) completamente implementada — backend + frontend.
 
-## Requerimientos Técnicos para Infrastructure:
-1. **Índices Únicos Compuestos (Crítico):**
-   - Tabla `Competitions`: `LeagueId` + `CompetitionNumber`.
-   - Tabla `CompetitionResults`: `CompetitionId` + `FishermanId`.
-   - Tabla `CompetitionResults`: `CompetitionId` + `AssignedSpotNumber` (permitir NULLs).
-2. **Mapeo de Datos:**
-   - Todos los Enums deben guardarse como `string`.
-   - `Venue` máximo 100 caracteres.
-   - `Points` precisión decimal (18,2).
-3. **DbContext:** Usar `ApplyConfigurationsFromAssembly` para registrar las nuevas clases.
+## Lo que funciona
+- CRUD de concursos dentro de una liga (Admin).
+- Inscripción de pescadores a concursos abiertos.
+- Consulta de resultados con ranking en tiempo real (ties compartidos).
+- Navegación: Ligas → Concursos → Resultados/Inscripciones.
+
+## Pendiente para Fase 3 extendida
+- **AssignSpotsCommand**: asignar puesto de sorteo a cada inscrito.
+- **EnterResultsCommand**: entrada bulk de pesos (DidAttend, WeightInGrams, BiggestCatchWeight).
+- **Transiciones de estado**: RegistrationOpen → Closed → ResultsDraft → ResultsValidated.
+- **Clasificación general**: suma de puntos por liga descartando los N peores resultados (`worstResultsToDiscard`).
+
+## Rama activa
+`branch_phase_three`

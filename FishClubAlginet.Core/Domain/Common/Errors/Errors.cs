@@ -46,4 +46,23 @@ public static partial class Errors
             code: "Auth.InvalidCredentials",
             description: "The provided credentials are invalid.");
     }
+
+    public static class Competition
+    {
+        public static Error NotFound => Error.NotFound(
+            code: "Competition.NotFound",
+            description: "The requested competition does not exist.");
+
+        public static Error DuplicateNumber => Error.Conflict(
+            code: "Competition.DuplicateNumber",
+            description: "A competition with this number already exists in the league.");
+
+        public static Error RegistrationNotOpen => Error.Validation(
+            code: "Competition.RegistrationNotOpen",
+            description: "This competition is not open for registration.");
+
+        public static Error AlreadyRegistered => Error.Conflict(
+            code: "Competition.AlreadyRegistered",
+            description: "This fisherman is already registered for this competition.");
+    }
 }

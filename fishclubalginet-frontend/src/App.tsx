@@ -8,6 +8,8 @@ import NotFoundPage from './pages/NotFound/NotFoundPage';
 import AdminUsersPage from './pages/AdminUsers/AdminUsersPage';
 import AdminFishermenPage from './pages/AdminFishermen/AdminFishermenPage';
 import AdminLeaguesPage from './pages/AdminLeagues/AdminLeaguesPage';
+import AdminCompetitionsPage from './pages/AdminCompetitions/AdminCompetitionsPage';
+import CompetitionResultsPage from './pages/AdminCompetitions/CompetitionResultsPage';
 import ProfilePage from './pages/Profile/ProfilePage';
 
 function App() {
@@ -49,6 +51,22 @@ function App() {
               element={
                 <ProtectedRoute requiredRoles={['Admin']}>
                   <AdminLeaguesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path={AppRoutes.Competitions}
+              element={
+                <ProtectedRoute requiredRoles={['Admin']}>
+                  <AdminCompetitionsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path={AppRoutes.CompetitionResults}
+              element={
+                <ProtectedRoute requiredRoles={['Admin']}>
+                  <CompetitionResultsPage />
                 </ProtectedRoute>
               }
             />
