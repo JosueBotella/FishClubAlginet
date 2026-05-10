@@ -393,7 +393,7 @@ export default function CompetitionResultsPage() {
               label="Mayor captura (gramos)"
               description="Déjalo vacío si no aplica"
               min={0}
-              value={editState.biggestCatchWeight ?? ''}
+              value={editState.biggestCatchWeight ?? undefined}
               onChange={(v) =>
                 setEditState((prev) =>
                   prev && { ...prev, biggestCatchWeight: typeof v === 'number' ? v : null }
@@ -533,3 +533,4 @@ export default function CompetitionResultsPage() {
     </Container>
   );
 }
+
