@@ -64,5 +64,9 @@ public static partial class Errors
         public static Error AlreadyRegistered => Error.Conflict(
             code: "Competition.AlreadyRegistered",
             description: "This fisherman is already registered for this competition.");
+
+        public static Error InvalidStatusTransition => Error.Validation(
+            code: "Competition.InvalidStatusTransition",
+            description: "This status transition is not allowed.");
     }
 }

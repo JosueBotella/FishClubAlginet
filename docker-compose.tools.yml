@@ -1,0 +1,28 @@
+# =============================================================
+# docker-compose.tools.yml - Herramientas opcionales (Portainer)
+#
+# No se levanta por defecto. Lanzalo junto al compose principal:
+#   docker compose -f docker-compose.yml -f docker-compose.tools.yml up -d
+# O solo Portainer (sin levantar la app):
+#   docker compose -f docker-compose.tools.yml up -d
+#
+# Acceso UI: http://localhost:PORTAINER_PORT  (por defecto 19100)
+# =============================================================
+
+services:
+
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: unless-stopped
+    ports:
+      # Lado izquierdo (host) configurable via .env (PORTAINER_PORT).
+      # Lado derecho (interno del contenedor) es 9000 y NO se cambia.
+      - "${PORTAINER_PORT:-19100}:9000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+
+volumes:
+  portainer_data:
+    driver: local

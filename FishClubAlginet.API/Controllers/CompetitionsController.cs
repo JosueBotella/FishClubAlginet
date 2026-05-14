@@ -61,6 +61,55 @@ public class CompetitionsController : ApiController
             errors => Problem(errors));
     }
 
+    /// <summary>Opens registration for a competition (Planned -> RegistrationOpen). Admin only.</summary>
+    [HttpPost("{id:guid}/open-registration")]
+    [Authorize(Roles = ApplicationConstants.Roles.Admin)]
+    public async Task<IActionResult> OpenRegistration(Guid id)
+    {
+        var result = await _mediator.Send(new OpenRegistrationCommand(id), default);
+        return result.Match(
+            _ => NoContent(),
+            errors => Problem(errors));
+    }
+
+    /// <summary>Closes registration for a competition (RegistrationOpen -> Closed). Admin only.</summary>
+    [HttpPost("{id:guid}/close-registration")]
+    [Authorize(Roles = ApplicationConstants.Roles.Admin)]
+    public async Task<IActionResult> CloseRegistration(Guid id)
+    {
+        var result = await _mediator.Send(new CloseRegistrationCommand(id), default);
+        return result.Match(
+            _ => NoContent(),
+            errors => Problem(errors));
+    }
+
+    /// <summary>Removes a fisherman registration from a competition. Admin only.</summary>
+    [HttpDelete("results/{resultId:guid}")]
+    [Authorize(Roles = ApplicationConstants.Roles.Admin)]
+    public async Task<IActionResult> RemoveRegistration(Guid resultId)
+    {
+        var result = await _mediator.Send(new RemoveRegistrationCommand(resultId), default);
+        return result.Match(
+            _ => NoContent(),
+            errors => Problem(errors));
+    }
+
+    /// <summary>Updates attendance and weight data for a competition result. Admin only.</summary>
+    [HttpPut("results/{resultId:guid}")]
+    [Authorize(Roles = ApplicationConstants.Roles.Admin)]
+    public async Task<IActionResult> UpdateResult(Guid resultId, [FromBody] UpdateCompetitionResultRequest request)
+    {
+        var command = new UpdateCompetitionResultCommand(
+            resultId,
+            request.DidAttend,
+            request.WeightInGrams,
+            request.BiggestCatchWeight);
+        var result = await _mediator.Send(command, default);
+        return result.Match(
+            _ => NoContent(),
+            errors => Problem(errors));
+    }
+
     /// <summary>Returns all results for a competition with live rankings.</summary>
     [HttpGet("{id:guid}/results")]
     public async Task<IActionResult> GetResults(Guid id)

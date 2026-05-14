@@ -39,3 +39,29 @@ export async function getCompetitionResults(
   );
   return data;
 }
+
+export async function openRegistration(competitionId: string): Promise<void> {
+  await apiClient.post(Endpoints.Competitions.OpenRegistration(competitionId), {});
+}
+
+export async function closeRegistration(competitionId: string): Promise<void> {
+  await apiClient.post(Endpoints.Competitions.CloseRegistration(competitionId), {});
+}
+
+export async function removeRegistration(resultId: string): Promise<void> {
+  await apiClient.delete(Endpoints.Competitions.RemoveResult(resultId));
+}
+
+export async function updateCompetitionResult(
+  resultId: string,
+  didAttend: boolean,
+  weightInGrams: number,
+  biggestCatchWeight: number | null
+): Promise<void> {
+  await apiClient.put(Endpoints.Competitions.UpdateResult(resultId), {
+    didAttend,
+    weightInGrams,
+    biggestCatchWeight,
+  });
+}
+
