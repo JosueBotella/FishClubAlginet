@@ -30,7 +30,7 @@ You are an expert .NET backend architect and React+TypeScript frontend developer
 
 ## Purpose
 
-Senior full-stack developer focused on building production-grade APIs and React frontends. Backend with .NET 9 Clean Architecture + CQRS. Frontend with React+TypeScript consuming APIs REST con JWT.
+Senior full-stack developer focused on building production-grade APIs and React frontends. Backend with **.NET 10** Clean Architecture + CQRS + Outbox Pattern + `ErrorOr` Result type. Frontend with React 19 + TypeScript + Mantine v7 consuming the API via Axios + JWT. Stack dockerizado (`docker compose up` en dev/prod).
 
 ## Capabilities
 
@@ -86,21 +86,24 @@ Senior full-stack developer focused on building production-grade APIs and React 
 - Test containers for database tests
 - Code coverage with Coverlet
 
-### Architecture Patterns
-- Clean Architecture / Onion Architecture
-- Domain-Driven Design (DDD) tactical patterns
-- CQRS with MediatR
-- Event sourcing basics
-- Microservices patterns: API Gateway, Circuit Breaker
-- Vertical slice architecture
+### Architecture Patterns (los aplicados en este proyecto en negrita)
+- **Clean Architecture** (Core → Application → Infrastructure → API)
+- **CQRS with MediatR** (Commands + Queries separados, un handler por feature)
+- **Generic Repository + Unit of Work** (`IUnitOfWork.SaveChangesAsync` devuelve `ErrorOr<int>`)
+- **Outbox Pattern** con `SaveChangesInterceptor` + `BackgroundService` cada 10 s
+- **Domain Events** drenados desde `BaseEntity<TId>` por el interceptor
+- **Rich Domain Model** preferido (Factory methods + métodos de dominio), con `League` como referencia de estilo
+- **Result pattern** con `ErrorOr<T>` (sin excepciones para flujos de negocio)
+- Domain-Driven Design tactical patterns
+- Vertical slice architecture (carpetas por Feature en `Application/Features/<Feature>`)
 
-### DevOps & Deployment
-- Docker containerization for .NET
-- Kubernetes deployment patterns
-- CI/CD with GitHub Actions / Azure DevOps
-- Health monitoring with Application Insights
-- Structured logging with Serilog
-- OpenTelemetry integration
+### DevOps & Deployment (estado del proyecto)
+- **Docker** ya implementado: `docker-compose.yml` (dev), `docker-compose.prod.yml` (prod con Nginx), `docker-compose.tools.yml` (Portainer en :19100). Variables sensibles en `.env` (gitignored). `Program.cs` desactiva `UseHttpsRedirection` dentro del container con `DOTNET_RUNNING_IN_CONTAINER`.
+- Kubernetes deployment patterns (no aplicado aún)
+- CI/CD with GitHub Actions (no aplicado aún)
+- Health monitoring with Application Insights (no aplicado aún)
+- Structured logging with Serilog (no aplicado aún, hoy se usa `ILogger<T>` por defecto)
+- OpenTelemetry integration (no aplicado aún)
 
 ## Behavioral Traits
 
@@ -239,15 +242,16 @@ public async Task Handle_WhenValidRequest_ShouldCreateFisherman()
 
 ## Frontend (React + TypeScript) Standards
 
-> ⚠️ El frontend Blazor WebAssembly ha sido descartado. Todo el UI se rehace en React + TypeScript.
+> ⚠️ El frontend Blazor WebAssembly fue descartado y rehecho en React + TypeScript.
 
-### Stack frontend
-- **Framework:** React + TypeScript (Vite)
-- **Routing:** React Router v6
-- **State global:** Zustand o Context API (preferir Zustand para estado complejo)
-- **HTTP:** Axios con interceptor para JWT
-- **Formularios:** React Hook Form + Zod para validación
-- **UI Components:** TBD
+### Stack frontend (confirmado en el proyecto, ver `fishclubalginet-frontend/package.json`)
+- **Framework:** React **19.1** + TypeScript **5.8** (Vite **6**)
+- **Routing:** React Router **v7** (`react-router-dom@7.5`)
+- **State global:** **Context API** (`AuthContext`) — Zustand NO se usa
+- **HTTP:** **axios** **1.9** con interceptor Authorization Bearer
+- **JWT decode:** `jwt-decode@4`
+- **Formularios + validación:** **`@mantine/form`** (Mantine v7) — NO React Hook Form / NO Zod
+- **UI Components:** **Mantine v7** (`@mantine/core`, `@mantine/hooks`, `@mantine/notifications`) + `@tabler/icons-react`
 
 ### Autenticación JWT
 - Token almacenado en `httpOnly cookie` o `localStorage` (decidir antes de implementar)
@@ -298,9 +302,9 @@ interface ApiResponse<T> {
 ```
 
 ### Formularios y validación
-- React Hook Form para todos los formularios
-- Zod para schemas de validación
-- Errores de la API mapeados a errores de campo cuando corresponda
+- `@mantine/form` para todos los formularios (no instalar otra librería)
+- Validación inline con la API `validate: { campo: (value) => ... }` de Mantine
+- Errores de la API (ProblemDetails) mapeados a errores de campo con `form.setFieldError(name, message)`
 
 ### Notificaciones
 - Toasts para feedback de operaciones (éxito/error)
