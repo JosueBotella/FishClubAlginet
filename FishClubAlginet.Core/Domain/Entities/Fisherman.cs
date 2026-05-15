@@ -50,9 +50,10 @@ public class Fisherman : BaseEntity<int>
         return fisherman;
     }
 
-    /* TODO: Implement Update method with domain event
     /// <summary>
-    /// Updates the fisherman's information and raises an update domain event
+    /// Updates the fisherman's mutable fields.
+    /// The caller (command handler) is responsible for raising FishermanUpdatedDomainEvent
+    /// before saving, following the same pattern as Fisherman.Create().
     /// </summary>
     public void Update(
         string firstName,
@@ -63,31 +64,18 @@ public class Fisherman : BaseEntity<int>
         LastName = lastName;
         Address = address;
         LastUpdateUtc = DateTime.UtcNow;
-
-        this.RaiseDomainEvent(new FishermanUpdatedDomainEvent 
-        { 
-            Id = this.Id,
-            FirstName = this.FirstName,
-            LastName = this.LastName
-        });
     }
-    */
 
-    /* TODO: Implement Delete method with domain event
     /// <summary>
-    /// Soft deletes the fisherman and raises a delete domain event
+    /// Soft-deletes the fisherman.
+    /// The caller (command handler) is responsible for raising FishermanDeletedDomainEvent
+    /// before saving, following the same pattern as Fisherman.Create().
     /// </summary>
     public void Delete()
     {
         IsDeleted = true;
         DeletedTimeUtc = DateTime.UtcNow;
-
-        this.RaiseDomainEvent(new FishermanDeletedDomainEvent 
-        { 
-            Id = this.Id
-        });
     }
-    */
 }
 public static class  FisherManConstraints
 {

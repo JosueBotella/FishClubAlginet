@@ -6,8 +6,16 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString(ApplicationConstants.Database.ConnectionName)
     ?? throw new InvalidOperationException(ApplicationConstants.Database.MigrationErrorMessage);
 var configuration = builder.Configuration;
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(connectionString));
+
+// El interceptor se registra como Singleton para permitir inyección de dependencias futura
+// (loggers, clocks, etc.) sin cambiar la firma del constructor de AppDbContext.
+builder.Services.AddSingleton<ConvertDomainEventsToOutboxMessagesInterceptor>();
+
+builder.Services.AddDbContext<AppDbContext>((sp, options) =>
+{
+    options.UseSqlServer(connectionString);
+    options.AddInterceptors(sp.GetRequiredService<ConvertDomainEventsToOutboxMessagesInterceptor>());
+});
 builder.Services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericRepository<,>));
 builder.Services.AddScoped<IUnitOfWork, UnitOfWorkService>();
 builder.Services.AddScoped<IAuthService, AuthService>();

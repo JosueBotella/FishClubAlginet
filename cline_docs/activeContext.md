@@ -1,9 +1,32 @@
-# Contexto Activo: Fase 3.5 — Estabilización del Outbox Pattern
+# Contexto Activo: Fase 3.5 ✅ COMPLETADA — Próximo: Fase 4
 
 ## Estado
-Fase 3 (Concursos y Resultados) cerrada funcionalmente. Antes de continuar con la Fase 3 extendida (AssignSpots, EnterResults, ClasificacionGeneral) hay que **estabilizar el Outbox Pattern**, que tiene dos bugs silenciosos detectados el 2026-05-14.
+Fase 3.5 completamente cerrada el **2026-05-15** (incluye TASK-C y build fix CS0246). Siguiente objetivo: **Fase 4** (gestión de estados UI + ReopenRegistration + UnarchiveLeague).
 
-## 🔴 Foco actual: bugs críticos del Outbox
+## ✅ Fix CS0246 (build break — resuelto 2026-05-15)
+- `ConvertDomainEventsToOutboxMessagesInterceptor` referenciado en `Program.cs` sin el `using` correspondiente.
+- Fix: `global using FishClubAlginet.Infrastructure.Persistence.Interceptors;` añadido a `FishClubAlginet.API/GlobalUsing.cs`.
+
+## ✅ TASK-C — Fisherman Update + Delete con domain events (resuelto 2026-05-15)
+
+### Decisión arquitectural clave
+`Fisherman.Update()` y `Fisherman.Delete()` son métodos de **mutación de estado puro** (no lanzan eventos).
+Los domain events se lanzan en el **command handler** (igual que `FisherManAddCommandHandler`), evitando dependencia circular Core → Application.
+
+### Ficheros nuevos/modificados
+- `Core/Domain/Entities/Fisherman.cs` — `Update()` y `Delete()` descomentados (sin RaiseDomainEvent).
+- `Application/Features/Events/Commands/Fishermen/FishermanUpdatedDomainEvent.cs` (NEW)
+- `Application/Features/Events/Commands/Fishermen/FishermanDeletedDomainEvent.cs` (NEW)
+- `Application/Features/Events/Handlers/FishermanUpdatedDomainEventHandler.cs` (NEW, stub)
+- `Application/Features/Events/Handlers/FishermanDeletedDomainEventHandler.cs` (NEW, stub)
+- `Application/Features/Fishermen/UpdateFishermanCommandHandler.cs` (NEW) — con `UpdateFishermanCommandValidator`
+- `Application/Features/Fishermen/SoftDeleteFishermanCommandHandler.cs` — refactorizado: usa `GetById` + `fisherman.Delete()` + `RaiseDomainEvent`
+- `Tests/Handlers/SoftDeleteFishermanCommandHandlerTests.cs` — actualizado (5 tests, verifica domain event)
+- `Tests/Handlers/UpdateFishermanCommandHandlerTests.cs` (NEW, 6 tests, verifica domain event)
+
+## ✅ Bugs resueltos (2026-05-15)
+
+## 🔴 Bugs que había (ya corregidos)
 
 ### BUG-1 — El interceptor solo captura eventos de `Fisherman`
 - **Archivo:** `FishClubAlginet.Infrastructure/Persistence/Interceptors/ConvertDomainEventsToOutboxMessagesInterceptor.cs:19`

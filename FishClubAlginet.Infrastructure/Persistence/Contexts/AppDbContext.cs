@@ -19,9 +19,7 @@ public class AppDbContext : IdentityDbContext
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
     }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        optionsBuilder.AddInterceptors(new ConvertDomainEventsToOutboxMessagesInterceptor());
-        base.OnConfiguring(optionsBuilder);
-    }
+    // El interceptor ConvertDomainEventsToOutboxMessagesInterceptor se registra
+    // externamente via DI (AddSingleton + AddDbContext((sp, o) => o.AddInterceptors(...)))
+    // para permitir inyección de dependencias en el interceptor en el futuro.
 }

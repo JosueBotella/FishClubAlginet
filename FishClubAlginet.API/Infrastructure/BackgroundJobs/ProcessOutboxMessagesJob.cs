@@ -49,13 +49,26 @@ public class ProcessOutboxMessagesJob : BackgroundService
         {
             try
             {
-                // Discover the event type from the string stored in the database
-                var typeName = $"FishClubAlginet.Application.Features.Events.Commands.Fishermen.{outboxMessage.Type}, FishClubAlginet.Application";
+                // Resolvemos el tipo buscando en todos los ensamblados cargados por nombre simple.
+                // Ventajas frente al namespace hardcodeado:
+                //   - Funciona con eventos en cualquier namespace / bounded context.
+                //   - No requiere migración (Type sigue almacenando el Name simple → retrocompatible).
+                // El doble filtro IDomainEvent + !IsAbstract elimina colisiones de nombres accidentales.
+                var type = AppDomain.CurrentDomain
+                    .GetAssemblies()
+                    .SelectMany(a =>
+                    {
+                        try { return a.GetTypes(); }
+                        catch { return []; } // ignora ensamblados dinámicos que no exponen tipos
+                    })
+                    .FirstOrDefault(t => t.Name == outboxMessage.Type
+                                     && typeof(IDomainEvent).IsAssignableFrom(t)
+                                     && !t.IsAbstract);
 
-                if (Type.GetType(typeName) is not Type type)
+                if (type is null)
                 {
-                    _logger.LogWarning("Type not found: {TypeName}", typeName);
-                    outboxMessage.Error = $"Type not found: {typeName}";
+                    _logger.LogWarning("IDomainEvent type not found for name: {TypeName}", outboxMessage.Type);
+                    outboxMessage.Error = $"Type not found: {outboxMessage.Type}";
                     continue;
                 }
 

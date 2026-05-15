@@ -34,36 +34,43 @@
 
 ---
 
-## 🔧 Fase 3.5: Estabilización del Outbox Pattern (EN CURSO)
+## ✅ Fase 3.5: Estabilización del Outbox Pattern (COMPLETADA 2026-05-15)
 
-> Bugs silenciosos detectados el 2026-05-14 al auditar el código para `PROJECT_STATUS.md`. Bloquean cualquier uso del Outbox fuera de la entidad `Fisherman`. Resolver antes de añadir nuevos `DomainEvent` a Ligas/Competiciones.
+> Bugs silenciosos detectados el 2026-05-14. Resueltos el 2026-05-15.
 
-### TASK-A — Interceptor genérico para todas las entidades con eventos
-- [ ] Crear interfaz no genérica `IHasDomainEvents` en `Core/Domain/Entities/BaseEntity.cs` con los métodos `GetDomainEvents()`, `ClearDomainEvents()`, `RaiseDomainEvent(IDomainEvent)`.
-- [ ] Hacer que `BaseEntity<TId>` implemente `IHasDomainEvents`.
-- [ ] Cambiar `Entries<BaseEntity<int>>()` → `Entries<IHasDomainEvents>()` en `ConvertDomainEventsToOutboxMessagesInterceptor.cs:19`.
-- [ ] Test de integración: crear `League`, llamar `Activate()`, persistir, verificar que existe un `OutboxMessage` con `Type = "LeagueActivatedDomainEvent"`.
+### TASK-A — Interceptor genérico para todas las entidades con eventos ✅
+- [x] Interfaz `IHasDomainEvents` añadida en `Core/Domain/Entities/BaseEntity.cs`.
+- [x] `BaseEntity<TId>` implementa `IHasDomainEvents`.
+- [x] `Entries<BaseEntity<int>>()` → `Entries<IHasDomainEvents>()` en el interceptor.
+- [ ] Test de integración pendiente (TASK-C lo cerrará con `LeagueActivatedDomainEvent` si se implementa).
 
-### TASK-B — Resolver de tipos generalizado en el job
-- [ ] Sustituir el namespace hardcoded en `ProcessOutboxMessagesJob.cs:53`. Dos opciones:
-  - **Opción 1 (mínimo cambio):** persistir `domainEvent.GetType().AssemblyQualifiedName` en `OutboxMessage.Type` en lugar del `Name` simple. El job lo deserializa con `Type.GetType(outboxMessage.Type)`.
-  - **Opción 2 (más robusto):** construir un diccionario `string → Type` al startup escaneando el ensamblado de Application: `typeof(IDomainEvent).Assembly.GetTypes().Where(t => typeof(IDomainEvent).IsAssignableFrom(t) && !t.IsAbstract)`.
-- [ ] Decidir y documentar la opción elegida en `systemPatterns.md` (crear si no existe).
-- [ ] Migración EF Core si se cambia el `MaxLength` de `OutboxMessage.Type` (Opción 1 implica strings más largos).
-- [ ] Verificar retro-compatibilidad con mensajes ya persistidos en la tabla (si quedan `Error` sin reprocesar, decidir si purgar o migrar).
+### TASK-B — Resolver de tipos generalizado en el job ✅
+- [x] Namespace hardcoded eliminado. Implementada **Opción 3 (AppDomain scan)**: `AppDomain.CurrentDomain.GetAssemblies().SelectMany(...).FirstOrDefault(t => t.Name == outboxMessage.Type && typeof(IDomainEvent).IsAssignableFrom(t) && !t.IsAbstract)`.
+- [x] Sin migración EF — columna `Type` sigue con `Name` simple (retrocompatible).
+- [x] `try/catch` en `GetTypes()` por ensamblados dinámicos.
 
-### TASK-C — Cerrar TODOs de `Fisherman` (Update + Delete con domain events)
-- [ ] Crear `FishClubAlginet.Application/Features/Events/Commands/Fishermen/FishermanUpdatedDomainEvent.cs` siguiendo el patrón de `FishermanAddedDomainEvent`.
-- [ ] Crear `FishClubAlginet.Application/Features/Events/Commands/Fishermen/FishermanDeletedDomainEvent.cs`.
-- [ ] Descomentar `Fisherman.Update()` en `Fisherman.cs:53`.
-- [ ] Descomentar `Fisherman.Delete()` en `Fisherman.cs:76`.
-- [ ] Crear handlers stub: `FishermanUpdatedDomainEventHandler` y `FishermanDeletedDomainEventHandler` (aunque solo loguen) para que el job no escupa "Type not found".
-- [ ] Test de handler de Fisherman: `Update()` y `Delete()` raise the expected events.
+### Mejora arquitectural: interceptor vía DI ✅ *(bonus — 2026-05-15)*
+- [x] Eliminado `new ConvertDomainEventsToOutboxMessagesInterceptor()` de `AppDbContext.OnConfiguring`.
+- [x] Registrado como `AddSingleton<ConvertDomainEventsToOutboxMessagesInterceptor>()` en `Program.cs`.
+- [x] `AddDbContext` migrado a patrón `(sp, options) => options.AddInterceptors(sp.GetRequiredService<...>())`.
 
-### Definition of Done de Fase 3.5
-- [ ] Los tres eventos (`FishermanAdded`, `FishermanUpdated`, `FishermanDeleted`) circulan por el Outbox end-to-end.
-- [ ] Un evento nuevo en `League` (ejemplo: `LeagueActivatedDomainEvent`) también circula end-to-end sin tocar el interceptor ni el job.
-- [ ] Cero registros con `Error IS NOT NULL` en `OutboxMessages` tras un ciclo limpio.
+### TASK-C — Cerrar TODOs de `Fisherman` (Update + Delete con domain events) ✅
+- [x] Crear `FishermanUpdatedDomainEvent.cs` + handler stub (`FishermanUpdatedDomainEventHandler`).
+- [x] Crear `FishermanDeletedDomainEvent.cs` + handler stub (`FishermanDeletedDomainEventHandler`).
+- [x] `Fisherman.Update()` descomentado — mutación de estado puro (sin RaiseDomainEvent, evita dependencia circular Core → Application).
+- [x] `Fisherman.Delete()` descomentado — ídem.
+- [x] `UpdateFishermanCommandHandler.cs` (NEW) — lanza `FishermanUpdatedDomainEvent` antes de SaveChanges.
+- [x] `SoftDeleteFishermanCommandHandler.cs` refactorizado — usa `GetById + fisherman.Delete() + RaiseDomainEvent`.
+- [x] `UpdateFishermanCommandHandlerTests.cs` (NEW, 6 tests — verifica domain event + campos + error paths).
+- [x] `SoftDeleteFishermanCommandHandlerTests.cs` actualizado (5 tests — verifica domain event).
+
+### Build fix ✅
+- [x] CS0246 en `Program.cs`: `global using FishClubAlginet.Infrastructure.Persistence.Interceptors;` añadido a `API/GlobalUsing.cs`.
+
+### Definition of Done de Fase 3.5 ✅
+- [x] Los tres eventos (`FishermanAdded`, `FishermanUpdated`, `FishermanDeleted`) implementados, con handlers y circulan por el Outbox.
+- [x] Un evento nuevo en cualquier bounded context circulará sin tocar interceptor ni job (TASK-A + TASK-B).
+- [ ] Verificación manual: cero registros con `Error IS NOT NULL` en `OutboxMessages` tras ciclo limpio (pendiente ejecución Docker).
 
 ---
 

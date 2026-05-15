@@ -14,9 +14,12 @@ public sealed class ConvertDomainEventsToOutboxMessagesInterceptor : SaveChanges
             return base.SavingChangesAsync(eventData, result, cancellationToken);
         }
 
-        // 1. Buscamos todas las entidades que tengan eventos pendientes
+        // 1. Buscamos todas las entidades que tengan eventos pendientes.
+        // IHasDomainEvents es una interfaz no genérica implementada por BaseEntity<TId>,
+        // lo que permite capturar entidades con cualquier tipo de Id (int, Guid, etc.)
+        // sin quedar atados a un BaseEntity<int> concreto.
         var outboxMessages = dbContext.ChangeTracker
-            .Entries<BaseEntity<int>>()
+            .Entries<IHasDomainEvents>()
             .Select(x => x.Entity)
             .SelectMany(entity =>
             {
