@@ -34,3 +34,14 @@ public sealed class OpenRegistrationCommandHandler
         return Result.Success;
     }
 }
+
+public class OpenRegistrationCommandValidator : AbstractValidator<OpenRegistrationCommand>
+{
+    public OpenRegistrationCommandValidator()
+    {
+        RuleFor(x => x.CompetitionId)
+            .NotEmpty()
+            .WithErrorCode("Competition.CompetitionId.Required")
+            .WithMessage("CompetitionId is required.");
+    }
+}

@@ -1,3 +1,5 @@
+using FishClubAlginet.Application.Features.Events.Commands.Fishermen;
+
 namespace FishClubAlginet.Application.Features.Fishermen;
 
 public record SoftDeleteFishermanCommand(int Id) : IRequest<ErrorOr<bool>>;
@@ -23,15 +25,23 @@ public sealed class SoftDeleteFishermanCommandHandler
         SoftDeleteFishermanCommand request,
         CancellationToken cancellationToken)
     {
-        var deleted = await _repository.SoftDelete(request.Id);
+        var fisherman = await _repository.GetById(request.Id);
 
-        if (!deleted)
+        if (fisherman is null)
         {
             _logger.LogWarning("Fisherman with Id {Id} not found for soft delete", request.Id);
             return Error.NotFound(
                 "Fisherman.NotFound",
                 $"Fisherman with Id {request.Id} was not found.");
         }
+
+        // Mutate state via domain method, then raise event before saving
+        // (same pattern as FisherManAddCommandHandler — event is raised in the handler, not in the entity,
+        //  to avoid a circular Core → Application dependency)
+        fisherman.Delete();
+        fisherman.RaiseDomainEvent(new FishermanDeletedDomainEvent { Id = fisherman.Id });
+
+        _repository.Update(fisherman);
 
         var saveResult = await _unitOfWork.SaveChangesAsync(cancellationToken);
         if (saveResult.IsError)

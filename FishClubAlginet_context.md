@@ -75,24 +75,36 @@ FishClubAlginet.Tests         → Unit tests (xUnit, Moq, FluentAssertions)
 
 ---
 
-## Flujo CQRS + Outbox Pattern (implementado en Fisherman)
+## Flujo CQRS + Outbox Pattern
+
+### Regla de oro: dónde se lanzan los domain events
+Los eventos se lanzan en el **command handler** (Application), NO en el entity (Core).
+Esto evita dependencia circular Core → Application (los DTOs de eventos están en Application).
+Los métodos de dominio (`Create`, `Update`, `Delete`) son **mutación de estado puro**.
 
 ```
 POST /api/fishermen/add
   → Controller mapea DTO → FisherManCommand (IRequest<ErrorOr<int>>)
   → MediatR → FisherManAddCommandHandler
-    → FluentValidation automático
-    → Fisherman.Create() [Factory]
-    → fisherman.RaiseDomainEvent(FishermanAddedDomainEvent) [ANTES de guardar]
+    → FluentValidation automático (ValidationPipelineBehavior)
+    → Fisherman.Create() [Factory — solo estado, no lanza eventos]
+    → fisherman.RaiseDomainEvent(FishermanAddedDomainEvent) [handler lanza evento ANTES de guardar]
     → _genericRepository.AddAsync()
     → SaveChangesAsync()
-      → ConvertDomainEventsToOutboxMessagesInterceptor captura eventos
+      → ConvertDomainEventsToOutboxMessagesInterceptor captura eventos de todas las entidades (IHasDomainEvents)
       → Crea OutboxMessage en la MISMA transacción (ACID)
-  → ProcessOutboxMessagesJob (cada 10s) publica eventos
+  → ProcessOutboxMessagesJob (cada 10s, AppDomain scan para resolver tipos)
   → FishermanAddedDomainEventHandler procesa
 ```
 
-**Garantía ACID:** Fisherman + OutboxMessage se guardan juntos o no se guarda nada.
+**Garantía ACID:** entidad + OutboxMessage se guardan juntos o no se guarda nada.
+
+### Eventos implementados (Fase 3.5)
+| Evento | Lanzado en | Handler |
+|---|---|---|
+| `FishermanAddedDomainEvent` | `FisherManAddCommandHandler` | `FishermanAddedDomainEventHandler` (log) |
+| `FishermanUpdatedDomainEvent` | `UpdateFishermanCommandHandler` | `FishermanUpdatedDomainEventHandler` (log) |
+| `FishermanDeletedDomainEvent` | `SoftDeleteFishermanCommandHandler` | `FishermanDeletedDomainEventHandler` (log) |
 
 ---
 
@@ -220,10 +232,19 @@ Rehacer desde cero todo el frontend en React+TypeScript manteniendo la misma fun
 - [x] Tests unitarios actualizados al nuevo patrón UoW (`SoftDeleteFishermanCommandHandlerTests` y `FisherManAddCommanHandlerTests`) con verificación explícita de `SaveChangesAsync` invocado/no invocado según flujo
 
 **Documentación (sesión 2026-05-14)**
-- [x] `PROJECT_STATUS.md` — Manifest técnico completo para handoff a OpenCode Desktop / nuevas sesiones (tech stack con versiones, esquema BD, fragmentos clave, bugs, micro-commitments).
-- [x] `cline_docs/activeContext.md` reescrito enfocado a Phase 3.5 (bugs del Outbox).
-- [x] `cline_docs/progress.md` con sección "Fase 3.5" + bloque "Deuda técnica detectada".
-- [x] `domain_model.md` reescrito con el modelo real verificado (entidades, value objects, enums, jerarquía, diagrama de relaciones).
+- [x] `PROJECT_STATUS.md` — Manifest técnico completo para handoff a OpenCode Desktop / nuevas sesiones.
+- [x] `cline_docs/activeContext.md`, `cline_docs/progress.md`, `domain_model.md` reescritos.
+
+**Fase 3.5 + TASK-C (sesión 2026-05-15)**
+- [x] BUG-1: Interceptor generalizado con `IHasDomainEvents` (todas las entidades, no solo `BaseEntity<int>`).
+- [x] BUG-2: Job resuelve tipos via AppDomain scan (sin namespace hardcodeado).
+- [x] Arq: Interceptor registrado como DI singleton en `Program.cs` (no `new` en `OnConfiguring`).
+- [x] Build fix CS0246: `global using ...Interceptors` añadido a `API/GlobalUsing.cs`.
+- [x] `FishermanUpdatedDomainEvent` + `FishermanDeletedDomainEvent` + handlers stub.
+- [x] `Fisherman.Update()` y `Fisherman.Delete()` implementados (estado puro, evento en handler).
+- [x] `UpdateFishermanCommandHandler` (nuevo) con validator.
+- [x] `SoftDeleteFishermanCommandHandler` refactorizado: usa entity method + raise event.
+- [x] Tests: `UpdateFishermanCommandHandlerTests` (6) + `SoftDeleteFishermanCommandHandlerTests` actualizado (5).
 ### ✅ Completado — Phase 2: Gestión de Ligas
 
 > Entidad `League` operativa con Rich Domain Model. Una sola liga activa simultáneamente en el club.

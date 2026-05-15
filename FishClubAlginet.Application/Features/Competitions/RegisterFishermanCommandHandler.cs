@@ -40,6 +40,11 @@ public sealed class RegisterFishermanCommandHandler
             return Errors.Competition.RegistrationNotOpen;
         }
 
+        if (competition.ParticipantCount >= competition.MaxSpots)
+        {
+            return Errors.Competition.MaxSpotsReached;
+        }
+
         var fisherman = await _fishermanRepository.GetById(request.FishermanId);
         if (fisherman is null || fisherman.IsDeleted)
         {

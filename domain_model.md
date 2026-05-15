@@ -73,6 +73,20 @@ public abstract class BaseEntity<TId>
 - `League.Create(name, year, minPoints, worstResultsToDiscard)` — Factory.
 - `League.Update(name, minPoints, worstResultsToDiscard)`
 - `League.Activate()` / `Deactivate()` / `Archive()`
+- `League.Unarchive()` *(pendiente de implementar — Fase 4)* — reversión a `IsArchived=false, IsActive=false`.
+
+**Ciclo de vida de estado:**
+```
+Created(IsActive=false, IsArchived=false)
+    │  Activate()
+    ▼
+Active(IsActive=true)
+    │  Archive()
+    ▼
+Archived(IsArchived=true, IsActive=false)  ◄──── Unarchive() (pendiente)
+```
+
+**Visibilidad:** las ligas archivadas **no aparecen** en la lista principal del Admin; solo son accesibles desde la vista de histórico (`/admin/leagues/archived`). Ver `cline_docs/progress.md → 4.C`.
 
 **Constraints:** `LeagueConstraints.NameMaxLength = 100`, `LeagueConstraints.MinYear = 2000`.
 
@@ -97,7 +111,31 @@ public abstract class BaseEntity<TId>
 
 **Anti-patron detectado:** setters publicos en todos los campos (Anemic Model). Contrasta con `League` que tiene Rich Model. Refactor pendiente en deuda tecnica (`cline_docs/progress.md`).
 
-**Estados (`CompetitionStatus`):** `Planned` -> `RegistrationOpen` -> `Closed` -> `ResultsDraft` -> `ResultsValidated`.
+**Máquina de estados (`CompetitionStatus`) — actualizada 2026-05-15:**
+
+```
+                    ┌──────────────────────────────────────┐
+                    │  Admin confirma + ≤ 30 días desde    │
+                    │  el cierre (ReopenRegistrationCmd)   │
+                    ▼                                      │
+Planned ──────► RegistrationOpen ──────────────────► Closed
+  │                                (CloseRegistration)    │
+  │ (OpenRegistration)                                     │
+  │                                                        ▼
+  └──────────────────────────────────────────────►  ResultsDraft ──► ResultsValidated
+                                                    (resultados
+                                                     imputados)
+```
+
+| Transición | Command existente | Regla de negocio | Confirmación UI |
+|---|---|---|---|
+| `Planned → RegistrationOpen` | `OpenRegistrationCommand` | estado == Planned | ✅ modal |
+| `RegistrationOpen → Closed` | `CloseRegistrationCommand` | estado == RegistrationOpen | ✅ modal |
+| `Closed → RegistrationOpen` | `ReopenRegistrationCommand` *(pendiente)* | estado == Closed **y** ≤ 30 días desde cierre | ✅ modal + aviso plazo |
+| `Closed → ResultsDraft` | *(pendiente, part of EnterResults flow)* | estado == Closed | ✅ modal |
+| `ResultsDraft → ResultsValidated` | *(pendiente)* | estado == ResultsDraft | ✅ modal |
+
+**Guardia de UI para imputar resultados:** el modal de entrada de peso solo se muestra cuando `status == Closed || status == ResultsDraft`. Ver `cline_docs/progress.md → 4.B`.
 
 ---
 

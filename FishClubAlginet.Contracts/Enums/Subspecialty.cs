@@ -1,7 +1,7 @@
 namespace FishClubAlginet.Contracts.Enums;
 
 public enum Subspecialty
-{
-    Mar = 1,
-    AguaDulce = 2
+{    
+    AguaDulce = 1,
+    Mar = 2
 }
