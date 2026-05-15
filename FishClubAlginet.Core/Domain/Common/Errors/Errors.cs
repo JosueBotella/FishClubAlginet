@@ -38,6 +38,10 @@ public static partial class Errors
         public static Error CannotModifyArchived => Error.Validation(
             code: "League.CannotModifyArchived",
             description: "Cannot modify an archived league.");
+
+        public static Error NotActive => Error.Validation(
+            code: "League.NotActive",
+            description: "The league is not active.");
     }
 
     public static class Auth
@@ -68,5 +72,26 @@ public static partial class Errors
         public static Error InvalidStatusTransition => Error.Validation(
             code: "Competition.InvalidStatusTransition",
             description: "This status transition is not allowed.");
+
+        public static Error MaxSpotsReached => Error.Conflict(
+            code: "Competition.MaxSpotsReached",
+            description: "The competition has reached maximum capacity.");
+
+        /// <summary>
+        /// Reabrir inscripción solo está permitido dentro de los 30 días siguientes al cierre.
+        /// </summary>
+        public static Error ReopenWindowExpired => Error.Validation(
+            code: "Competition.ReopenWindowExpired",
+            description: "Cannot reopen registration: the 30-day window after closing has expired.");
+    }
+
+    public static class LeagueErrors
+    {
+        /// <summary>
+        /// Intentar desarchivar una liga que no está archivada.
+        /// </summary>
+        public static Error NotArchived => Error.Conflict(
+            code: "League.NotArchived",
+            description: "The league is not archived.");
     }
 }

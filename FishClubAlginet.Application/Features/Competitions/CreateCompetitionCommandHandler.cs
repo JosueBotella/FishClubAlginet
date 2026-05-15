@@ -46,6 +46,11 @@ public sealed class CreateCompetitionCommandHandler
             return Errors.League.CannotModifyArchived;
         }
 
+        if (!league.IsActive)
+        {
+            return Errors.League.NotActive;
+        }
+
         var duplicateNumber = _competitionRepository
             .GetAll()
             .Any(c => c.LeagueId == request.LeagueId

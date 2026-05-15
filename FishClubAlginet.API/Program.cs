@@ -1,4 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
+using FishClubAlginet.Application;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -12,11 +13,8 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWorkService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserManagementService, UserManagementService>();
 
-builder.Services.AddMediatR(cfg =>
-{
-    cfg.RegisterServicesFromAssembly(typeof(RegisterUserCommand).Assembly);
-});
-builder.Services.AddValidatorsFromAssembly(typeof(LoginUserCommand).Assembly);
+// Application layer: MediatR + ValidationPipelineBehavior + FluentValidation validators
+builder.Services.AddApplication();
 builder.Services.AddIdentityCore<IdentityUser>(options => {
     options.Password.RequireDigit = false;
     options.Password.RequiredLength = 6;
