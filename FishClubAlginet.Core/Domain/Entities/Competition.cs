@@ -17,4 +17,48 @@ public class Competition : BaseEntity<Guid>
     public CompetitionStatus Status { get; set; } = CompetitionStatus.Planned;
     public int MaxSpots { get; set; }
     public int ParticipantCount { get; set; }
+
+    /// <summary>Opens registration (Planned → RegistrationOpen).</summary>
+    public void OpenRegistration()
+    {
+        Status = CompetitionStatus.RegistrationOpen;
+        LastUpdateUtc = DateTime.UtcNow;
+    }
+
+    /// <summary>Closes registration (RegistrationOpen → Closed).</summary>
+    public void CloseRegistration()
+    {
+        Status = CompetitionStatus.Closed;
+        LastUpdateUtc = DateTime.UtcNow;
+    }
+
+    /// <summary>
+    /// Reopens registration (Closed → RegistrationOpen).
+    /// Only allowed within 30 days of closing (LastUpdateUtc).
+    /// Returns false if the window has expired.
+    /// </summary>
+    public bool ReopenRegistration()
+    {
+        var daysSinceClosed = (DateTime.UtcNow - LastUpdateUtc).TotalDays;
+        if (daysSinceClosed > 30)
+            return false;
+
+        Status = CompetitionStatus.RegistrationOpen;
+        LastUpdateUtc = DateTime.UtcNow;
+        return true;
+    }
+
+    /// <summary>Moves to results draft (Closed → ResultsDraft).</summary>
+    public void MoveToResultsDraft()
+    {
+        Status = CompetitionStatus.ResultsDraft;
+        LastUpdateUtc = DateTime.UtcNow;
+    }
+
+    /// <summary>Validates results (ResultsDraft → ResultsValidated).</summary>
+    public void ValidateResults()
+    {
+        Status = CompetitionStatus.ResultsValidated;
+        LastUpdateUtc = DateTime.UtcNow;
+    }
 }

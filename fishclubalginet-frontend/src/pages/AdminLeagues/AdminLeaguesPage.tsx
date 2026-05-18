@@ -25,6 +25,8 @@ import {
   IconPlayerPlay,
   IconEdit,
   IconCalendarEvent,
+  IconHistory,
+  IconChartBar,
 } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import {
@@ -35,13 +37,11 @@ import {
 import type { LeagueDto } from '../../types';
 import { Routes } from '../../constants';
 import CreateEditLeagueModal from './CreateEditLeagueModal';
+import ConfirmationModal from '../../components/ConfirmationModal';
 
 const PAGE_SIZE = 15;
 
 function leagueStatusBadge(league: LeagueDto) {
-  if (league.isArchived) {
-    return <Badge color="gray" variant="light">Archivada</Badge>;
-  }
   if (league.isActive) {
     return <Badge color="green" variant="light">Activa</Badge>;
   }
@@ -58,6 +58,9 @@ export default function AdminLeaguesPage() {
   const [error, setError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [editLeague, setEditLeague] = useState<LeagueDto | null>(null);
+  const [archiveTarget, setArchiveTarget] = useState<LeagueDto | null>(null);
+  const [archiving, setArchiving] = useState(false);
+  const [recentlyArchived, setRecentlyArchived] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
@@ -67,7 +70,8 @@ export default function AdminLeaguesPage() {
     setError(null);
     try {
       const skip = (page - 1) * PAGE_SIZE;
-      const result = await getLeagues(skip, PAGE_SIZE, yearFilter);
+      // archived=false → solo ligas no archivadas (comportamiento por defecto)
+      const result = await getLeagues(skip, PAGE_SIZE, yearFilter, false);
       setLeagues(result.items);
       setTotalCount(result.totalCount);
     } catch {
@@ -109,14 +113,19 @@ export default function AdminLeaguesPage() {
     }
   };
 
-  const handleArchive = async (league: LeagueDto) => {
+  const handleArchiveConfirm = async () => {
+    if (!archiveTarget) return;
+    setArchiving(true);
     try {
-      await archiveLeague(league.id);
+      await archiveLeague(archiveTarget.id);
+      const archivedName = `${archiveTarget.name} (${archiveTarget.year})`;
       notifications.show({
         title: 'Liga archivada',
-        message: `${league.name} (${league.year})`,
+        message: `${archivedName} ha sido archivada.`,
         color: 'gray',
       });
+      setRecentlyArchived(archivedName);
+      setArchiveTarget(null);
       await fetchLeagues();
     } catch {
       notifications.show({
@@ -124,6 +133,8 @@ export default function AdminLeaguesPage() {
         message: 'No se pudo archivar la liga.',
         color: 'red',
       });
+    } finally {
+      setArchiving(false);
     }
   };
 
@@ -144,12 +155,22 @@ export default function AdminLeaguesPage() {
         <Title order={3}>
           <Group gap={6} component="span">
             <IconTrophy size={22} />
-            Gestion de ligas
+            Gestión de ligas
           </Group>
         </Title>
-        <Button leftSection={<IconPlus size={18} />} onClick={() => setModalOpen(true)}>
-          Crear liga
-        </Button>
+        <Group gap="sm">
+          <Button
+            variant="light"
+            color="gray"
+            leftSection={<IconHistory size={18} />}
+            onClick={() => navigate(Routes.ArchivedLeagues)}
+          >
+            Histórico archivadas
+          </Button>
+          <Button leftSection={<IconPlus size={18} />} onClick={() => setModalOpen(true)}>
+            Crear liga
+          </Button>
+        </Group>
       </Group>
 
       <Group mb="md">
@@ -183,13 +204,37 @@ export default function AdminLeaguesPage() {
         </Alert>
       )}
 
+      {recentlyArchived && (
+        <Alert
+          color="gray"
+          mb="md"
+          withCloseButton
+          icon={<IconArchive size={16} />}
+          onClose={() => setRecentlyArchived(null)}
+        >
+          <Group justify="space-between" gap={0}>
+            <Text size="sm">
+              <Text span fw={600}>{recentlyArchived}</Text> ha sido archivada.
+            </Text>
+            <Button
+              size="compact-xs"
+              variant="subtle"
+              color="gray"
+              onClick={() => navigate(Routes.ArchivedLeagues)}
+            >
+              Ver histórico
+            </Button>
+          </Group>
+        </Alert>
+      )}
+
       {loading ? (
         <Center py="xl">
           <Loader size="lg" />
         </Center>
       ) : leagues.length === 0 ? (
         <Text c="dimmed" ta="center" py="xl">
-          No se encontraron ligas.
+          No se encontraron ligas activas o inactivas.
         </Text>
       ) : (
         <>
@@ -202,16 +247,14 @@ export default function AdminLeaguesPage() {
                 <Table.Th>Concursos</Table.Th>
                 <Table.Th>Min. puntos</Table.Th>
                 <Table.Th>Descartes</Table.Th>
-                <Table.Th style={{ width: 200 }}>Acciones</Table.Th>
+                <Table.Th style={{ width: 220 }}>Acciones</Table.Th>
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
               {leagues.map((l) => (
                 <Table.Tr key={l.id}>
                   <Table.Td>
-                    <Text size="sm" fw={500}>
-                      {l.name}
-                    </Text>
+                    <Text size="sm" fw={500}>{l.name}</Text>
                   </Table.Td>
                   <Table.Td>
                     <Text size="sm">{l.year}</Text>
@@ -237,18 +280,25 @@ export default function AdminLeaguesPage() {
                           <IconCalendarEvent size={18} />
                         </ActionIcon>
                       </Tooltip>
-                      {!l.isArchived && (
-                        <Tooltip label="Editar">
-                          <ActionIcon
-                            variant="subtle"
-                            color="blue"
-                            onClick={() => setEditLeague(l)}
-                          >
-                            <IconEdit size={18} />
-                          </ActionIcon>
-                        </Tooltip>
-                      )}
-                      {!l.isActive && !l.isArchived && (
+                      <Tooltip label="Clasificación">
+                        <ActionIcon
+                          variant="subtle"
+                          color="violet"
+                          onClick={() => navigate(Routes.standingsFor(l.id))}
+                        >
+                          <IconChartBar size={18} />
+                        </ActionIcon>
+                      </Tooltip>
+                      <Tooltip label="Editar">
+                        <ActionIcon
+                          variant="subtle"
+                          color="blue"
+                          onClick={() => setEditLeague(l)}
+                        >
+                          <IconEdit size={18} />
+                        </ActionIcon>
+                      </Tooltip>
+                      {!l.isActive && (
                         <Tooltip label="Activar liga">
                           <ActionIcon
                             variant="subtle"
@@ -259,17 +309,15 @@ export default function AdminLeaguesPage() {
                           </ActionIcon>
                         </Tooltip>
                       )}
-                      {!l.isArchived && (
-                        <Tooltip label="Archivar">
-                          <ActionIcon
-                            variant="subtle"
-                            color="gray"
-                            onClick={() => handleArchive(l)}
-                          >
-                            <IconArchive size={18} />
-                          </ActionIcon>
-                        </Tooltip>
-                      )}
+                      <Tooltip label="Archivar">
+                        <ActionIcon
+                          variant="subtle"
+                          color="gray"
+                          onClick={() => setArchiveTarget(l)}
+                        >
+                          <IconArchive size={18} />
+                        </ActionIcon>
+                      </Tooltip>
                     </Group>
                   </Table.Td>
                 </Table.Tr>
@@ -293,6 +341,17 @@ export default function AdminLeaguesPage() {
         onClose={handleModalClose}
         onSuccess={handleSuccess}
         league={editLeague}
+      />
+
+      <ConfirmationModal
+        opened={archiveTarget !== null}
+        title="Archivar liga"
+        description={`¿Seguro que quieres archivar "${archiveTarget?.name} (${archiveTarget?.year})"? Podrás desarchivarla después desde el histórico.`}
+        confirmLabel="Archivar"
+        confirmColor="gray"
+        isLoading={archiving}
+        onConfirm={handleArchiveConfirm}
+        onCancel={() => setArchiveTarget(null)}
       />
     </Container>
   );

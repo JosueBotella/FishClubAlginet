@@ -10,7 +10,9 @@ public record FisherManGetAllQueryResponse(
     TypeNationalIdentifier DocumentType,
     string DocumentNumber,
     string? FederationLicense,
+    string AddressStreet,
     string AddressCity,
+    string AddressZipCode,
     string AddressProvince,
     bool IsDeleted
 );
@@ -58,7 +60,9 @@ public class FisherManGetAllQueryHandler : IRequestHandler<FisherManGetAllQuery,
                     DocumentType: f.DocumentType,
                     DocumentNumber: f.DocumentNumber,
                     FederationLicense: f.FederationLicense,
+                    AddressStreet: f.Address.Street,
                     AddressCity: f.Address.City,
+                    AddressZipCode: f.Address.ZipCode,
                     AddressProvince: f.Address.Province,
                     IsDeleted: f.IsDeleted
                 ))

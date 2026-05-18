@@ -27,8 +27,7 @@ public sealed class OpenRegistrationCommandHandler
         if (competition.Status != CompetitionStatus.Planned)
             return Errors.Competition.InvalidStatusTransition;
 
-        competition.Status = CompetitionStatus.RegistrationOpen;
-        competition.LastUpdateUtc = DateTime.UtcNow;
+        competition.OpenRegistration();
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         return Result.Success;

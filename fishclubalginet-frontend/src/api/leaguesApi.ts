@@ -1,13 +1,14 @@
 import { apiClient } from './apiClient';
 import { Endpoints } from '../constants';
-import type { LeagueDto, CreateLeagueRequest, UpdateLeagueRequest, PaginatedResult } from '../types';
+import type { LeagueDto, CreateLeagueRequest, UpdateLeagueRequest, PaginatedResult, LeagueStandingsDto } from '../types';
 
 export async function getLeagues(
   skip: number,
   take: number,
-  year?: number
+  year?: number,
+  archived?: boolean
 ): Promise<PaginatedResult<LeagueDto>> {
-  const url = Endpoints.Leagues.GetAllPaged(skip, take, year);
+  const url = Endpoints.Leagues.GetAllPaged(skip, take, year, archived);
   const { data } = await apiClient.get<PaginatedResult<LeagueDto>>(url);
   return data;
 }
@@ -46,5 +47,15 @@ export async function activateLeague(id: string): Promise<LeagueDto> {
 
 export async function archiveLeague(id: string): Promise<LeagueDto> {
   const { data } = await apiClient.post<LeagueDto>(Endpoints.Leagues.Archive(id), {});
+  return data;
+}
+
+export async function unarchiveLeague(id: string): Promise<LeagueDto> {
+  const { data } = await apiClient.put<LeagueDto>(Endpoints.Leagues.Unarchive(id), {});
+  return data;
+}
+
+export async function getLeagueStandings(id: string): Promise<LeagueStandingsDto> {
+  const { data } = await apiClient.get<LeagueStandingsDto>(Endpoints.Leagues.Standings(id));
   return data;
 }

@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using FishClubAlginet.Contracts.Dtos.Requests.Fisherman;
 
 namespace FishClubAlginet.API.Controllers;
 
@@ -48,6 +49,27 @@ public class FisherMenController : ApiController
             fishermen => Ok(fishermen),
             errors => Problem(errors)
         );
+    }
+
+    [HttpPut("{id:int}")]
+    [Authorize(Roles = ApplicationConstants.Roles.Admin)]
+    public async Task<IActionResult> Update(int id, [FromBody] UpdateFishermanRequest request)
+    {
+        var command = new UpdateFishermanCommand(
+            id,
+            request.FirstName,
+            request.LastName,
+            request.FederationLicense,
+            request.AddressStreet,
+            request.AddressCity,
+            request.AddressZipCode,
+            request.AddressProvince);
+
+        var result = await _mediator.Send(command, default);
+
+        return result.Match(
+            _ => NoContent(),
+            errors => Problem(errors));
     }
 
     [HttpDelete("{id:int}")]

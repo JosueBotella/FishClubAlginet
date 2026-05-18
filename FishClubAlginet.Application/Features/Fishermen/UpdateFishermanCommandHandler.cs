@@ -6,6 +6,7 @@ public record UpdateFishermanCommand(
     int Id,
     string FirstName,
     string LastName,
+    string? FederationLicense,
     string? AddressStreet,
     string? AddressCity,
     string? AddressZipCode,
@@ -48,6 +49,7 @@ public sealed class UpdateFishermanCommandHandler
         fisherman.Update(
             request.FirstName,
             request.LastName,
+            request.FederationLicense,
             new Address
             {
                 Street = request.AddressStreet ?? string.Empty,

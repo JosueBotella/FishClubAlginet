@@ -8,8 +8,10 @@ import NotFoundPage from './pages/NotFound/NotFoundPage';
 import AdminUsersPage from './pages/AdminUsers/AdminUsersPage';
 import AdminFishermenPage from './pages/AdminFishermen/AdminFishermenPage';
 import AdminLeaguesPage from './pages/AdminLeagues/AdminLeaguesPage';
+import AdminArchivedLeaguesPage from './pages/AdminLeagues/AdminArchivedLeaguesPage';
 import AdminCompetitionsPage from './pages/AdminCompetitions/AdminCompetitionsPage';
 import CompetitionResultsPage from './pages/AdminCompetitions/CompetitionResultsPage';
+import LeagueStandingsPage from './pages/AdminLeagues/LeagueStandingsPage';
 import ProfilePage from './pages/Profile/ProfilePage';
 
 function App() {
@@ -51,6 +53,22 @@ function App() {
               element={
                 <ProtectedRoute requiredRoles={['Admin']}>
                   <AdminLeaguesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path={AppRoutes.ArchivedLeagues}
+              element={
+                <ProtectedRoute requiredRoles={['Admin']}>
+                  <AdminArchivedLeaguesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path={AppRoutes.LeagueStandings}
+              element={
+                <ProtectedRoute requiredRoles={['Admin']}>
+                  <LeagueStandingsPage />
                 </ProtectedRoute>
               }
             />

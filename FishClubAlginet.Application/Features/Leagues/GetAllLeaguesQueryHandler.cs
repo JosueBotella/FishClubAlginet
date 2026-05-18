@@ -16,7 +16,9 @@ public record GetAllLeaguesQueryResponse(
 public record GetAllLeaguesQuery(
     int Skip,
     int Take,
-    int? Year = null) : IRequest<ErrorOr<PaginatedResult<GetAllLeaguesQueryResponse>>>;
+    int? Year = null,
+    bool? Archived = null   // null = solo no archivadas, true = solo archivadas, false explícito = solo no archivadas
+) : IRequest<ErrorOr<PaginatedResult<GetAllLeaguesQueryResponse>>>;
 
 public class GetAllLeaguesQueryHandler
     : IRequestHandler<GetAllLeaguesQuery, ErrorOr<PaginatedResult<GetAllLeaguesQueryResponse>>>
@@ -34,6 +36,12 @@ public class GetAllLeaguesQueryHandler
     {
         var query = _repository.GetAll()
             .Where(l => !l.IsDeleted);
+
+        // Por defecto (null) y false → excluye archivadas. true → solo archivadas.
+        if (request.Archived == true)
+            query = query.Where(l => l.IsArchived);
+        else
+            query = query.Where(l => !l.IsArchived);
 
         if (request.Year.HasValue)
         {

@@ -50,3 +50,21 @@ export interface RegisterFishermanRequest {
 }
 
 export type CreateCompetitionFormData = Omit<CreateCompetitionRequest, 'leagueId'>;
+
+export interface LeagueFishermanStandingDto {
+  fishermanId: number;
+  fullName: string;
+  totalWeightGrams: number;
+  totalPoints: number;
+  pointsAfterDiscard: number;
+  competitionsAttended: number;
+}
+
+export interface LeagueStandingsDto {
+  leagueId: string;
+  leagueName: string;
+  year: number;
+  worstResultsToDiscard: number;
+  byWeight: LeagueFishermanStandingDto[];
+  byPoints: LeagueFishermanStandingDto[];
+}

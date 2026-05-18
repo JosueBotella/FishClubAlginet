@@ -20,6 +20,7 @@ import {
   Divider,
   NumberInput,
   Switch,
+  Tooltip,
 } from '@mantine/core';
 import {
   IconChevronLeft,
@@ -29,21 +30,25 @@ import {
   IconSearch,
   IconTrash,
   IconPencil,
+  IconInfoCircle,
 } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import {
+  getCompetitionById,
   getCompetitionResults,
   registerFisherman,
   removeRegistration,
   updateCompetitionResult,
 } from '../../api/competitionsApi';
 import { getFishermen } from '../../api/fishermenApi';
-import type { CompetitionResultDto, FishermanDto } from '../../types';
+import type { CompetitionDto, CompetitionResultDto, FishermanDto } from '../../types';
 
 const PAGE_SIZE = 10;
 const RESULTS_PAGE_SIZE = 10;
 
-// ── Edit modal state ────────────────────────────────────────────────────────
+// Statuses that allow editing weight/attendance data
+const EDITABLE_STATUSES: CompetitionDto['status'][] = ['Closed', 'ResultsDraft'];
+
 interface EditState {
   resultId: string;
   fishermanId: number;
@@ -55,6 +60,9 @@ interface EditState {
 export default function CompetitionResultsPage() {
   const { competitionId } = useParams<{ competitionId: string }>();
   const navigate = useNavigate();
+
+  // Competition metadata (needed for status guard)
+  const [competition, setCompetition] = useState<CompetitionDto | null>(null);
 
   // Results + pagination
   const [results, setResults] = useState<CompetitionResultDto[]>([]);
@@ -91,24 +99,32 @@ export default function CompetitionResultsPage() {
     resultsPage * RESULTS_PAGE_SIZE
   );
 
-  // ── Fetch results ─────────────────────────────────────────────────────────
-  const fetchResults = useCallback(async () => {
+  // Derived: can we edit weights?
+  const canEditResults =
+    competition !== null && EDITABLE_STATUSES.includes(competition.status);
+
+  // ── Fetch competition + results ──────────────────────────────────────────
+  const fetchAll = useCallback(async () => {
     if (!competitionId) return;
     setLoading(true);
     setError(null);
     try {
-      const data = await getCompetitionResults(competitionId);
+      const [comp, data] = await Promise.all([
+        getCompetitionById(competitionId),
+        getCompetitionResults(competitionId),
+      ]);
+      setCompetition(comp);
       setResults(data);
     } catch {
-      setError('Error al cargar los resultados.');
+      setError('Error al cargar los datos del concurso.');
     } finally {
       setLoading(false);
     }
   }, [competitionId]);
 
   useEffect(() => {
-    fetchResults();
-  }, [fetchResults]);
+    fetchAll();
+  }, [fetchAll]);
 
   // ── Delete ────────────────────────────────────────────────────────────────
   const handleDelete = async () => {
@@ -118,7 +134,7 @@ export default function CompetitionResultsPage() {
       await removeRegistration(deleteResultId);
       notifications.show({ title: 'Inscripción eliminada', message: '', color: 'orange' });
       setDeleteResultId(null);
-      fetchResults();
+      fetchAll();
     } catch {
       notifications.show({ title: 'Error', message: 'No se pudo eliminar la inscripción.', color: 'red' });
     } finally {
@@ -128,6 +144,7 @@ export default function CompetitionResultsPage() {
 
   // ── Edit ──────────────────────────────────────────────────────────────────
   const openEdit = (r: CompetitionResultDto) => {
+    if (!canEditResults) return;
     setEditState({
       resultId: r.id,
       fishermanId: r.fishermanId,
@@ -149,7 +166,7 @@ export default function CompetitionResultsPage() {
       );
       notifications.show({ title: 'Resultado actualizado', message: '', color: 'green' });
       setEditState(null);
-      fetchResults();
+      fetchAll();
     } catch {
       notifications.show({ title: 'Error', message: 'No se pudo actualizar el resultado.', color: 'red' });
     } finally {
@@ -235,7 +252,7 @@ export default function CompetitionResultsPage() {
       notifications.show({ title: 'Error', message: 'Ningún pescador pudo inscribirse.', color: 'red' });
     }
     setRegisterOpen(false);
-    fetchResults();
+    fetchAll();
   };
 
   // ── Ranking badge ─────────────────────────────────────────────────────────
@@ -245,6 +262,10 @@ export default function CompetitionResultsPage() {
     if (ranking === 3) return <Badge color="orange" variant="filled">3</Badge>;
     return <Text size="sm">{ranking}</Text>;
   };
+
+  const editTooltip = !canEditResults
+    ? 'Solo disponible en estado Cerrado o Resultados en borrador'
+    : 'Editar resultado';
 
   return (
     <Container size="lg" py="md">
@@ -256,12 +277,36 @@ export default function CompetitionResultsPage() {
           <Group gap={6} component="span">
             <IconMedal size={22} />
             Resultados del concurso
+            {competition && (
+              <Badge color="gray" variant="outline" ml={4}>
+                #{competition.competitionNumber}
+              </Badge>
+            )}
           </Group>
         </Title>
         <Button leftSection={<IconUserPlus size={18} />} ml="auto" variant="light" onClick={openModal}>
           Inscribir pescadores
         </Button>
       </Group>
+
+      {/* Status guard informational alert */}
+      {competition && !canEditResults && results.length > 0 && (
+        <Alert
+          icon={<IconInfoCircle size={18} />}
+          color="blue"
+          variant="light"
+          mb="md"
+        >
+          La edición de pesos y asistencia solo está disponible cuando el concurso está en estado{' '}
+          <strong>Cerrado</strong> o <strong>Resultados en borrador</strong>. Estado actual:{' '}
+          <strong>
+            {competition.status === 'Planned' && 'Planificado'}
+            {competition.status === 'RegistrationOpen' && 'Inscripción abierta'}
+            {competition.status === 'ResultsValidated' && 'Resultados validados'}
+          </strong>
+          .
+        </Alert>
+      )}
 
       {error && <Alert color="red" mb="md">{error}</Alert>}
 
@@ -311,14 +356,17 @@ export default function CompetitionResultsPage() {
                   </Table.Td>
                   <Table.Td>
                     <Group gap={4}>
-                      <ActionIcon
-                        variant="subtle"
-                        color="blue"
-                        title="Editar resultado"
-                        onClick={() => openEdit(r)}
-                      >
-                        <IconPencil size={16} />
-                      </ActionIcon>
+                      <Tooltip label={editTooltip}>
+                        <ActionIcon
+                          variant="subtle"
+                          color={canEditResults ? 'blue' : 'gray'}
+                          title="Editar resultado"
+                          disabled={!canEditResults}
+                          onClick={() => openEdit(r)}
+                        >
+                          <IconPencil size={16} />
+                        </ActionIcon>
+                      </Tooltip>
                       <ActionIcon
                         variant="subtle"
                         color="red"
@@ -533,4 +581,3 @@ export default function CompetitionResultsPage() {
     </Container>
   );
 }
-

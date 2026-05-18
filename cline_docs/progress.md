@@ -82,70 +82,101 @@
 
 ---
 
-## Fase 4 (pendiente, después de 3.5)
+## ✅ Fase 4 — Full-stack estados de concurso + clasificación (COMPLETADA 2026-05-16)
 
-### 4.A — Backend: Nuevos Commands y transiciones de estado
+### 4.A — Backend ✅
+- [x] **`ReopenRegistrationCommand`** — `Closed → RegistrationOpen`, ventana ≤30 días. `PUT /competitions/{id}/reopen-registration`.
+- [x] **`UnarchiveLeagueCommand`** — `IsArchived=false, IsActive=false`. `PUT /leagues/{id}/unarchive`.
+- [x] **`AssignSpotsCommand`** — asignación secuencial por `RegistrationDate`. Permitido en `RegistrationOpen` o `Closed`. `POST /competitions/{id}/assign-spots`.
+- [x] **`MoveToResultsDraftCommand`** — `Closed → ResultsDraft`. `POST /competitions/{id}/results-draft`.
+- [x] **`ValidateResultsCommand`** — `ResultsDraft → ResultsValidated`. `POST /competitions/{id}/validate-results`.
+- [x] **`GetCompetitionByIdQuery`** — `GET /competitions/{id}` para el frontend.
+- [x] **`GetLeagueStandingsQuery`** — `GET /leagues/{id}/standings`. ByWeight + ByPoints con descarte configurable.
+- [x] **`GetAllLeaguesQuery`** ampliado con `archived?` — filtra ligas archivadas/no archivadas.
+- [x] Rich domain methods en `Competition`: `OpenRegistration`, `CloseRegistration`, `ReopenRegistration`, `MoveToResultsDraft`, `ValidateResults`.
+- [x] `League.Unarchive()` domain method.
+- [x] Tests: `ReopenRegistrationCommandHandlerTests`, `AssignSpotsCommandHandlerTests`, `MoveToResultsDraftAndValidateTests`, `UnarchiveLeagueCommandHandlerTests`.
+- [ ] **Revisar concurrencia** en `RegisterFishermanCommandHandler` (race condition potencial último spot) — deuda técnica.
 
-- [ ] **`ReopenRegistrationCommand`** — transición `Closed → RegistrationOpen`.
-  - Regla de negocio: solo permitido si `Competition.LastUpdateUtc` (momento del cierre) hace ≤ 30 días. Devolver `Error.Validation("Competition.ReopenWindowExpired")` si ha superado el plazo.
-  - Validator: `CompetitionId` requerido.
-  - Handler: verificar estado `Closed`, calcular ventana temporal, cambiar a `RegistrationOpen`.
-  - Endpoint: `PUT /competitions/{id}/reopen-registration` (solo Admin).
-  - Test: happy path + competición no en `Closed` + ventana expirada.
-
-- [ ] **`UnarchiveLeagueCommand`** — revertir estado de liga archivada a `IsArchived=false, IsActive=false`.
-  - Regla de negocio: solo ejecutable si `IsArchived=true`. No reactiva la liga (queda inactiva, listo para activar manualmente si se necesita).
-  - Validator: `LeagueId` requerido.
-  - Handler: similar a `ActivateLeagueCommandHandler`, check `IsArchived`.
-  - Endpoint: `PUT /leagues/{id}/unarchive` (solo Admin).
-  - Test: happy path + liga no archivada + liga no encontrada.
-
-- [ ] **`AssignSpotsCommand`** — asignación de pesqueras por sorteo.
-- [ ] **`EnterResultsCommand`** — entrada bulk de resultados: `DidAttend`, `WeightInGrams`, `BiggestCatchWeight`.
-- [ ] **Transición `Closed → ResultsDraft`** via command explícito (o como parte de `EnterResultsCommand` cuando hay al menos 1 resultado).
-- [ ] **Transición `ResultsDraft → ResultsValidated`** — bloquea edición de resultados.
-- [ ] **Clasificación general por liga** — suma de puntos descartando `WorstResultsToDiscard` peores.
-- [ ] **Revisar concurrencia** en `RegisterFishermanCommandHandler` (race condition potencial último spot).
-
-### 4.B — Frontend: Modales de confirmación y guardias de estado
-
-> Principio: **toda acción destructiva o irreversible muestra un modal de confirmación**. Las guardias de estado viven en el frontend (UI) y también en el backend (commands).
-
-#### Componente reutilizable
-- [ ] **`ConfirmationModal`** (Mantine `Modal`): recibe `title`, `description`, `onConfirm`, `onCancel`, `isLoading`. Usar en todas las acciones de estado listadas abajo.
-
-#### Concursos — gestión de estados
-- [ ] **OpenRegistration**: añadir `ConfirmationModal` antes de enviar la petición.
-- [ ] **CloseRegistration**: añadir `ConfirmationModal` antes de enviar la petición.
-- [ ] **ReopenRegistration** (nueva): botón visible solo cuando `status === 'Closed'` + `ConfirmationModal` + mensaje de advertencia sobre ventana de 30 días.
-- [ ] **Panel de estado de concurso**: mostrar estado actual + botones de transición disponibles según estado actual. Ejemplo:
-  - `Planned` → botón "Abrir inscripción"
-  - `RegistrationOpen` → botón "Cerrar inscripción"
-  - `Closed` → botones "Reabrir inscripción" (si ≤30 días) + "Pasar a Borrador resultados"
-  - `ResultsDraft` → botón "Validar resultados"
-  - `ResultsValidated` → solo lectura
-
-#### Concursos — imputación de resultados
-- [ ] **Modal de peso** (`UpdateResultModal`): solo habilitar cuando `competition.status === 'Closed' || competition.status === 'ResultsDraft'`. Mostrar mensaje informativo si el estado no lo permite (en lugar de ocultar el botón).
-
-#### Ligas — archivo y desarchivo
-- [ ] **Archivar liga**: sustituir el click directo por `ConfirmationModal` con texto: *"Esta acción archivará la liga. Podrás desarchivarla después desde el histórico."*
-- [ ] **Desarchivar liga**: botón en `AdminArchivedLeaguesPage` + `ConfirmationModal`.
-
-### 4.C — Frontend: Vista histórica de ligas archivadas
-
-- [ ] **`AdminLeaguesPage`** (existente): filtrar `IsArchived=true` del listado principal. Añadir enlace/botón "Ver histórico de ligas" que navega a `/admin/leagues/archived`.
-- [ ] **`AdminArchivedLeaguesPage`** (nueva): lista ligas con `IsArchived=true`. Columnas: Nombre, Año, Nº concursos, acciones [Ver, Desarchivar]. Sin opción de crear concursos.
-- [ ] **Ruta** `routes.ts`: añadir `/admin/leagues/archived` con `ProtectedRoute` Admin.
-- [ ] **`api/leaguesApi.ts`**: añadir llamada `unarchiveLeague(id)` → `PUT /leagues/{id}/unarchive`.
-- [ ] **Endpoint backend para listar solo archivadas**: `GET /leagues?archived=true` o endpoint dedicado `GET /leagues/archived`.
+### 4.B/C — Frontend ✅
+- [x] **`ConfirmationModal`** componente reutilizable.
+- [x] **`AdminLeaguesPage`** — filtra archivadas, ConfirmationModal al archivar, botón histórico, botón clasificación.
+- [x] **`AdminArchivedLeaguesPage`** (nueva) — lista archivadas, ConfirmationModal al desarchivar.
+- [x] **`AdminCompetitionsPage`** — panel de estado completo, ConfirmationModal unificado, todos los botones de transición por estado.
+- [x] **`CompetitionResultsPage`** — fetcha `CompetitionDto` al cargar, guarda edición solo en `Closed`/`ResultsDraft`, Alert informativo en otros estados.
+- [x] **`LeagueStandingsPage`** (nueva) — tabs "Por puntos" (con descarte) y "Por peso".
+- [x] Rutas `ArchivedLeagues`, `LeagueStandings` en `App.tsx` + `routes.ts`.
+- [x] `endpoints.ts`, `leaguesApi.ts`, `competitionsApi.ts`, `types/competition.ts` — todo actualizado.
 
 ---
 
-## Deuda técnica detectada (no bloqueante)
+---
 
-- [ ] Eliminar o implementar `IFishermanRepository` (declarada vacía en `Core/Abstractions/IFishermanRepository.cs`).
-- [ ] Convertir `Competition` a Rich Domain Model (hoy es anémico, contraste con `League`). Especialmente urgente si se añaden más métodos de dominio en Fase 4.
-- [x] ~~Añadir `ValidationBehavior<TRequest,TResponse>` al pipeline de MediatR.~~ **Resuelto 2026-05-15**.
-- [ ] Squashar las dos migraciones "iniciales" (`InitialSqlServer` + `Initial`) antes del primer deploy real.
-- [ ] Revisar si quedan referencias al antiguo `JWT_SECRET_KEY` commiteado en historial; considerar rotación + force-push si llegó a remoto.
+## 🔴 Fase 5 — PointsCalculator + Clasificación detallada (PRÓXIMA)
+
+### 5.A — Bug crítico: Points = WeightInGrams (BLOQUEANTE) 🔴
+
+`CompetitionResult.RecordResult()` almacena `Points = WeightInGrams`. Los puntos reales (ranking inverso con empates y mínimo) NO se calculan en ningún sitio.
+
+**Algoritmo confirmado** con `18º - CONCURSO.xls`:
+1. Filtrar `DidAttend = true`, ordenar desc por `WeightInGrams`.
+2. Asignar `Ranking` con empates (mismo peso → mismo rank, el siguiente salta).
+3. Puntos 1º = N (posiciones únicas). *Ej 18º: 27 asistentes − 2 empates dobles = **25 pts al 1º***.
+4. Empates comparten media de puntos. *Ej pos 14-15 (1125 g) → 11,5. Pos 18-19 (1010 g) → 7,5*.
+5. Mínimo `League.MinPoints` (default 5) para asistentes con 0 g.
+6. Ausencia → `Points = 0`, sin mínimo.
+
+**Items a implementar:**
+- [ ] `IPointsCalculator` domain service en `Core` — stateless, recibe `IEnumerable<CompetitionResultInput>` + `minPoints`, devuelve `IEnumerable<CalculatedResult>`.
+- [ ] `PointsCalculator` implementación en `Application`.
+- [ ] `CalculateCompetitionPointsCommand(Guid CompetitionId)` + Handler — obtiene resultados, llama al servicio, persiste `Points` + `Ranking` en cada `CompetitionResult`. Idempotente.
+- [ ] Llamada automática en `MoveToResultsDraftCommandHandler` justo antes de `SaveChangesAsync`.
+- [ ] Tests unitarios `PointsCalculatorTests` — al menos 8 casos: happy path, empate doble, empate triple, todos con 0 g, un solo participante, mínimo aplicado, ausencia, mezcla asistentes+ausentes.
+- [ ] Verificación con datos reales del `18º - CONCURSO.xls`: 27 participantes, pos 14-15 = 11,5, pos 18-19 = 7,5.
+
+### 5.B — Clasificación detallada (matriz por concurso)
+- [ ] Ampliar `GetLeagueStandingsQuery` con desglose por concurso: nuevo DTO `LeagueStandingsDetailDto` con `Competitions[]` + `ResultsPerCompetition: Dictionary<Guid, decimal>` por pescador.
+- [ ] Tests con datos de `LIGA POR PESO 2025.xls` (43 pescadores, 18 concursos, total 1.071.845 g).
+- [ ] **Columna "RESTA"**: ⚠️ PENDIENTE DEL CLIENTE — no implementar hasta recibir la regla exacta.
+- [ ] Frontend: `LeagueStandingsPage` ampliada con scroll horizontal, totales por concurso, exportar Excel.
+
+### 5.C — Pieza Mayor
+- [ ] `GetSeasonBiggestCatchQuery(leagueId)` — pescador + peso + concurso.
+- [ ] `GetCompetitionBiggestCatchQuery(competitionId)`.
+- [ ] Widget en `/home` con resumen de liga activa.
+
+### 5.D — Snapshots al archivar (opcional)
+- [ ] Entidad `LeagueSeasonSnapshot`. Command `ArchiveLeagueWithSnapshotCommand`.
+
+---
+
+## 🔲 Fase 6 — Acta Oficial FPCV (Word/PDF)
+
+- [ ] Generación programática del Acta Word con `OpenXml SDK` o `DocX`.
+- [ ] Endpoint `GET /api/competitions/{id}/acta?format={pdf|docx}` (solo Admin, solo `ResultsValidated`).
+- [ ] Conversor Word → PDF (LibreOffice headless o `Spire.Doc`).
+- [ ] `GenerateActaRequest` con campos editables (presidente, jueces, especies, tiempo).
+- [ ] Frontend: botón **Generar Acta** en detalle concurso (`ResultsValidated`) con modal de campos y descarga.
+
+---
+
+## 🔲 Fase 7 — Frontend rol Fisherman
+
+- [ ] Página Calendario (`/calendar`) — concursos de la liga activa.
+- [ ] Página Mis inscripciones (`/my-registrations`) — concursos inscritos con resultado.
+- [ ] Sidebar adaptado al rol `Fisherman`.
+
+---
+
+## Deuda técnica
+
+| Prio | Item | Estado |
+|------|------|--------|
+| 🔴 | `Points = WeightInGrams` en `RecordResult()` | Fase 5.A |
+| 🟡 | Race condition `RegisterFishermanCommandHandler` (último spot) | Pendiente |
+| 🟡 | Squashar migraciones iniciales antes del deploy | Pendiente |
+| 🟡 | Verificar/rotar `JWT_SECRET_KEY` si está en historial git | Pendiente |
+| 🟢 | Eliminar `IFishermanRepository` vacía | Pendiente |
+| 🟢 | Índice único `Fisherman.FederationNumber` + regex `^V-\d+$` | Pendiente |
+| ✅ | `Competition` Rich Domain Model | Fase 4.A |
+| ✅ | `ValidationBehavior<,>` en pipeline MediatR | Fase 3 |

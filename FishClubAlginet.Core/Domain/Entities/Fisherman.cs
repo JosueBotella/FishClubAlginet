@@ -58,10 +58,12 @@ public class Fisherman : BaseEntity<int>
     public void Update(
         string firstName,
         string lastName,
+        string? federationLicense,
         Address address)
     {
         FirstName = firstName;
         LastName = lastName;
+        FederationLicense = federationLicense;
         Address = address;
         LastUpdateUtc = DateTime.UtcNow;
     }

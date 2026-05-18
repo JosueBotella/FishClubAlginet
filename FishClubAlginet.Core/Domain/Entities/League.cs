@@ -53,6 +53,16 @@ public class League : BaseEntity<Guid>
         IsActive = false;
         LastUpdateUtc = DateTime.UtcNow;
     }
+
+    /// <summary>
+    /// Unarchives the league (IsArchived → false). Leaves IsActive = false so admin
+    /// must manually re-activate it if needed.
+    /// </summary>
+    public void Unarchive()
+    {
+        IsArchived = false;
+        LastUpdateUtc = DateTime.UtcNow;
+    }
 }
 
 public static class LeagueConstraints
