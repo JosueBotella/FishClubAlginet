@@ -245,6 +245,23 @@ Rehacer desde cero todo el frontend en React+TypeScript manteniendo la misma fun
 - [x] `UpdateFishermanCommandHandler` (nuevo) con validator.
 - [x] `SoftDeleteFishermanCommandHandler` refactorizado: usa entity method + raise event.
 - [x] Tests: `UpdateFishermanCommandHandlerTests` (6) + `SoftDeleteFishermanCommandHandlerTests` actualizado (5).
+
+**Fase 4.A — Estados avanzados de concurso + clasificación de liga (sesión 2026-05-16)**
+- [x] `Competition` refactorizado a Rich Domain Model: métodos `OpenRegistration`, `CloseRegistration`, `ReopenRegistration` (bool, ventana 30d), `MoveToResultsDraft`, `ValidateResults`.
+- [x] `League.Unarchive()` domain method.
+- [x] `GetCompetitionByIdQueryHandler` + `GET /competitions/{id}`.
+- [x] `ReopenRegistrationCommandHandler` + `PUT /competitions/{id}/reopen-registration`.
+- [x] `AssignSpotsCommandHandler` + `POST /competitions/{id}/assign-spots` (orden por `RegistrationDate`).
+- [x] `MoveToResultsDraftCommandHandler` + `POST /competitions/{id}/results-draft`.
+- [x] `ValidateResultsCommandHandler` + `POST /competitions/{id}/validate-results`.
+- [x] `UnarchiveLeagueCommandHandler` + `PUT /leagues/{id}/unarchive`.
+- [x] `GetLeagueStandingsQueryHandler` + `GET /leagues/{id}/standings` — `LeagueStandingsDto` con ByWeight + ByPoints (con `WorstResultsToDiscard`).
+- [x] `GetAllLeaguesQuery` ampliado con `archived?` bool — filtra archivadas del listado principal.
+- [x] Tests: `ReopenRegistrationCommandHandlerTests`, `AssignSpotsCommandHandlerTests`, `MoveToResultsDraftAndValidateTests`, `UnarchiveLeagueCommandHandlerTests`.
+- [x] Frontend: `ConfirmationModal`, `AdminArchivedLeaguesPage`, `LeagueStandingsPage` (nueva).
+- [x] Frontend: `AdminLeaguesPage`, `AdminCompetitionsPage`, `CompetitionResultsPage` mejorados con guards de estado.
+- [x] Frontend: `types/competition.ts` — `LeagueFishermanStandingDto`, `LeagueStandingsDto`.
+- [x] Frontend: `leaguesApi.ts` + `competitionsApi.ts` + `endpoints.ts` — todos los endpoints nuevos.
 ### ✅ Completado — Phase 2: Gestión de Ligas
 
 > Entidad `League` operativa con Rich Domain Model. Una sola liga activa simultáneamente en el club.
@@ -270,14 +287,14 @@ Rehacer desde cero todo el frontend en React+TypeScript manteniendo la misma fun
 
 ---
 
-### 🟡 Mayormente completado — Phase 3: Concursos y Resultados
+### ✅ Completado — Phase 3 + Fase 4.A: Concursos y Resultados (gestión avanzada de estados)
 
-> Núcleo de gestión de concursos implementado: crear, abrir/cerrar inscripciones, inscribir pescadores, registrar resultados, consultar ranking. Quedan piezas avanzadas (sorteo de puestos, entrada bulk, transiciones automáticas, cálculo de puntos).
+> Gestión completa de concursos: crear, transiciones de estado (Planned→RegistrationOpen→Closed→ResultsDraft→ResultsValidated), inscripción de pescadores, asignación de pesqueras, registro de resultados, consulta de ranking, clasificación de liga. Frontend con panel de estado completo y guards.
 
 #### Backend — Entidades
 
 - [x] Entidad `Competition : BaseEntity<Guid>` con todos los campos definidos (LeagueId, CompetitionNumber, Date, Venue/Zone libres, Subspecialty, Category, MaxSpots, ParticipantCount, `Status` con enum `Planned/RegistrationOpen/Closed/ResultsDraft/ResultsValidated`).
-  - ⚠️ **Estilo Anemic Model** (todos setters públicos). Refactor a Rich Model pendiente en deuda técnica.
+  - ✅ **Rich Domain Model** (métodos: `OpenRegistration`, `CloseRegistration`, `ReopenRegistration`, `MoveToResultsDraft`, `ValidateResults`). Refactor completado en Fase 4.A.
 - [x] Entidad `CompetitionResult : BaseEntity<Guid>` combinando inscripción + resultado (FishermanId int, AssignedSpotNumber int?, DidAttend, WeightInGrams, BiggestCatchWeight, Points decimal, Ranking, RegistrationDate, IsValidated).
 - [x] Índices únicos compuestos `(CompetitionId, FishermanId)` y `(CompetitionId, AssignedSpotNumber)` aplicados en migración `20260508180238_AddCompetitions`.
 - [x] DTOs: `CompetitionDto`, `CompetitionRequests`, `FishermanProfileDto`.
@@ -293,10 +310,15 @@ Rehacer desde cero todo el frontend en React+TypeScript manteniendo la misma fun
 - [x] `GetCompetitionsByLeagueQuery` + Handler
 - [x] `CompetitionsController` con endpoints REST
 
-#### Backend — Pendiente de Phase 3 extendida
-- [ ] `AssignSpotsCommand` (sorteo manual / aleatorio de puestos pesquera)
+#### Backend — Fase 4.A completada
+- [x] `AssignSpotsCommand` (asignación secuencial por `RegistrationDate`, válido en `RegistrationOpen` o `Closed`)
+- [x] `ReopenRegistrationCommand` (ventana ≤30 días desde cierre)
+- [x] `MoveToResultsDraftCommand` + `ValidateResultsCommand`
+- [x] `UnarchiveLeagueCommand`
+- [x] `GetCompetitionByIdQuery` + `GetLeagueStandingsQuery`
+
+#### Backend — Pendiente (deuda técnica)
 - [ ] `EnterResultsCommand` bulk (introducir todos los pesos en una sola operación)
-- [ ] Transición automática del `Status`: al validar todos los resultados → `ResultsValidated`
 - [ ] **Servicio de dominio `PointsCalculator`** con tests exhaustivos:
   - Algoritmo (CONFIRMADO observando `18º - CONCURSO.xls`):
     1. Filtrar `DidAttend = true`, ordenar desc por `WeightInGrams`.
@@ -320,67 +342,86 @@ Rehacer desde cero todo el frontend en React+TypeScript manteniendo la misma fun
 
 ---
 
-### 🔧 Phase 3.5: Estabilización del Outbox Pattern (EN CURSO — 2026-05-14)
+### ✅ Phase 3.5: Estabilización del Outbox Pattern (COMPLETADA 2026-05-15)
 
-> **Bugs detectados al auditar el código para `PROJECT_STATUS.md`.** Bloquean cualquier emisión de `DomainEvent` desde Ligas o Competiciones. Resolver antes de añadir nuevos eventos.
-
-#### 🔴 BUG-1 — Interceptor solo captura `BaseEntity<int>`
-- **Archivo:** `FishClubAlginet.Infrastructure/Persistence/Interceptors/ConvertDomainEventsToOutboxMessagesInterceptor.cs:19`
-- **Síntoma:** `dbContext.ChangeTracker.Entries<BaseEntity<int>>()` solo matchea `Fisherman`. Los eventos de `League`, `Competition`, `CompetitionResult` (todos `BaseEntity<Guid>`) **se descartan silenciosamente**.
-- **Impacto:** cualquier `RaiseDomainEvent()` en `League.Activate/Archive/Update` o `Competition.*` no produce side effects.
-
-#### 🔴 BUG-2 — Job hardcoded al namespace Fishermen
-- **Archivo:** `FishClubAlginet.API/Infrastructure/BackgroundJobs/ProcessOutboxMessagesJob.cs:53`
-- **Síntoma:** `var typeName = $"FishClubAlginet.Application.Features.Events.Commands.Fishermen.{outboxMessage.Type}, FishClubAlginet.Application";`
-- **Impacto:** aunque arreglemos BUG-1, eventos de otros bounded contexts saldrán como "Type not found".
-
-#### TODOs ligados (Fisherman)
-- [ ] `Fisherman.cs:53` — descomentar `Update()` con `FishermanUpdatedDomainEvent`
-- [ ] `Fisherman.cs:76` — descomentar `Delete()` con `FishermanDeletedDomainEvent`
-
-#### Plan de fix (ver detalle en `cline_docs/progress.md`)
-- [ ] **TASK-A** — Crear interfaz `IHasDomainEvents` no genérica en `BaseEntity.cs`, cambiar el interceptor a `Entries<IHasDomainEvents>()`.
-- [ ] **TASK-B** — Persistir `AssemblyQualifiedName` en `OutboxMessage.Type` o construir diccionario de tipos al startup.
-- [ ] **TASK-C** — Cerrar `Update()`/`Delete()` de Fisherman con sus dos `DomainEvent` y handlers stub.
+- [x] **BUG-1** corregido: Interceptor generalizado con `IHasDomainEvents` — captura eventos de todas las entidades, no solo `BaseEntity<int>`.
+- [x] **BUG-2** corregido: Job resuelve tipos via AppDomain scan (sin namespace hardcodeado).
+- [x] Interceptor registrado como DI singleton en `Program.cs`.
+- [x] Build fix CS0246: `global using ...Interceptors` añadido a `API/GlobalUsing.cs`.
+- [x] `FishermanUpdatedDomainEvent` + `FishermanDeletedDomainEvent` + handlers stub.
+- [x] `Fisherman.Update()` y `Fisherman.Delete()` implementados (estado puro, evento en handler).
+- [x] `UpdateFishermanCommandHandler` (nuevo). `SoftDeleteFishermanCommandHandler` refactorizado.
+- [x] Tests: `UpdateFishermanCommandHandlerTests` (6) + `SoftDeleteFishermanCommandHandlerTests` actualizado (5).
 
 ---
 
-### 🔲 Pendiente — Phase 4: Clasificaciones de Liga
+### ✅ Fase 4: Estados avanzados + Clasificación básica (COMPLETADA 2026-05-16)
 
-> **Análisis basado en `LIGA POR PESO 2025.xls` y `LIGA RESTA 2025.xls`**.
+> Transiciones de estado completas, ligas archivadas, clasificación de liga simplificada (totales).
+
+- [x] Rich Domain Model en `Competition`: `OpenRegistration`, `CloseRegistration`, `ReopenRegistration` (ventana 30d), `MoveToResultsDraft`, `ValidateResults`.
+- [x] `League.Unarchive()` domain method.
+- [x] Handlers: `ReopenRegistration`, `AssignSpots`, `MoveToResultsDraft`, `ValidateResults`, `UnarchiveLeague`, `GetCompetitionById`, `GetLeagueStandings`.
+- [x] `GetAllLeaguesQuery` ampliado con `archived?` bool.
+- [x] Tests: `ReopenRegistrationCommandHandlerTests`, `AssignSpotsCommandHandlerTests`, `MoveToResultsDraftAndValidateTests`, `UnarchiveLeagueCommandHandlerTests`.
+- [x] Frontend: `ConfirmationModal`, `AdminArchivedLeaguesPage`, `LeagueStandingsPage` (básica — totales).
+- [x] Frontend: `CompetitionResultsPage` con status guard (edición solo en `Closed`/`ResultsDraft`).
+- [x] Frontend: `AdminCompetitionsPage` panel de estados completo + `AdminLeaguesPage` mejorada.
+
+> ⚠️ **BUG CRÍTICO PENDIENTE**: `CompetitionResult.RecordResult()` asigna `Points = WeightInGrams` (no el sistema de puntos por ranking). La clasificación "Por Puntos" en `LeagueStandingsPage` muestra gramos, no puntos reales. **Bloqueante para Fase 5.**
+
+---
+
+### 🔲 Pendiente — Fase 5: PointsCalculator + Clasificación detallada
+
+> **Análisis basado en `18º - CONCURSO.xls`, `LIGA POR PESO 2025.xls` y `LIGA RESTA 2025.xls`**.
 >
-> Las clasificaciones son **vistas calculadas** sobre los `CompetitionResult` ya validados de una `League`. No se persisten (siempre son frescas), pero se pueden **snapshotear** para histórico al cerrar una temporada.
+> Las clasificaciones son **vistas calculadas** sobre los `CompetitionResult` ya validados. No se persisten (siempre frescas), pero se puede snapshotear al cerrar temporada.
 
-#### Backend — Servicios de cálculo
-- [ ] Servicio `WeightStandingCalculator`:
-  - Suma directa de `WeightInGrams` por `FishermanId` para todos los `CompetitionResult` de la liga
-  - Pescador con `DidAttend = false` aporta 0 (igual que `WeightInGrams = 0`)
-  - Devuelve lista ordenada descendente con: Posición, Pescador, Peso por concurso (matriz), Total
-  - Incluye agregado por concurso (peso total de cada concurso)
-- [ ] Servicio `PointsStandingCalculator`:
-  - Suma de `Points` por `FishermanId`
-  - Aplica `League.WorstResultsToDiscard`: descarta los N peores `CompetitionResult` (incluidas ausencias con 0)
-  - Devuelve: Posición, Pescador, Puntos por concurso, **Total bruto**, **Total descartado** (renombrar para evitar confusión con "Resta" del Excel), **Total final**
-  - ⚠️ **PENDIENTE DEL CLIENTE — NO IMPLEMENTAR HASTA TENER LA REGLA**: el Excel `LIGA RESTA 2025.xls` muestra una columna "RESTA" cuyo significado preciso no es deducible solo de los datos. En la temporada 2025 únicamente Juan Alcaraz tiene `RESTA = 2,5` aplicada, sin patrón evidente respecto a otros pescadores con decimales. El cliente confirmará la regla más adelante; hasta entonces, la implementación de esta vista debe **dejarse para el final de Phase 4** y arrancar en cuanto se conozca la fórmula. Mientras tanto, la columna se mostrará vacía en la UI con un tooltip "Pendiente de definir".
-- [ ] Tests unitarios validando con los datos exactos del `LIGA POR PESO 2025.xls` (43 pescadores, 18 concursos celebrados, total general 1.071.845 g)
+#### 5.A — Bug crítico: PointsCalculator (BLOQUEANTE)
 
-#### Backend — Pieza Mayor
-- [ ] Query `GetSeasonBiggestCatchQuery(leagueId)`: mayor `BiggestCatchWeight` de toda la liga → devuelve pescador, peso, concurso. Confirmado en `LIGA RESTA 2025.xls` R54: "PM CRISTIAN VOINESCU - con un peso de: 4870 gr."
-- [ ] Query `GetCompetitionBiggestCatchQuery(competitionId)`: mayor `BiggestCatchWeight` del concurso
+El campo `CompetitionResult.Points` actualmente almacena el peso como puntos (`Points = WeightInGrams`). El algoritmo correcto confirmado con datos reales:
 
-#### Backend — Snapshots opcionales
-- [ ] Entidad opcional `LeagueSeasonSnapshot` (Guid, LeagueId, CapturedAt, JsonPayload) para guardar la clasificación final del año al archivar la liga
-- [ ] Command `ArchiveLeagueWithSnapshotCommand`
+1. Filtrar `DidAttend = true`, ordenar `desc` por `WeightInGrams`.
+2. Asignar `Ranking` con empates: mismo peso → mismo ranking, el siguiente salta.
+3. Puntos del 1º = `N` donde `N = nº de posiciones únicas` (total asistentes − nº de grupos de empate + nº grupos). *Ej 18º: 27 asistentes − 2 empates dobles = **25 pts al 1º***.
+4. Empates: media de los puntos de las posiciones compartidas. *Ej pos 14-15 (1125 g) → (12+11)/2 = **11,5 c/u**. Pos 18-19 (1010 g) → (8+7)/2 = **7,5 c/u***.
+5. Mínimo `League.MinPoints` (default 5) para todo asistente, aunque traiga 0 g.
+6. Ausencia (`DidAttend = false`) → `Points = 0` (sin mínimo).
 
-#### Frontend
-- [ ] Página **Clasificación liga peso** (`/leagues/{id}/standings/weight`): tabla amplia con scroll horizontal — columnas: Posición, Nombre, [Concurso 1] [Concurso 2] ... [Concurso N], Total. Última fila con totales por concurso. Exportable a Excel
-- [ ] Página **Clasificación liga puntos** (`/leagues/{id}/standings/points`): misma estructura pero con puntos. Columnas adicionales: Total bruto, Descartado, Total final
-- [ ] Página **Pieza Mayor** (`/leagues/{id}/biggest-catches`): top de mayores capturas de la temporada y por concurso
-- [ ] Widget en home con **resumen liga activa** (top 3 peso + top 3 puntos + última pieza mayor)
+Items a implementar:
+- [ ] `IPointsCalculator` domain service en `Core` — calcula rankings + puntos para una lista de resultados
+- [ ] `CalculateCompetitionPointsCommand` + Handler — aplica `IPointsCalculator` y persiste en `CompetitionResult.Points` + `CompetitionResult.Ranking`. Idempotente (recalculable).
+- [ ] Invocar automáticamente en `MoveToResultsDraftCommandHandler` (o llamada explícita del admin).
+- [ ] Tests unitarios con datos exactos del `18º - CONCURSO.xls`: 27 participantes, verificar pos 14-15 (11,5), pos 18-19 (7,5), mínimo 5 pts.
+
+#### 5.B — Clasificación detallada (matriz por concurso)
+
+- [ ] Ampliar `GetLeagueStandingsQuery` para devolver desglose por concurso (matriz `FishermanId → [puntos/peso por concurso]`).
+- [ ] Nuevo DTO `LeagueStandingsDetailDto` con `Competitions: CompetitionHeaderDto[]` y por pescador `ResultsPerCompetition: Dictionary<Guid, decimal>`.
+- [ ] Tests con datos de `LIGA POR PESO 2025.xls` (43 pescadores, 18 concursos, total 1.071.845 g).
+- [ ] **Columna "RESTA"**: ⚠️ **PENDIENTE DEL CLIENTE** — En la temporada 2025 solo Juan Alcaraz tiene `RESTA = 2,5`, sin patrón deducible. No implementar hasta recibir la regla. Mostrar tooltip "Pendiente de definir".
+
+#### 5.C — Pieza Mayor
+
+- [ ] `GetSeasonBiggestCatchQuery(leagueId)` → pescador, peso, concurso. Confirmado: "PM CRISTIAN VOINESCU — 4870 gr" (`LIGA RESTA 2025.xls`).
+- [ ] `GetCompetitionBiggestCatchQuery(competitionId)` → mayor `BiggestCatchWeight` del concurso.
+- [ ] Incluido en `CompetitionResultDto` y en la sección del acta.
+
+#### 5.D — Frontend clasificación detallada
+
+- [ ] `LeagueStandingsPage` ampliada con **matriz de scroll horizontal**: columnas Posición | Nombre | [C1] [C2] ... [CN] | Total. Última fila = totales por concurso. Exportable a Excel.
+- [ ] Pestaña "Pieza Mayor" (`/leagues/{id}/biggest-catches`): top temporada + por concurso.
+- [ ] Widget en `/home` con resumen liga activa (top 3 peso + top 3 puntos + última pieza mayor).
+
+#### 5.E — Snapshots opcionales (al archivar temporada)
+
+- [ ] Entidad `LeagueSeasonSnapshot` (Guid, LeagueId, CapturedAt, JsonPayload).
+- [ ] `ArchiveLeagueWithSnapshotCommand` — archiva y guarda snapshot JSON de la clasificación final.
 
 ---
 
-### 🔲 Pendiente — Phase 5: Acta Oficial FPCV (Word/PDF)
+### 🔲 Pendiente — Fase 6: Acta Oficial FPCV (Word/PDF)
 
 > **Análisis basado en `18ª Acta competiciones clubs de 02-11-2025.doc`**.
 >
@@ -406,11 +447,34 @@ Rehacer desde cero todo el frontend en React+TypeScript manteniendo la misma fun
 
 ---
 
-### 🔲 Pendiente — Phase 6: Estadísticas y Reporting (opcional / futura)
+### 🔲 Pendiente — Fase 7: Frontend rol Fisherman (Pescador)
+
+- [ ] Página **Calendario** (`/calendar`) — lista de concursos de la liga activa con estado, fecha, venue.
+- [ ] Página **Mis inscripciones** (`/my-registrations`) — lista de concursos en los que el pescador está inscrito, con su puesto asignado y resultado si ya está validado.
+- [ ] Navegación del sidebar para rol `Fisherman`: Inicio, Calendario, Mis inscripciones, Perfil.
+
+---
+
+### 🔲 Pendiente — Fase 8: Estadísticas y Reporting (opcional / futura)
 - [ ] Dashboard global del club: nº pescadores activos, nº concursos celebrados por temporada, evolución de la pesca (kg por año), top historico de pieza mayor
 - [ ] Gráficos con `recharts` (ya disponible en stack React)
 - [ ] Comparativa entre temporadas (ligas históricas)
 - [ ] Exportación de cualquier vista a Excel (xlsx)
+
+---
+
+## Deuda técnica (priorizada)
+
+| Prio | Item | Estado |
+|------|------|--------|
+| 🔴 Bloqueante | `Points = WeightInGrams` en `CompetitionResult.RecordResult()` — puntos reales NO calculados | Pendiente Fase 5.A |
+| 🟡 Alta | Race condition en `RegisterFishermanCommandHandler` (último spot) | Pendiente |
+| 🟡 Alta | Squashar migraciones `InitialSqlServer` + `Initial` antes del primer deploy real | Pendiente |
+| 🟡 Alta | Verificar rotación de `JWT_SECRET_KEY` si llegó a remoto en historial git | Pendiente |
+| 🟢 Baja | Eliminar o implementar `IFishermanRepository` (interfaz vacía en `Core/Abstractions/`) | Pendiente |
+| 🟢 Baja | Índice único sobre `Fisherman.FederationNumber` + regex `^V-\d+$` | Pendiente |
+| ✅ Resuelta | `Competition` Anemic Model → Rich Domain Model | Hecho Fase 4.A |
+| ✅ Resuelta | `ValidationBehavior<,>` al pipeline MediatR | Hecho Fase 3 |
 
 ---
 

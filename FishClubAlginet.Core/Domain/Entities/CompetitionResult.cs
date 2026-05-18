@@ -42,36 +42,26 @@ public class CompetitionResult : BaseEntity<Guid>
     }
 
     /// <summary>
-    /// Records the result after the competition.
-    /// Applies minimum points rule: if attended but no catch, fisherman receives minPoints.
+    /// Records the raw result after the competition (weight, attendance).
+    /// Points and ranking are calculated separately by <see cref="Core.Domain.Services.IPointsCalculator"/>
+    /// when the competition moves to ResultsDraft.
     /// </summary>
-    public void RecordResult(bool didAttend, int weightInGrams, int? biggestCatchWeight, int minPoints)
+    public void RecordResult(bool didAttend, int weightInGrams, int? biggestCatchWeight)
     {
         DidAttend = didAttend;
-
-        if (!didAttend)
-        {
-            WeightInGrams = 0;
-            BiggestCatchWeight = null;
-            Points = 0;
-        }
-        else
-        {
-            WeightInGrams = weightInGrams;
-            BiggestCatchWeight = biggestCatchWeight;
-            Points = weightInGrams > 0
-                ? weightInGrams
-                : minPoints;
-        }
-
+        WeightInGrams = didAttend ? weightInGrams : 0;
+        BiggestCatchWeight = didAttend ? biggestCatchWeight : null;
+        Points = 0;   // recalculated by IPointsCalculator on MoveToResultsDraft
+        Ranking = 0;
         LastUpdateUtc = DateTime.UtcNow;
     }
 
     /// <summary>
-    /// Sets the final ranking within the competition.
+    /// Assigns the calculated points and ranking produced by <see cref="Core.Domain.Services.IPointsCalculator"/>.
     /// </summary>
-    public void SetRanking(int ranking)
+    public void SetCalculatedPoints(decimal points, int ranking)
     {
+        Points = points;
         Ranking = ranking;
         LastUpdateUtc = DateTime.UtcNow;
     }

@@ -11,18 +11,15 @@ public sealed class UpdateCompetitionResultCommandHandler
 {
     private readonly IGenericRepository<CompetitionResult, Guid> _resultRepository;
     private readonly IGenericRepository<Competition, Guid> _competitionRepository;
-    private readonly IGenericRepository<League, Guid> _leagueRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public UpdateCompetitionResultCommandHandler(
         IGenericRepository<CompetitionResult, Guid> resultRepository,
         IGenericRepository<Competition, Guid> competitionRepository,
-        IGenericRepository<League, Guid> leagueRepository,
         IUnitOfWork unitOfWork)
     {
         _resultRepository = resultRepository;
         _competitionRepository = competitionRepository;
-        _leagueRepository = leagueRepository;
         _unitOfWork = unitOfWork;
     }
 
@@ -38,10 +35,9 @@ public sealed class UpdateCompetitionResultCommandHandler
         if (competition is null || competition.IsDeleted)
             return Errors.Competition.NotFound;
 
-        var league = await _leagueRepository.GetById(competition.LeagueId);
-        var minPoints = league?.MinPoints ?? 5;
-
-        result.RecordResult(request.DidAttend, request.WeightInGrams, request.BiggestCatchWeight, minPoints);
+        // Raw result recorded here; Points/Ranking are calculated later by
+        // IPointsCalculator when the competition moves to ResultsDraft.
+        result.RecordResult(request.DidAttend, request.WeightInGrams, request.BiggestCatchWeight);
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         return Result.Success;

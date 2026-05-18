@@ -6,7 +6,9 @@ export interface FishermanDto {
   documentType: number;
   documentNumber: string;
   federationLicense: string | null;
+  addressStreet: string;
   addressCity: string;
+  addressZipCode: string;
   addressProvince: string;
   isDeleted: boolean;
 }

@@ -15,6 +15,16 @@ public class CompetitionsController : ApiController
         _mediator = mediator;
     }
 
+    /// <summary>Returns a single competition by id.</summary>
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> GetById(Guid id)
+    {
+        var result = await _mediator.Send(new GetCompetitionByIdQuery(id), default);
+        return result.Match(
+            dto => Ok(dto),
+            errors => Problem(errors));
+    }
+
     /// <summary>Returns all competitions for a league.</summary>
     [HttpGet]
     public async Task<IActionResult> GetByLeague([FromQuery] Guid leagueId)
@@ -78,6 +88,50 @@ public class CompetitionsController : ApiController
     public async Task<IActionResult> CloseRegistration(Guid id)
     {
         var result = await _mediator.Send(new CloseRegistrationCommand(id), default);
+        return result.Match(
+            _ => NoContent(),
+            errors => Problem(errors));
+    }
+
+    /// <summary>Reopens registration (Closed -> RegistrationOpen, ≤30 days window). Admin only.</summary>
+    [HttpPut("{id:guid}/reopen-registration")]
+    [Authorize(Roles = ApplicationConstants.Roles.Admin)]
+    public async Task<IActionResult> ReopenRegistration(Guid id)
+    {
+        var result = await _mediator.Send(new ReopenRegistrationCommand(id), default);
+        return result.Match(
+            _ => NoContent(),
+            errors => Problem(errors));
+    }
+
+    /// <summary>Assigns fishing spots by sequential draw (RegistrationOpen). Admin only.</summary>
+    [HttpPost("{id:guid}/assign-spots")]
+    [Authorize(Roles = ApplicationConstants.Roles.Admin)]
+    public async Task<IActionResult> AssignSpots(Guid id)
+    {
+        var result = await _mediator.Send(new AssignSpotsCommand(id), default);
+        return result.Match(
+            _ => NoContent(),
+            errors => Problem(errors));
+    }
+
+    /// <summary>Moves competition to ResultsDraft (Closed -> ResultsDraft). Admin only.</summary>
+    [HttpPost("{id:guid}/results-draft")]
+    [Authorize(Roles = ApplicationConstants.Roles.Admin)]
+    public async Task<IActionResult> MoveToResultsDraft(Guid id)
+    {
+        var result = await _mediator.Send(new MoveToResultsDraftCommand(id), default);
+        return result.Match(
+            _ => NoContent(),
+            errors => Problem(errors));
+    }
+
+    /// <summary>Validates results (ResultsDraft -> ResultsValidated). Admin only.</summary>
+    [HttpPost("{id:guid}/validate-results")]
+    [Authorize(Roles = ApplicationConstants.Roles.Admin)]
+    public async Task<IActionResult> ValidateResults(Guid id)
+    {
+        var result = await _mediator.Send(new ValidateResultsCommand(id), default);
         return result.Match(
             _ => NoContent(),
             errors => Problem(errors));

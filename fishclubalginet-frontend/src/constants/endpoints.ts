@@ -8,6 +8,7 @@ export const Endpoints = {
     Add: 'api/fishermen/Add',
     GetAll: 'api/fishermen/GetAll',
     MyProfile: 'api/fishermen/my-profile',
+    Update: (id: number) => `api/fishermen/${id}`,
     Delete: (id: number) => `api/fishermen/${id}`,
     GetAllPaged: (skip: number, take: number, search?: string, showDeleted?: boolean) => {
       let url = `api/fishermen/GetAll?skip=${skip}&take=${take}`;
@@ -35,19 +36,27 @@ export const Endpoints = {
     ById: (id: string) => `api/leagues/${id}`,
     Activate: (id: string) => `api/leagues/${id}/activate`,
     Archive: (id: string) => `api/leagues/${id}/archive`,
-    GetAllPaged: (skip: number, take: number, year?: number) => {
+    Unarchive: (id: string) => `api/leagues/${id}/unarchive`,
+    Standings: (id: string) => `api/leagues/${id}/standings`,
+    GetAllPaged: (skip: number, take: number, year?: number, archived?: boolean) => {
       let url = `api/leagues?skip=${skip}&take=${take}`;
       if (year !== undefined) url += `&year=${year}`;
+      if (archived !== undefined) url += `&archived=${archived}`;
       return url;
     },
   },
   Competitions: {
     Base: 'api/competitions',
+    ById: (id: string) => `api/competitions/${id}`,
     ByLeague: (leagueId: string) => `api/competitions?leagueId=${leagueId}`,
     Register: (id: string) => `api/competitions/${id}/register`,
     Results: (id: string) => `api/competitions/${id}/results`,
     OpenRegistration: (id: string) => `api/competitions/${id}/open-registration`,
     CloseRegistration: (id: string) => `api/competitions/${id}/close-registration`,
+    ReopenRegistration: (id: string) => `api/competitions/${id}/reopen-registration`,
+    AssignSpots: (id: string) => `api/competitions/${id}/assign-spots`,
+    MoveToResultsDraft: (id: string) => `api/competitions/${id}/results-draft`,
+    ValidateResults: (id: string) => `api/competitions/${id}/validate-results`,
     RemoveResult: (resultId: string) => `api/competitions/results/${resultId}`,
     UpdateResult: (resultId: string) => `api/competitions/results/${resultId}`,
   },

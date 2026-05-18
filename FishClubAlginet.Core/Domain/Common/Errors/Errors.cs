@@ -77,12 +77,26 @@ public static partial class Errors
             code: "Competition.MaxSpotsReached",
             description: "The competition has reached maximum capacity.");
 
-        /// <summary>
-        /// Reabrir inscripción solo está permitido dentro de los 30 días siguientes al cierre.
-        /// </summary>
+        /// <summary>Reabrir inscripción solo está permitido dentro de los 30 días siguientes al cierre.</summary>
         public static Error ReopenWindowExpired => Error.Validation(
             code: "Competition.ReopenWindowExpired",
             description: "Cannot reopen registration: the 30-day window after closing has expired.");
+
+        public static Error NotInClosed => Error.Validation(
+            code: "Competition.NotInClosed",
+            description: "This operation requires the competition to be in Closed status.");
+
+        public static Error NotInResultsDraft => Error.Validation(
+            code: "Competition.NotInResultsDraft",
+            description: "This operation requires the competition to be in ResultsDraft status.");
+
+        public static Error AlreadyValidated => Error.Validation(
+            code: "Competition.AlreadyValidated",
+            description: "The competition results have already been validated.");
+
+        public static Error NoResultsToAssign => Error.Validation(
+            code: "Competition.NoResultsToAssign",
+            description: "There are no registered fishermen to assign spots to.");
     }
 
     public static class LeagueErrors

@@ -1,5 +1,7 @@
 using System.Reflection;
 using FishClubAlginet.Application.Behaviors;
+using FishClubAlginet.Application.Services;
+using FishClubAlginet.Core.Domain.Services;
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,6 +15,7 @@ public static class DependencyInjection
     /// - MediatR handlers (scanned from this assembly)
     /// - ValidationPipelineBehavior (auto-validates commands before handlers)
     /// - FluentValidation validators (scanned from this assembly)
+    /// - Domain services (IPointsCalculator → PointsCalculatorService)
     /// </summary>
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
@@ -25,6 +28,8 @@ public static class DependencyInjection
         });
 
         services.AddValidatorsFromAssembly(assembly);
+
+        services.AddScoped<IPointsCalculator, PointsCalculatorService>();
 
         return services;
     }

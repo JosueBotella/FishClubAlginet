@@ -1,14 +1,14 @@
 namespace FishClubAlginet.Application.Features.Competitions;
 
-public record CloseRegistrationCommand(Guid CompetitionId) : IRequest<ErrorOr<Success>>;
+public record ValidateResultsCommand(Guid CompetitionId) : IRequest<ErrorOr<Success>>;
 
-public sealed class CloseRegistrationCommandHandler
-    : IRequestHandler<CloseRegistrationCommand, ErrorOr<Success>>
+public sealed class ValidateResultsCommandHandler
+    : IRequestHandler<ValidateResultsCommand, ErrorOr<Success>>
 {
     private readonly IGenericRepository<Competition, Guid> _repository;
     private readonly IUnitOfWork _unitOfWork;
 
-    public CloseRegistrationCommandHandler(
+    public ValidateResultsCommandHandler(
         IGenericRepository<Competition, Guid> repository,
         IUnitOfWork unitOfWork)
     {
@@ -17,26 +17,28 @@ public sealed class CloseRegistrationCommandHandler
     }
 
     public async Task<ErrorOr<Success>> Handle(
-        CloseRegistrationCommand request,
+        ValidateResultsCommand request,
         CancellationToken cancellationToken)
     {
         var competition = await _repository.GetById(request.CompetitionId);
         if (competition is null || competition.IsDeleted)
             return Errors.Competition.NotFound;
 
-        if (competition.Status != CompetitionStatus.RegistrationOpen)
-            return Errors.Competition.InvalidStatusTransition;
+        if (competition.Status == CompetitionStatus.ResultsValidated)
+            return Errors.Competition.AlreadyValidated;
 
-        competition.CloseRegistration();
+        if (competition.Status != CompetitionStatus.ResultsDraft)
+            return Errors.Competition.NotInResultsDraft;
 
+        competition.ValidateResults();
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         return Result.Success;
     }
 }
 
-public class CloseRegistrationCommandValidator : AbstractValidator<CloseRegistrationCommand>
+public class ValidateResultsCommandValidator : AbstractValidator<ValidateResultsCommand>
 {
-    public CloseRegistrationCommandValidator()
+    public ValidateResultsCommandValidator()
     {
         RuleFor(x => x.CompetitionId)
             .NotEmpty()

@@ -1,14 +1,14 @@
 namespace FishClubAlginet.Application.Features.Competitions;
 
-public record CloseRegistrationCommand(Guid CompetitionId) : IRequest<ErrorOr<Success>>;
+public record ReopenRegistrationCommand(Guid CompetitionId) : IRequest<ErrorOr<Success>>;
 
-public sealed class CloseRegistrationCommandHandler
-    : IRequestHandler<CloseRegistrationCommand, ErrorOr<Success>>
+public sealed class ReopenRegistrationCommandHandler
+    : IRequestHandler<ReopenRegistrationCommand, ErrorOr<Success>>
 {
     private readonly IGenericRepository<Competition, Guid> _repository;
     private readonly IUnitOfWork _unitOfWork;
 
-    public CloseRegistrationCommandHandler(
+    public ReopenRegistrationCommandHandler(
         IGenericRepository<Competition, Guid> repository,
         IUnitOfWork unitOfWork)
     {
@@ -17,26 +17,29 @@ public sealed class CloseRegistrationCommandHandler
     }
 
     public async Task<ErrorOr<Success>> Handle(
-        CloseRegistrationCommand request,
+        ReopenRegistrationCommand request,
         CancellationToken cancellationToken)
     {
         var competition = await _repository.GetById(request.CompetitionId);
         if (competition is null || competition.IsDeleted)
             return Errors.Competition.NotFound;
 
-        if (competition.Status != CompetitionStatus.RegistrationOpen)
+        if (competition.Status != CompetitionStatus.Closed)
             return Errors.Competition.InvalidStatusTransition;
 
-        competition.CloseRegistration();
+        // Business rule: only allowed within 30 days of closing
+        var reopened = competition.ReopenRegistration();
+        if (!reopened)
+            return Errors.Competition.ReopenWindowExpired;
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         return Result.Success;
     }
 }
 
-public class CloseRegistrationCommandValidator : AbstractValidator<CloseRegistrationCommand>
+public class ReopenRegistrationCommandValidator : AbstractValidator<ReopenRegistrationCommand>
 {
-    public CloseRegistrationCommandValidator()
+    public ReopenRegistrationCommandValidator()
     {
         RuleFor(x => x.CompetitionId)
             .NotEmpty()

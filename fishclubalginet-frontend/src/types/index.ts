@@ -25,4 +25,6 @@ export type {
   CreateCompetitionRequest,
   RegisterFishermanRequest,
   CreateCompetitionFormData,
+  LeagueFishermanStandingDto,
+  LeagueStandingsDto,
 } from './competition';

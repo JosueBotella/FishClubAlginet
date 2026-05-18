@@ -66,10 +66,26 @@ public class LeaguesController : ApiController
             errors => Problem(errors));
     }
 
-    [HttpGet]
-    public async Task<IActionResult> GetAll([FromQuery] int skip = 0, [FromQuery] int take = 15, [FromQuery] int? year = null)
+    /// <summary>Unarchives a league (IsArchived → false, IsActive stays false). Admin only.</summary>
+    [HttpPut("{id:guid}/unarchive")]
+    [Authorize(Roles = ApplicationConstants.Roles.Admin)]
+    public async Task<IActionResult> Unarchive(Guid id)
     {
-        var query = new GetAllLeaguesQuery(skip, take, year);
+        var command = new UnarchiveLeagueCommand(id);
+        var result = await _mediator.Send(command, default);
+        return result.Match(
+            dto => Ok(dto),
+            errors => Problem(errors));
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAll(
+        [FromQuery] int skip = 0,
+        [FromQuery] int take = 15,
+        [FromQuery] int? year = null,
+        [FromQuery] bool? archived = null)
+    {
+        var query = new GetAllLeaguesQuery(skip, take, year, archived);
         var result = await _mediator.Send(query, default);
         return result.Match(
             paginated => Ok(paginated),
@@ -90,6 +106,17 @@ public class LeaguesController : ApiController
     public async Task<IActionResult> GetById(Guid id)
     {
         var query = new GetLeagueByIdQuery(id);
+        var result = await _mediator.Send(query, default);
+        return result.Match(
+            dto => Ok(dto),
+            errors => Problem(errors));
+    }
+
+    /// <summary>Returns league standings by weight and by points (with worst-results discard).</summary>
+    [HttpGet("{id:guid}/standings")]
+    public async Task<IActionResult> GetStandings(Guid id)
+    {
+        var query = new GetLeagueStandingsQuery(id);
         var result = await _mediator.Send(query, default);
         return result.Match(
             dto => Ok(dto),

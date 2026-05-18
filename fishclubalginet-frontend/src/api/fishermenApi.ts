@@ -13,6 +13,20 @@ export async function getFishermen(
   return data;
 }
 
+export interface UpdateFishermanRequest {
+  firstName: string;
+  lastName: string;
+  federationLicense: string | null;
+  addressStreet: string;
+  addressCity: string;
+  addressZipCode: string;
+  addressProvince: string;
+}
+
+export async function updateFisherman(id: number, request: UpdateFishermanRequest): Promise<void> {
+  await apiClient.put(Endpoints.Fishermen.Update(id), request);
+}
+
 export async function deleteFisherman(id: number): Promise<void> {
   await apiClient.delete(Endpoints.Fishermen.Delete(id));
 }

@@ -37,6 +37,7 @@ public class UpdateFishermanCommandHandlerTests
             Id: id,
             FirstName: "Pedro",
             LastName: "López",
+            FederationLicense: "LIC-001",
             AddressStreet: "Calle Nueva 5",
             AddressCity: "Algemesí",
             AddressZipCode: "46260",
