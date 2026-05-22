@@ -18,6 +18,12 @@ public class Competition : BaseEntity<Guid>
     public int MaxSpots { get; set; }
     public int ParticipantCount { get; set; }
 
+    /// <summary>
+    /// Optional minimum weight (in grams) for a catch to qualify as "pieza mayor".
+    /// When null, any catch is considered valid. Configurable per zone/competition.
+    /// </summary>
+    public int? BiggestCatchMinWeightInGrams { get; set; }
+
     /// <summary>Opens registration (Planned → RegistrationOpen).</summary>
     public void OpenRegistration()
     {
@@ -59,6 +65,13 @@ public class Competition : BaseEntity<Guid>
     public void ValidateResults()
     {
         Status = CompetitionStatus.ResultsValidated;
+        LastUpdateUtc = DateTime.UtcNow;
+    }
+
+    /// <summary>Updates the optional minimum weight threshold for "pieza mayor".</summary>
+    public void SetBiggestCatchMinWeight(int? minWeightInGrams)
+    {
+        BiggestCatchMinWeightInGrams = minWeightInGrams;
         LastUpdateUtc = DateTime.UtcNow;
     }
 }

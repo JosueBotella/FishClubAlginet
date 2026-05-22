@@ -52,11 +52,24 @@ public class CompetitionsController : ApiController
             request.Zone,
             request.Subspecialty,
             request.Category,
-            request.MaxSpots);
+            request.MaxSpots,
+            request.BiggestCatchMinWeightInGrams);
 
         var result = await _mediator.Send(command, default);
         return result.Match(
             id => CreatedAtAction(nameof(GetResults), new { id }, new { Id = id }),
+            errors => Problem(errors));
+    }
+
+    /// <summary>Updates the "pieza mayor" minimum weight for a competition. Admin only.</summary>
+    [HttpPatch("{id:guid}/biggest-catch-config")]
+    [Authorize(Roles = ApplicationConstants.Roles.Admin)]
+    public async Task<IActionResult> UpdateBiggestCatchConfig(Guid id, [FromBody] UpdateBiggestCatchConfigRequest request)
+    {
+        var command = new UpdateBiggestCatchConfigCommand(id, request.MinWeightInGrams);
+        var result = await _mediator.Send(command, default);
+        return result.Match(
+            _ => NoContent(),
             errors => Problem(errors));
     }
 

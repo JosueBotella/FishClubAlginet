@@ -5,6 +5,7 @@ import type {
   CompetitionResultDto,
   CreateCompetitionRequest,
   RegisterFishermanRequest,
+  UpdateBiggestCatchConfigRequest,
 } from '../types';
 
 export async function getCompetitionsByLeague(leagueId: string): Promise<CompetitionDto[]> {
@@ -84,4 +85,11 @@ export async function updateCompetitionResult(
     weightInGrams,
     biggestCatchWeight,
   });
+}
+
+export async function updateBiggestCatchConfig(
+  competitionId: string,
+  request: UpdateBiggestCatchConfigRequest
+): Promise<void> {
+  await apiClient.patch(Endpoints.Competitions.BiggestCatchConfig(competitionId), request);
 }

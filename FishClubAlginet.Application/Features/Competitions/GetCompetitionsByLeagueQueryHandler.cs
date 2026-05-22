@@ -47,7 +47,8 @@ public sealed class GetCompetitionsByLeagueQueryHandler
                 c.Status.ToString(),
                 c.MaxSpots,
                 c.ParticipantCount,
-                c.LastUpdateUtc))
+                c.LastUpdateUtc,
+                c.BiggestCatchMinWeightInGrams))
             .ToArray();
 
         return Task.FromResult<ErrorOr<CompetitionDto[]>>(dtos);

@@ -8,17 +8,23 @@ namespace FishClubAlginet.Application.Services;
 ///
 /// Algorithm:
 ///   1. Sort attendees by WeightInGrams descending.
-///   2. Points for position p (1-indexed) = N + 1 - p, where N = total attendees.
-///   3. Ties share the average of the points for their tied positions.
-///   4. Apply a minimum floor: every attendee gets at least <c>minPoints</c>.
+///   2. Every attendee receives <c>minPoints</c> just for attending.
+///   3. Ranking bonus (fixed scale): position 1 → +20, position 2 → +19, … position 20 → +1, beyond → +0.
+///   4. Ties within the top 20: each tied participant receives +1/tieCount bonus.
 ///   5. Non-attendees receive 0 points and ranking 0.
 ///
-/// Example (N = 5, minPoints = 5):
-///   Rank 1 → 5 pts | Rank 2 → 4 pts | Rank 3+4 (tie) → (3+2)/2 = 2.5 → floor → 5 pts
-///   Rank 5 → 1 pt → floor → 5 pts
+/// Example (minPoints = 5, attendees = 25):
+///   Rank 1 → 5 + 20 = 25 pts
+///   Rank 2 (tied with 3) → 5 + 19 + 0.5 = 24.5 pts
+///   Rank 3 (tied with 2) → 5 + 18 + 0.5 = 23.5 pts
+///   Rank 20 → 5 + 1 = 6 pts
+///   Rank 21+ → 5 + 0 = 5 pts
 /// </summary>
 public sealed class PointsCalculatorService : IPointsCalculator
 {
+    private const int FirstPlaceBonus = 20;
+    private const int MaxRankedPositions = 20;
+
     public void CalculateAndAssign(IReadOnlyList<CompetitionResult> results, int minPoints)
     {
         var attendees = results
@@ -31,29 +37,29 @@ public sealed class PointsCalculatorService : IPointsCalculator
 
         while (i < n)
         {
-            // Extend to include all participants with the same weight (tie group)
             int j = i;
             while (j + 1 < n && attendees[j + 1].WeightInGrams == attendees[i].WeightInGrams)
                 j++;
 
-            // Sum points for positions i+1 … j+1 (1-indexed)
-            // Points for position p = n + 1 - p  →  for 0-indexed k: n + 1 - (k + 1) = n - k
-            decimal totalPoints = 0;
-            for (int k = i; k <= j; k++)
-                totalPoints += n - k;
-
             int tieCount = j - i + 1;
-            decimal avgPoints = totalPoints / tieCount;
-            decimal finalPoints = Math.Max(avgPoints, minPoints);
-            int rank = i + 1; // rank of the tie group = first position (1-indexed)
+            int groupStartRank = i + 1; // 1-indexed rank assigned to all in this group
+
+            // 1 bonus point shared among tied participants, only when inside the top 20
+            decimal tieBonus = (tieCount > 1 && groupStartRank <= MaxRankedPositions)
+                ? 1m / tieCount
+                : 0m;
 
             for (int k = i; k <= j; k++)
-                attendees[k].SetCalculatedPoints(finalPoints, rank);
+            {
+                int position = k + 1; // 1-indexed position for ranking-points calculation
+                decimal rankingBonus = Math.Max(0, FirstPlaceBonus + 1 - position);
+                decimal points = minPoints + rankingBonus + tieBonus;
+                attendees[k].SetCalculatedPoints(points, groupStartRank);
+            }
 
             i = j + 1;
         }
 
-        // Non-attendees: 0 points, rank 0
         foreach (var nonAttendee in results.Where(r => !r.DidAttend))
             nonAttendee.SetCalculatedPoints(0m, 0);
     }

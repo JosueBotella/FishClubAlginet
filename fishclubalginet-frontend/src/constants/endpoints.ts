@@ -59,6 +59,7 @@ export const Endpoints = {
     ValidateResults: (id: string) => `api/competitions/${id}/validate-results`,
     RemoveResult: (resultId: string) => `api/competitions/results/${resultId}`,
     UpdateResult: (resultId: string) => `api/competitions/results/${resultId}`,
+    BiggestCatchConfig: (id: string) => `api/competitions/${id}/biggest-catch-config`,
   },
 } as const;
 

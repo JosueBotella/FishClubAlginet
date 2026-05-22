@@ -11,7 +11,8 @@ public record CreateCompetitionCommand(
     string Zone,
     Subspecialty Subspecialty,
     Category Category,
-    int MaxSpots) : IRequest<ErrorOr<Guid>>;
+    int MaxSpots,
+    int? BiggestCatchMinWeightInGrams = null) : IRequest<ErrorOr<Guid>>;
 
 public sealed class CreateCompetitionCommandHandler
     : IRequestHandler<CreateCompetitionCommand, ErrorOr<Guid>>
@@ -78,6 +79,7 @@ public sealed class CreateCompetitionCommandHandler
             Status = CompetitionStatus.Planned,
             MaxSpots = request.MaxSpots,
             ParticipantCount = 0,
+            BiggestCatchMinWeightInGrams = request.BiggestCatchMinWeightInGrams,
             LastUpdateUtc = DateTime.UtcNow
         };
 

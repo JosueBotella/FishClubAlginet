@@ -22,6 +22,7 @@ const DEFAULT_FORM: CreateCompetitionFormData = {
   subspecialty: 'Mar',
   category: 'Seniors',
   maxSpots: 30,
+  biggestCatchMinWeightInGrams: null,
 };
 
 export default function CreateCompetitionModal({ opened, leagueId, onClose, onSuccess }: Props) {
@@ -150,6 +151,19 @@ export default function CreateCompetitionModal({ opened, leagueId, onClose, onSu
             required
             min={1}
             {...form.getInputProps('maxSpots')}
+          />
+
+          <NumberInput
+            label="Peso mínimo pieza mayor (gramos, opcional)"
+            description="Solo se considera pieza mayor si supera este peso. Déjalo vacío para no aplicar mínimo."
+            min={1}
+            value={form.values.biggestCatchMinWeightInGrams ?? ''}
+            onChange={(val) =>
+              form.setFieldValue(
+                'biggestCatchMinWeightInGrams',
+                typeof val === 'number' ? val : null
+              )
+            }
           />
 
           <Group justify="flex-end" mt="md">

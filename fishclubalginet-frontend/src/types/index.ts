@@ -25,6 +25,7 @@ export type {
   CreateCompetitionRequest,
   RegisterFishermanRequest,
   CreateCompetitionFormData,
+  UpdateBiggestCatchConfigRequest,
   LeagueFishermanStandingDto,
   LeagueStandingsDto,
 } from './competition';

@@ -14,6 +14,7 @@ export interface CompetitionDto {
   maxSpots: number;
   participantCount: number;
   lastUpdateUtc: string;
+  biggestCatchMinWeightInGrams: number | null;
 }
 
 export interface CompetitionResultDto {
@@ -42,6 +43,11 @@ export interface CreateCompetitionRequest {
   subspecialty: 'Mar' | 'AguaDulce';
   category: 'Seniors' | 'Juvenil';
   maxSpots: number;
+  biggestCatchMinWeightInGrams: number | null;
+}
+
+export interface UpdateBiggestCatchConfigRequest {
+  minWeightInGrams: number | null;
 }
 
 export interface RegisterFishermanRequest {

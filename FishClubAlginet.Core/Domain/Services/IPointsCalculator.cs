@@ -2,10 +2,13 @@ namespace FishClubAlginet.Core.Domain.Services;
 
 /// <summary>
 /// Domain service that calculates competition points and rankings for a set of results.
-/// Points are determined by ranking (highest weight = best rank).
-/// Ties share the average of the points for the tied positions.
-/// Every attendee receives at least <c>minPoints</c> regardless of ranking.
-/// Non-attendees always receive 0 points.
+///
+/// Algorithm:
+///   1. Sort attendees by WeightInGrams descending.
+///   2. Every attendee receives <c>minPoints</c> just for attending.
+///   3. Ranking bonus (fixed scale): position 1 → +20, position 2 → +19, … position 20 → +1, beyond → +0.
+///   4. Ties within the top 20: each tied participant receives an additional +1/tieCount bonus.
+///   5. Non-attendees receive 0 points and ranking 0.
 /// </summary>
 public interface IPointsCalculator
 {

@@ -15,7 +15,8 @@ public record CompetitionDto(
     string Status,
     int MaxSpots,
     int ParticipantCount,
-    DateTime LastUpdateUtc);
+    DateTime LastUpdateUtc,
+    int? BiggestCatchMinWeightInGrams);
 
 public record CompetitionResultDto(
     Guid Id,

@@ -29,10 +29,14 @@ FishClubAlginet.Tests         → Unit tests (xUnit, Moq, FluentAssertions)
 - Una Competición pertenece a una sola Liga
 - Cada Competición tiene un número máximo de puestos (MaxSpots) y un nº real de participantes (ParticipantCount)
 - Las inscripciones requieren validación manual por Admin
-- Puntuación por concurso: ranking inverso basado en peso. Empates en peso → media de puntos de las posiciones afectadas. Mínimo 5 puntos (incluso con 0 capturas). Ausencia = sin puntos.
+- **Puntuación por concurso (sistema actualizado — Fase 5.A):**
+  - Asistencia: cada participante que asiste recibe `League.MinPoints` (= 5) solo por acudir.
+  - Escala fija de ranking: 1º → +20 pts, 2º → +19 pts, … 20º → +1 pt, más allá del 20º → +0 pts.
+  - Empates dentro del top 20: cada empatado conserva sus puntos de posición individual + recibe `+1/nEmpatados` bonus. Ejemplo: 2º y 3º empatados → 2º = 5+19+0.5 = 24.5, 3º = 5+18+0.5 = 23.5.
+  - Ausencia: 0 puntos (no se aplica mínimo de asistencia).
 - Clasificación liga por peso: suma directa de gramos acumulados
 - Clasificación liga por puntos (resta): suma de puntos − N peores resultados (configurable por liga)
-- Premio Pieza Mayor (PM): por concurso (mayor BiggestCatchWeight) y por temporada (mayor de toda la liga)
+- **Pieza Mayor (PM):** por concurso (mayor BiggestCatchWeight). Cada competición tiene un `BiggestCatchMinWeightInGrams` opcional (configurable por zona): solo se considera "pieza mayor" si supera ese umbral. Sin configurar → cualquier captura válida. Control manual del admin.
 - El Acta oficial de cada concurso se genera para la FPCV (Federación de Pesca de la Comunidad Valenciana), club V42
 
 ## Estándares i18n
@@ -57,7 +61,9 @@ FishClubAlginet.Tests         → Unit tests (xUnit, Moq, FluentAssertions)
     - Sistema resta: al total de puntos acumulados se le descuentan los N peores resultados (WorstResultsToDiscard).
     - No participar en un concurso = no recibir puntos (no se asigna MinPoints por ausencia).
 
-- **Competition:** Id (Guid), CompetitionNumber (int — nº ordinal dentro de la liga: 1º, 2º... 18º), Name, Date, StartTime, EndTime, Venue (string — escenario: "Bellús", "Pinedo", "Fortaleny"), Zone (string — zona: "Norte", "Sur", "C", "B", "A1-A2-A3"...), Subspecialty (string — "MAR", "AGUA DULCE"), Category (string — "SENIORS", "JUVENIL"), MaxSpots (int), ParticipantCount (int — nº real de participantes), LeagueId (FK). → Pertenece a League, 1:N con CompetitionResults.
+- **Competition:** Id (Guid), CompetitionNumber (int — nº ordinal dentro de la liga: 1º, 2º... 18º), Name, Date, StartTime, EndTime, Venue (string — escenario: "Bellús", "Pinedo", "Fortaleny"), Zone (string — zona: "Norte", "Sur", "C", "B", "A1-A2-A3"...), Subspecialty (string — "MAR", "AGUA DULCE"), Category (string — "SENIORS", "JUVENIL"), MaxSpots (int), ParticipantCount (int — nº real de participantes), **BiggestCatchMinWeightInGrams (int?, nullable — peso mínimo en gramos para que una captura se considere "pieza mayor"; sin valor = sin mínimo)**, LeagueId (FK). → Pertenece a League, 1:N con CompetitionResults.
+  - Método `SetBiggestCatchMinWeight(int?)` en el dominio.
+  - Endpoint `PATCH /api/competitions/{id}/biggest-catch-config` body `{ minWeightInGrams: int? }` para actualizar el mínimo en cualquier momento.
 
 - **CompetitionResult:** Id (Guid), FishermanId (FK), CompetitionId (FK), AssignedSpotNumber (int — nº pesquera asignado por sorteo), WeightInGrams (int — peso total capturado), BiggestCatchWeight (int?, nullable — peso de la pieza mayor, solo si aplica), Points (decimal — puntos asignados según ranking, ej: 25, 11.5, 7.5, 5), Ranking (int — posición final en ese concurso), RegistrationDate, IsValidated (bool, default false).
   - Nota: sustituye a la antigua CompetitionRegistration. Combina inscripción + resultado en una sola entidad.
@@ -372,28 +378,38 @@ Rehacer desde cero todo el frontend en React+TypeScript manteniendo la misma fun
 
 ---
 
-### 🔲 Pendiente — Fase 5: PointsCalculator + Clasificación detallada
+### ✅ Completado — Fase 5.A: PointsCalculator + Pieza Mayor config (2026-05-22)
+
+#### 5.A — Sistema de puntos rediseñado
+
+El sistema de puntos fue completamente rediseñado a petición del club. El nuevo algoritmo (clase `PointsCalculatorService`):
+
+1. **Asistencia base:** todo participante que acude recibe `League.MinPoints` (= 5) solo por presentarse.
+2. **Bonus de ranking fijo:** posición 1 → +20, posición 2 → +19, … posición 20 → +1, posiciones 21+ → +0.
+3. **Empates dentro del top 20:** cada empatado conserva sus puntos de posición individual y recibe un bonus de `+1/nEmpatados`. Ej: 2º y 3º empatados → 2º = 5+19+0.5 = **24.5 pts**, 3º = 5+18+0.5 = **23.5 pts** (1 punto repartido entre ambos).
+4. **Ausencia:** 0 puntos (sin asistencia no se aplica el mínimo).
+
+Implementación:
+- [x] `IPointsCalculator` (Core) — interfaz del domain service, docs actualizados.
+- [x] `PointsCalculatorService` (Application/Services) — algoritmo reescrito con constantes `FirstPlaceBonus = 20`, `MaxRankedPositions = 20`.
+- [x] Se invoca automáticamente en `MoveToResultsDraftCommandHandler` con `League.MinPoints`.
+- [x] 11 tests unitarios en `PointsCalculatorServiceTests` cubren: ranking normal, posiciones más allá del 20, empates 2-way, empates 3-way, empate en frontera posición 20/21, empate fuera del top 20, no-asistentes, edge cases.
+
+#### 5.A.bis — Pieza Mayor: mínimo de peso configurable por competición
+
+- [x] `Competition.BiggestCatchMinWeightInGrams` (int?, nullable) — campo nuevo con migración `20260522174249_AddBiggestCatchMinWeightToCompetitions`.
+- [x] `Competition.SetBiggestCatchMinWeight(int?)` — método de dominio.
+- [x] `CreateCompetitionCommand` ampliado con `BiggestCatchMinWeightInGrams? = null`.
+- [x] `UpdateBiggestCatchConfigCommandHandler` — nuevo comando + handler `PATCH /api/competitions/{id}/biggest-catch-config`.
+- [x] `CompetitionDto` ampliado con `BiggestCatchMinWeightInGrams?` — ambas queries (`GetById`, `GetByLeague`) lo incluyen.
+- [x] Frontend — `CreateCompetitionModal`: nuevo `NumberInput` opcional "Peso mínimo pieza mayor".
+- [x] Frontend — `CompetitionResultsPage`: sección inline para leer/actualizar el mínimo en tiempo real.
+
+### 🔲 Pendiente — Fase 5.B-E: Clasificación detallada + Pieza Mayor + Frontend
 
 > **Análisis basado en `18º - CONCURSO.xls`, `LIGA POR PESO 2025.xls` y `LIGA RESTA 2025.xls`**.
 >
 > Las clasificaciones son **vistas calculadas** sobre los `CompetitionResult` ya validados. No se persisten (siempre frescas), pero se puede snapshotear al cerrar temporada.
-
-#### 5.A — Bug crítico: PointsCalculator (BLOQUEANTE)
-
-El campo `CompetitionResult.Points` actualmente almacena el peso como puntos (`Points = WeightInGrams`). El algoritmo correcto confirmado con datos reales:
-
-1. Filtrar `DidAttend = true`, ordenar `desc` por `WeightInGrams`.
-2. Asignar `Ranking` con empates: mismo peso → mismo ranking, el siguiente salta.
-3. Puntos del 1º = `N` donde `N = nº de posiciones únicas` (total asistentes − nº de grupos de empate + nº grupos). *Ej 18º: 27 asistentes − 2 empates dobles = **25 pts al 1º***.
-4. Empates: media de los puntos de las posiciones compartidas. *Ej pos 14-15 (1125 g) → (12+11)/2 = **11,5 c/u**. Pos 18-19 (1010 g) → (8+7)/2 = **7,5 c/u***.
-5. Mínimo `League.MinPoints` (default 5) para todo asistente, aunque traiga 0 g.
-6. Ausencia (`DidAttend = false`) → `Points = 0` (sin mínimo).
-
-Items a implementar:
-- [ ] `IPointsCalculator` domain service en `Core` — calcula rankings + puntos para una lista de resultados
-- [ ] `CalculateCompetitionPointsCommand` + Handler — aplica `IPointsCalculator` y persiste en `CompetitionResult.Points` + `CompetitionResult.Ranking`. Idempotente (recalculable).
-- [ ] Invocar automáticamente en `MoveToResultsDraftCommandHandler` (o llamada explícita del admin).
-- [ ] Tests unitarios con datos exactos del `18º - CONCURSO.xls`: 27 participantes, verificar pos 14-15 (11,5), pos 18-19 (7,5), mínimo 5 pts.
 
 #### 5.B — Clasificación detallada (matriz por concurso)
 
@@ -467,12 +483,12 @@ Items a implementar:
 
 | Prio | Item | Estado |
 |------|------|--------|
-| 🔴 Bloqueante | `Points = WeightInGrams` en `CompetitionResult.RecordResult()` — puntos reales NO calculados | Pendiente Fase 5.A |
 | 🟡 Alta | Race condition en `RegisterFishermanCommandHandler` (último spot) | Pendiente |
 | 🟡 Alta | Squashar migraciones `InitialSqlServer` + `Initial` antes del primer deploy real | Pendiente |
 | 🟡 Alta | Verificar rotación de `JWT_SECRET_KEY` si llegó a remoto en historial git | Pendiente |
 | 🟢 Baja | Eliminar o implementar `IFishermanRepository` (interfaz vacía en `Core/Abstractions/`) | Pendiente |
 | 🟢 Baja | Índice único sobre `Fisherman.FederationNumber` + regex `^V-\d+$` | Pendiente |
+| ✅ Resuelta | `Points = WeightInGrams` bug — PointsCalculator rediseñado con escala fija | Hecho Fase 5.A (2026-05-22) |
 | ✅ Resuelta | `Competition` Anemic Model → Rich Domain Model | Hecho Fase 4.A |
 | ✅ Resuelta | `ValidationBehavior<,>` al pipeline MediatR | Hecho Fase 3 |
 

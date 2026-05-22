@@ -39,6 +39,7 @@ import {
   registerFisherman,
   removeRegistration,
   updateCompetitionResult,
+  updateBiggestCatchConfig,
 } from '../../api/competitionsApi';
 import { getFishermen } from '../../api/fishermenApi';
 import type { CompetitionDto, CompetitionResultDto, FishermanDto } from '../../types';
@@ -78,6 +79,10 @@ export default function CompetitionResultsPage() {
   const [editState, setEditState] = useState<EditState | null>(null);
   const [saving, setSaving] = useState(false);
 
+  // Biggest catch config
+  const [biggestCatchMinWeight, setBiggestCatchMinWeight] = useState<number | null>(null);
+  const [savingConfig, setSavingConfig] = useState(false);
+
   // Register modal
   const [registerOpen, setRegisterOpen] = useState(false);
   const [fishermen, setFishermen] = useState<FishermanDto[]>([]);
@@ -114,6 +119,7 @@ export default function CompetitionResultsPage() {
         getCompetitionResults(competitionId),
       ]);
       setCompetition(comp);
+      setBiggestCatchMinWeight(comp.biggestCatchMinWeightInGrams);
       setResults(data);
     } catch {
       setError('Error al cargar los datos del concurso.');
@@ -139,6 +145,20 @@ export default function CompetitionResultsPage() {
       notifications.show({ title: 'Error', message: 'No se pudo eliminar la inscripción.', color: 'red' });
     } finally {
       setDeleting(false);
+    }
+  };
+
+  // ── Biggest catch config ──────────────────────────────────────────────────
+  const handleSaveBiggestCatchConfig = async () => {
+    if (!competitionId) return;
+    setSavingConfig(true);
+    try {
+      await updateBiggestCatchConfig(competitionId, { minWeightInGrams: biggestCatchMinWeight });
+      notifications.show({ title: 'Configuración guardada', message: 'Mínimo pieza mayor actualizado.', color: 'green' });
+    } catch {
+      notifications.show({ title: 'Error', message: 'No se pudo guardar la configuración.', color: 'red' });
+    } finally {
+      setSavingConfig(false);
     }
   };
 
@@ -306,6 +326,32 @@ export default function CompetitionResultsPage() {
           </strong>
           .
         </Alert>
+      )}
+
+      {/* Biggest catch minimum weight config */}
+      {competition && (
+        <Group mb="md" align="flex-end" gap="xs">
+          <Text size="sm" c="dimmed" fw={500}>Mínimo pieza mayor (g):</Text>
+          <NumberInput
+            size="xs"
+            placeholder="Sin mínimo"
+            min={1}
+            value={biggestCatchMinWeight ?? ''}
+            onChange={(v) => setBiggestCatchMinWeight(typeof v === 'number' ? v : null)}
+            style={{ width: 130 }}
+          />
+          <Button
+            size="xs"
+            variant="light"
+            loading={savingConfig}
+            onClick={handleSaveBiggestCatchConfig}
+          >
+            Guardar
+          </Button>
+          {biggestCatchMinWeight === null && (
+            <Text size="xs" c="dimmed">(sin mínimo configurado)</Text>
+          )}
+        </Group>
       )}
 
       {error && <Alert color="red" mb="md">{error}</Alert>}

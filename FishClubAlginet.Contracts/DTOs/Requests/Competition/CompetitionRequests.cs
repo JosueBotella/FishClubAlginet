@@ -11,7 +11,8 @@ public record CreateCompetitionRequest(
     string Zone,
     Subspecialty Subspecialty,
     Category Category,
-    int MaxSpots);
+    int MaxSpots,
+    int? BiggestCatchMinWeightInGrams = null);
 
 public record RegisterFishermanRequest(
     Guid CompetitionId,
@@ -23,4 +24,6 @@ public record UpdateCompetitionResultRequest
     public int WeightInGrams { get; init; }
     public int? BiggestCatchWeight { get; init; }
 }
+
+public record UpdateBiggestCatchConfigRequest(int? MinWeightInGrams);
 

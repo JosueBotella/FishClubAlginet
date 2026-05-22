@@ -34,7 +34,8 @@ public sealed class GetCompetitionByIdQueryHandler
                 c.Status.ToString(),
                 c.MaxSpots,
                 c.ParticipantCount,
-                c.LastUpdateUtc))
+                c.LastUpdateUtc,
+                c.BiggestCatchMinWeightInGrams))
             .FirstOrDefault();
 
         if (dto is null)
