@@ -1,182 +1,118 @@
-# Roadmap
+# Roadmap de Progreso - FishClubAlginet
 
-## Fase 3: Concursos y Resultados ✅
-
-### Capa 1: Dominio (Core)
-- [x] Crear Enums: `Subspecialty`, `Category`, `CompetitionStatus`.
-- [x] Crear Entidad `Competition` (con reglas de negocio y estados).
-- [x] Crear Entidad `CompetitionResult` (vinculación pescador-concurso y lógica de puntos).
-
-### Capa 2: Infraestructura (Infrastructure)
-- [x] Configuración Fluent API para `Competition` (Índice único: LeagueId + Number).
-- [x] Configuración Fluent API para `CompetitionResult` (Índice único: CompetitionId + FishermanId).
-- [x] Crear y ejecutar Migración de EF Core: `AddCompetitions`.
-
-### Capa 3: Aplicación (Application)
-- [x] Definir DTOs de Fase 3 (`CompetitionDto`, `CompetitionResultDto`, `CreateCompetitionRequest`, `RegisterFishermanRequest`).
-- [x] Implementar Command: `CreateCompetitionCommand` + Handler + Validator (Solo Admin).
-- [x] Implementar Command: `RegisterFishermanCommand` + Handler + Validator.
-- [x] Implementar Query: `GetCompetitionResultsQuery` (Rankings calculados en tiempo real).
-- [x] Implementar Query: `GetCompetitionsByLeagueQuery` (listado de concursos por liga).
-
-### Capa 4: API (Presentación backend)
-- [x] `CompetitionsController`: GET /competitions?leagueId, POST /competitions, POST /competitions/{id}/register, GET /competitions/{id}/results.
-
-### Capa 5: Presentación (React)
-- [x] `types/competition.ts` — interfaces TypeScript para todos los DTOs.
-- [x] `api/competitionsApi.ts` — cliente Axios (getByLeague, create, register, getResults).
-- [x] `constants/endpoints.ts` + `routes.ts` — endpoints y rutas actualizados.
-- [x] `AdminLeaguesPage` — icono para navegar a concursos de cada liga.
-- [x] `AdminCompetitionsPage` — listado de concursos con estado y plazas.
-- [x] `CreateCompetitionModal` — formulario completo (número, fecha, venue, zona, subesp., categoría, plazas).
-- [x] `CompetitionResultsPage` — tabla de resultados con ranking en tiempo real + modal inscripción pescador.
-- [x] `App.tsx` — rutas registradas con ProtectedRoute Admin.
+## Estado General del Proyecto
+- **Backend:** Arquitectura Limpia (Clean Architecture), .NET 10, EF Core, SQL Server Express, MediatR (CQRS), Outbox Pattern. CRUDs principales completos y lógica de dominio rica en funcionamiento.
+- **Frontend:** React 19 + TypeScript, Mantine v7, Axios, Client-side routing. Vistas de administración para usuarios, pescadores, ligas y concursos operativas con guards de estado.
+- **Base de Datos:** Migrado de PostgreSQL a SQL Server Express. Soporta dockerización completa en entornos de desarrollo y producción.
 
 ---
 
-## ✅ Fase 3.5: Estabilización del Outbox Pattern (COMPLETADA 2026-05-15)
+## ✅ Fase 1 a Fase 4: Infraestructura, Auth, Ligas y Concursos (COMPLETADAS)
 
-> Bugs silenciosos detectados el 2026-05-14. Resueltos el 2026-05-15.
+### Fase 1: Auth, Identity y Dockerización
+- [x] Configuración de ASP.NET Core Identity con roles `Admin` y `Fisherman`.
+- [x] Autenticación JWT en backend y almacenamiento seguro con tokens en frontend.
+- [x] Muro de login, rutas protegidas y sidebar adaptativo por rol en frontend.
+- [x] Dockerización multi-stage para desarrollo (`docker-compose.yml`) y producción (`docker-compose.prod.yml`).
+- [x] Integración de Portainer para monitorización local.
 
-### TASK-A — Interceptor genérico para todas las entidades con eventos ✅
-- [x] Interfaz `IHasDomainEvents` añadida en `Core/Domain/Entities/BaseEntity.cs`.
-- [x] `BaseEntity<TId>` implementa `IHasDomainEvents`.
-- [x] `Entries<BaseEntity<int>>()` → `Entries<IHasDomainEvents>()` en el interceptor.
-- [ ] Test de integración pendiente (TASK-C lo cerrará con `LeagueActivatedDomainEvent` si se implementa).
+### Fase 2: Gestión de Ligas
+- [x] Entidad `League` con Rich Domain Model (métodos de activación, inactivación, archivo e históricos).
+- [x] CRUD de ligas con endpoints REST y handlers de MediatR correspondientes.
+- [x] Grid de administración de ligas en frontend con modals para creación/edición.
 
-### TASK-B — Resolver de tipos generalizado en el job ✅
-- [x] Namespace hardcoded eliminado. Implementada **Opción 3 (AppDomain scan)**: `AppDomain.CurrentDomain.GetAssemblies().SelectMany(...).FirstOrDefault(t => t.Name == outboxMessage.Type && typeof(IDomainEvent).IsAssignableFrom(t) && !t.IsAbstract)`.
-- [x] Sin migración EF — columna `Type` sigue con `Name` simple (retrocompatible).
-- [x] `try/catch` en `GetTypes()` por ensamblados dinámicos.
+### Fase 3: Concursos y Resultados Básicos
+- [x] Entidades `Competition` y `CompetitionResult` (que combinan registro y resultado) con índices únicos para evitar duplicidades de pesquera e inscripción doble.
+- [x] Transiciones de estado del concurso: `Planned` $\rightarrow$ `RegistrationOpen` $\rightarrow$ `Closed`.
+- [x] Flujos de registro e inscripción de pescadores desde frontend.
+- [x] Asignación secuencial automática de pesqueras (`AssignSpotsCommand`).
 
-### Mejora arquitectural: interceptor vía DI ✅ *(bonus — 2026-05-15)*
-- [x] Eliminado `new ConvertDomainEventsToOutboxMessagesInterceptor()` de `AppDbContext.OnConfiguring`.
-- [x] Registrado como `AddSingleton<ConvertDomainEventsToOutboxMessagesInterceptor>()` en `Program.cs`.
-- [x] `AddDbContext` migrado a patrón `(sp, options) => options.AddInterceptors(sp.GetRequiredService<...>())`.
+### Fase 3.5: Estabilización del Outbox Pattern
+- [x] Interceptor `ConvertDomainEventsToOutboxMessagesInterceptor` generalizado con la interfaz `IHasDomainEvents` (captura eventos de todas las entidades, no solo de tipo `int`).
+- [x] Job `ProcessOutboxMessagesJob` adaptado para escanear tipos en el AppDomain, resolviendo tipos dinámicos sin nombres de espacio hardcodeados.
+- [x] Domain events en `Fisherman` (`Added`, `Updated`, `Deleted`) integrados y testados con cobertura del 100% de los handlers con FluentAssertions.
 
-### TASK-C — Cerrar TODOs de `Fisherman` (Update + Delete con domain events) ✅
-- [x] Crear `FishermanUpdatedDomainEvent.cs` + handler stub (`FishermanUpdatedDomainEventHandler`).
-- [x] Crear `FishermanDeletedDomainEvent.cs` + handler stub (`FishermanDeletedDomainEventHandler`).
-- [x] `Fisherman.Update()` descomentado — mutación de estado puro (sin RaiseDomainEvent, evita dependencia circular Core → Application).
-- [x] `Fisherman.Delete()` descomentado — ídem.
-- [x] `UpdateFishermanCommandHandler.cs` (NEW) — lanza `FishermanUpdatedDomainEvent` antes de SaveChanges.
-- [x] `SoftDeleteFishermanCommandHandler.cs` refactorizado — usa `GetById + fisherman.Delete() + RaiseDomainEvent`.
-- [x] `UpdateFishermanCommandHandlerTests.cs` (NEW, 6 tests — verifica domain event + campos + error paths).
-- [x] `SoftDeleteFishermanCommandHandlerTests.cs` actualizado (5 tests — verifica domain event).
-
-### Build fix ✅
-- [x] CS0246 en `Program.cs`: `global using FishClubAlginet.Infrastructure.Persistence.Interceptors;` añadido a `API/GlobalUsing.cs`.
-
-### Definition of Done de Fase 3.5 ✅
-- [x] Los tres eventos (`FishermanAdded`, `FishermanUpdated`, `FishermanDeleted`) implementados, con handlers y circulan por el Outbox.
-- [x] Un evento nuevo en cualquier bounded context circulará sin tocar interceptor ni job (TASK-A + TASK-B).
-- [ ] Verificación manual: cero registros con `Error IS NOT NULL` en `OutboxMessages` tras ciclo limpio (pendiente ejecución Docker).
+### Fase 4: Concursos Avanzados y Ligas Archivadas
+- [x] Transiciones de estado avanzado: `Closed` $\rightarrow$ `ResultsDraft` $\rightarrow$ `ResultsValidated`.
+- [x] Acciones avanzadas: reapertura de inscripciones (`ReopenRegistration` con ventana de 30 días) y desarchivo de ligas.
+- [x] Pestañas de clasificación básica por peso y puntos en `LeagueStandingsPage` en frontend.
+- [x] Guards de estado en frontend (`EDITABLE_STATUSES` para edición de resultados únicamente en borrador o cerrado).
 
 ---
 
-## Fase 3 — Capa Application (✅ completada 2026-05-15)
+## ✅ Fase 5.A: PointsCalculator + Configuración de Pieza Mayor (COMPLETADA 2026-05-22)
 
-- [x] `ValidationPipelineBehavior` + `DependencyInjection.cs` + `Application.csproj` actualizado.
-- [x] Validators en `OpenRegistrationCommandHandler` y `CloseRegistrationCommandHandler`.
-- [x] Tests: `ValidationPipelineBehaviorTests`, `CreateCompetitionCommandHandlerTests`, `RegisterFishermanCommandHandlerTests`, `OpenCloseRegistrationCommandHandlerTests`.
+### 5.A — Sistema de puntos rediseñado y automatizado
+- [x] Interfaz `IPointsCalculator` definida en el dominio (`Core/Domain/Services`).
+- [x] Implementación en `PointsCalculatorService` (Application) siguiendo las reglas del club:
+  - Asistencia base: `League.MinPoints` (= 5 puntos) para todo el que asista (`DidAttend = true`).
+  - Bonus por ranking: Posiciones 1 a 20 reciben bonus decreciente (+20 a +1 punto). Posiciones 21+ reciben +0 puntos.
+  - Gestión de empates: Los empatados en peso en el top 20 reciben el ranking de inicio de grupo y se reparten equitativamente un bonus de `+1 / nEmpatados`.
+  - Ausentes: Reciben 0 puntos y ranking 0.
+- [x] Integración automática en `MoveToResultsDraftCommandHandler` justo antes de persistir los resultados en la base de datos.
+- [x] Cobertura de tests unitarios al 100% en `PointsCalculatorServiceTests.cs` (10 tests detallando happy path, empates dobles/triples, posiciones >20, ausentes y casos sin capturas).
 
----
-
-## ✅ Fase 4 — Full-stack estados de concurso + clasificación (COMPLETADA 2026-05-16)
-
-### 4.A — Backend ✅
-- [x] **`ReopenRegistrationCommand`** — `Closed → RegistrationOpen`, ventana ≤30 días. `PUT /competitions/{id}/reopen-registration`.
-- [x] **`UnarchiveLeagueCommand`** — `IsArchived=false, IsActive=false`. `PUT /leagues/{id}/unarchive`.
-- [x] **`AssignSpotsCommand`** — asignación secuencial por `RegistrationDate`. Permitido en `RegistrationOpen` o `Closed`. `POST /competitions/{id}/assign-spots`.
-- [x] **`MoveToResultsDraftCommand`** — `Closed → ResultsDraft`. `POST /competitions/{id}/results-draft`.
-- [x] **`ValidateResultsCommand`** — `ResultsDraft → ResultsValidated`. `POST /competitions/{id}/validate-results`.
-- [x] **`GetCompetitionByIdQuery`** — `GET /competitions/{id}` para el frontend.
-- [x] **`GetLeagueStandingsQuery`** — `GET /leagues/{id}/standings`. ByWeight + ByPoints con descarte configurable.
-- [x] **`GetAllLeaguesQuery`** ampliado con `archived?` — filtra ligas archivadas/no archivadas.
-- [x] Rich domain methods en `Competition`: `OpenRegistration`, `CloseRegistration`, `ReopenRegistration`, `MoveToResultsDraft`, `ValidateResults`.
-- [x] `League.Unarchive()` domain method.
-- [x] Tests: `ReopenRegistrationCommandHandlerTests`, `AssignSpotsCommandHandlerTests`, `MoveToResultsDraftAndValidateTests`, `UnarchiveLeagueCommandHandlerTests`.
-- [ ] **Revisar concurrencia** en `RegisterFishermanCommandHandler` (race condition potencial último spot) — deuda técnica.
-
-### 4.B/C — Frontend ✅
-- [x] **`ConfirmationModal`** componente reutilizable.
-- [x] **`AdminLeaguesPage`** — filtra archivadas, ConfirmationModal al archivar, botón histórico, botón clasificación.
-- [x] **`AdminArchivedLeaguesPage`** (nueva) — lista archivadas, ConfirmationModal al desarchivar.
-- [x] **`AdminCompetitionsPage`** — panel de estado completo, ConfirmationModal unificado, todos los botones de transición por estado.
-- [x] **`CompetitionResultsPage`** — fetcha `CompetitionDto` al cargar, guarda edición solo en `Closed`/`ResultsDraft`, Alert informativo en otros estados.
-- [x] **`LeagueStandingsPage`** (nueva) — tabs "Por puntos" (con descarte) y "Por peso".
-- [x] Rutas `ArchivedLeagues`, `LeagueStandings` en `App.tsx` + `routes.ts`.
-- [x] `endpoints.ts`, `leaguesApi.ts`, `competitionsApi.ts`, `types/competition.ts` — todo actualizado.
+### 5.A.bis — Configuración de Pieza Mayor por Competición
+- [x] Agregar campo nullable `BiggestCatchMinWeightInGrams` a `Competition` con migración SQL Server exitosa.
+- [x] Crear endpoint `PATCH /api/competitions/{id}/biggest-catch-config` accesible a administradores.
+- [x] Añadir control inline `NumberInput` en la página de resultados del concurso (`CompetitionResultsPage.tsx`) en frontend para actualizar y guardar este mínimo dinámicamente en tiempo real.
+- [x] Soporte en la creación de concursos (`CreateCompetitionModal.tsx`) para asignar este límite desde el inicio.
 
 ---
 
----
+## 🔲 Fase 5.B - 5.E: Clasificación Detallada y Pieza Mayor (EN CURSO)
 
-## 🔴 Fase 5 — PointsCalculator + Clasificación detallada (PRÓXIMA)
+### 5.B — Clasificación Detallada (Matriz por Concurso)
+- [ ] Ampliar `GetLeagueStandingsQuery` para devolver un desglose matricial: `FishermanId` -> `Dictionary<Guid, decimal>` (puntos/peso por cada `CompetitionId`).
+- [ ] Definir DTO `LeagueStandingsDetailDto` para estructurar la matriz de forma óptima.
+- [ ] Diseñar tests unitarios y de integración basándose en los datos reales de la temporada 2025 (`LIGA POR PESO 2025.xls`, ~43 pescadores, 18 concursos).
+- [ ] **Columna "RESTA" (Descartes):** Pendiente de definir reglas por parte del cliente. De momento, mostrar tooltip *"Pendiente de definir"* en frontend.
 
-### 5.A — Bug crítico: Points = WeightInGrams (BLOQUEANTE) 🔴
+### 5.C — Agregaciones de Pieza Mayor
+- [ ] Implementar query `GetSeasonBiggestCatchQuery(Guid leagueId)` para retornar la captura récord de la liga (Pescador, Concurso, Peso).
+- [ ] Implementar query `GetCompetitionBiggestCatchQuery(Guid competitionId)` para obtener la pieza mayor de una jornada.
+- [ ] Incluir la marca y cálculo de pieza mayor en el acta de resultados oficial de cada concurso.
 
-`CompetitionResult.RecordResult()` almacena `Points = WeightInGrams`. Los puntos reales (ranking inverso con empates y mínimo) NO se calculan en ningún sitio.
+### 5.D — Frontend para Matriz Detallada
+- [ ] Modificar `LeagueStandingsPage.tsx` para renderizar una tabla scrollable horizontal que liste todos los concursos de la temporada como columnas (`[C1] [C2] ... [CN]`).
+- [ ] Agregar fila final con la suma total y promedios por jornada.
+- [ ] Diseñar la pestaña "Pieza Mayor" (`/leagues/{id}/biggest-catches`) en frontend.
+- [ ] Agregar widgets resumen de la liga en el panel principal (`HomePage.tsx`).
 
-**Algoritmo confirmado** con `18º - CONCURSO.xls`:
-1. Filtrar `DidAttend = true`, ordenar desc por `WeightInGrams`.
-2. Asignar `Ranking` con empates (mismo peso → mismo rank, el siguiente salta).
-3. Puntos 1º = N (posiciones únicas). *Ej 18º: 27 asistentes − 2 empates dobles = **25 pts al 1º***.
-4. Empates comparten media de puntos. *Ej pos 14-15 (1125 g) → 11,5. Pos 18-19 (1010 g) → 7,5*.
-5. Mínimo `League.MinPoints` (default 5) para asistentes con 0 g.
-6. Ausencia → `Points = 0`, sin mínimo.
-
-**Items a implementar:**
-- [ ] `IPointsCalculator` domain service en `Core` — stateless, recibe `IEnumerable<CompetitionResultInput>` + `minPoints`, devuelve `IEnumerable<CalculatedResult>`.
-- [ ] `PointsCalculator` implementación en `Application`.
-- [ ] `CalculateCompetitionPointsCommand(Guid CompetitionId)` + Handler — obtiene resultados, llama al servicio, persiste `Points` + `Ranking` en cada `CompetitionResult`. Idempotente.
-- [ ] Llamada automática en `MoveToResultsDraftCommandHandler` justo antes de `SaveChangesAsync`.
-- [ ] Tests unitarios `PointsCalculatorTests` — al menos 8 casos: happy path, empate doble, empate triple, todos con 0 g, un solo participante, mínimo aplicado, ausencia, mezcla asistentes+ausentes.
-- [ ] Verificación con datos reales del `18º - CONCURSO.xls`: 27 participantes, pos 14-15 = 11,5, pos 18-19 = 7,5.
-
-### 5.B — Clasificación detallada (matriz por concurso)
-- [ ] Ampliar `GetLeagueStandingsQuery` con desglose por concurso: nuevo DTO `LeagueStandingsDetailDto` con `Competitions[]` + `ResultsPerCompetition: Dictionary<Guid, decimal>` por pescador.
-- [ ] Tests con datos de `LIGA POR PESO 2025.xls` (43 pescadores, 18 concursos, total 1.071.845 g).
-- [ ] **Columna "RESTA"**: ⚠️ PENDIENTE DEL CLIENTE — no implementar hasta recibir la regla exacta.
-- [ ] Frontend: `LeagueStandingsPage` ampliada con scroll horizontal, totales por concurso, exportar Excel.
-
-### 5.C — Pieza Mayor
-- [ ] `GetSeasonBiggestCatchQuery(leagueId)` — pescador + peso + concurso.
-- [ ] `GetCompetitionBiggestCatchQuery(competitionId)`.
-- [ ] Widget en `/home` con resumen de liga activa.
-
-### 5.D — Snapshots al archivar (opcional)
-- [ ] Entidad `LeagueSeasonSnapshot`. Command `ArchiveLeagueWithSnapshotCommand`.
+### 5.E — Snapshots de Temporada
+- [ ] Crear la entidad de persistencia `LeagueSeasonSnapshot` para guardar el estado final inmutable de la liga.
+- [ ] Implementar `ArchiveLeagueWithSnapshotCommand` que se ejecute en cascada al archivar una liga activa.
 
 ---
 
-## 🔲 Fase 6 — Acta Oficial FPCV (Word/PDF)
+## 🔲 Planificación de Fases Futuras
 
-- [ ] Generación programática del Acta Word con `OpenXml SDK` o `DocX`.
-- [ ] Endpoint `GET /api/competitions/{id}/acta?format={pdf|docx}` (solo Admin, solo `ResultsValidated`).
-- [ ] Conversor Word → PDF (LibreOffice headless o `Spire.Doc`).
-- [ ] `GenerateActaRequest` con campos editables (presidente, jueces, especies, tiempo).
-- [ ] Frontend: botón **Generar Acta** en detalle concurso (`ResultsValidated`) con modal de campos y descarga.
+### Fase 6: Acta Oficial FPCV (Word/PDF)
+- [ ] Integrar generación de documentos oficiales con `OpenXml SDK` o `DocX` en backend.
+- [ ] Programar los filtros de edad automatizados para rellenar las columnas `< 14 años` y `> 14 años` usando la fecha de nacimiento (`Fisherman.DateOfBirth`) contra la del concurso.
+- [ ] Endpoint `GET /api/competitions/{id}/acta?format={pdf|docx}` disponible cuando `Status = ResultsValidated`.
+- [ ] Formulario interactivo en frontend para rellenar campos variables (jueces, presidente, especies, tiempo de pesca) antes de la descarga.
+
+### Fase 7: Frontend para Rol Fisherman
+- [ ] Página de calendario de concursos (`/calendar`).
+- [ ] Página personal del pescador (`/my-registrations`) para ver estado de sorteos, pesqueras asignadas e histórico de pesajes propios.
+- [ ] Adaptar la barra lateral de navegación para usuarios con rol Fisherman.
+
+### Fase 8: Estadísticas y Reporting
+- [ ] Gráficos evolutivos de pesca total (kg acumulados por año/escenario) con `recharts`.
+- [ ] Exportación directa de clasificaciones y grids a formato Excel (`.xlsx`).
 
 ---
 
-## 🔲 Fase 7 — Frontend rol Fisherman
+## Deuda Técnica Priorizada
 
-- [ ] Página Calendario (`/calendar`) — concursos de la liga activa.
-- [ ] Página Mis inscripciones (`/my-registrations`) — concursos inscritos con resultado.
-- [ ] Sidebar adaptado al rol `Fisherman`.
-
----
-
-## Deuda técnica
-
-| Prio | Item | Estado |
-|------|------|--------|
-| 🔴 | `Points = WeightInGrams` en `RecordResult()` | Fase 5.A |
-| 🟡 | Race condition `RegisterFishermanCommandHandler` (último spot) | Pendiente |
-| 🟡 | Squashar migraciones iniciales antes del deploy | Pendiente |
-| 🟡 | Verificar/rotar `JWT_SECRET_KEY` si está en historial git | Pendiente |
-| 🟢 | Eliminar `IFishermanRepository` vacía | Pendiente |
-| 🟢 | Índice único `Fisherman.FederationNumber` + regex `^V-\d+$` | Pendiente |
-| ✅ | `Competition` Rich Domain Model | Fase 4.A |
-| ✅ | `ValidationBehavior<,>` en pipeline MediatR | Fase 3 |
+| Prioridad | Descripción del Item | Bounded Context | Estado |
+| :---: | :--- | :---: | :---: |
+| 🟡 **Media** | Controlar carrera de competidores en el último spot disponible en `RegisterFishermanCommandHandler`. | Application | Pendiente |
+| 🟡 **Media** | Integrar/squashar migraciones de desarrollo (`InitialSqlServer` + `Initial`) antes de producción. | Infrastructure | Pendiente |
+| 🟡 **Media** | Auditar historial git para asegurar la no exposición de claves secretas (`JWT_SECRET_KEY`). | DevOps | Pendiente |
+| 🟢 **Baja** | Eliminar la interfaz vacía `IFishermanRepository` si se usa exclusivamente el repositorio genérico. | Core | Pendiente |
+| 🟢 **Baja** | Aplicar índice único y restricción regex `^V-\d+$` en `Fisherman.FederationNumber`. | Core / DB | Pendiente |
+| ✅ **Resuelta** | Corregir bug crítico de asignación de gramos como puntos en el cálculo de resultados. | Core / App | **Resuelto (5.A)** |
+| ✅ **Resuelta** | Refactorizar `Competition` de modelo anémico a Rich Domain Model. | Core | **Resuelto (4.A)** |
+| ✅ **Resuelta** | Registrar `ValidationBehavior` global en el pipeline de MediatR para validaciones automáticas. | Application | **Resuelto (3)** |
