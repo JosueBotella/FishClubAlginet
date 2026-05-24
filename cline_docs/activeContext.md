@@ -11,6 +11,16 @@ También se ha completado la configuración del **mínimo de peso para Pieza May
 
 ---
 
+## 🔴 NUEVO REQUERIMIENTO — Zona de Concurso Opcional
+
+- **Descripción:** El campo de zona (`Zone`) en la entidad `Competition` y en la interfaz de creación de concursos es actualmente **obligatorio**. Se requiere cambiarlo para que sea **opcional (nullable)**.
+- **Acciones técnicas requeridas:**
+  - **Core/Backend:** Cambiar tipo de `Zone` a `string?` en `Competition.cs`.
+  - **Application/Validators:** Modificar `CreateCompetitionCommandValidator` para omitir la regla de obligatoriedad en `Zone` y permitir valores nulos o vacíos.
+  - **Frontend:** En `CreateCompetitionModal.tsx`, ajustar el formulario de Mantine para no exigir "Zona" (hacerlo opcional quitando asteriscos de validación).
+
+---
+
 ## 🔲 Foco de Trabajo Actual — Fase 5.B-E: Clasificación detallada + Pieza Mayor + Frontend
 
 Estamos listos para abordar las siguientes sub-fases de clasificación avanzada:
@@ -48,6 +58,7 @@ Estamos listos para abordar las siguientes sub-fases de clasificación avanzada:
 1. **Fase 6: Acta Oficial FPCV (Word/PDF):** Generación programática del Acta FPCV basada en la plantilla oficial. Integración de datos de participantes, pesajes, piezas mayores, datos federativos y filtros de edad automatizados (<14 y >14 años).
 2. **Fase 7: Frontend rol Fisherman:** Vistas e interfaces adaptadas para pescadores no administradores (calendario `/calendar`, mis inscripciones `/my-registrations` y navegación acotada).
 3. **Fase 8: Estadísticas y Reporting:** Dashboard global con gráficos (recharts), evolución de kg/concurso e histórico del club.
+4. **Fase de Revisión de Tests y Mockeo:** Refactorizar y ampliar la suite de pruebas mediante el plan estructurado de [test_review_plan.md](file:///C:/Users/spawndevuser/.gemini/antigravity/brain/a6d74e53-07f9-449b-8472-052cbb9ec34c/test_review_plan.md) (crear tests unitarios puros para Core, estandarizar Builders de datos y robustecer verificaciones de UoW).
 
 ---
 

@@ -18,7 +18,7 @@ const DEFAULT_FORM: CreateCompetitionFormData = {
   startTime: '09:00:00',
   endTime: '14:00:00',
   venue: '',
-  zone: '',
+  zone: null,
   subspecialty: 'Mar',
   category: 'Seniors',
   maxSpots: 30,
@@ -34,7 +34,6 @@ export default function CreateCompetitionModal({ opened, leagueId, onClose, onSu
       startTime: (v: string) => (v ? null : 'La hora de inicio es obligatoria'),
       endTime: (v: string) => (v ? null : 'La hora de fin es obligatoria'),
       venue: (v: string) => (v.trim().length > 0 ? null : 'El lugar es obligatorio'),
-      zone: (v: string) => (v.trim().length > 0 ? null : 'La zona es obligatoria'),
       maxSpots: (v: number) => (v > 0 ? null : 'Debe ser > 0'),
     },
   });
@@ -50,6 +49,7 @@ export default function CreateCompetitionModal({ opened, leagueId, onClose, onSu
         ...values,
         leagueId,
         name: values.name?.trim() || null,
+        zone: values.zone?.trim() || null,
       });
       notifications.show({
         title: 'Concurso creado',
@@ -120,10 +120,11 @@ export default function CreateCompetitionModal({ opened, leagueId, onClose, onSu
               {...form.getInputProps('venue')}
             />
             <TextInput
-              label="Zona"
+              label="Zona (opcional)"
               placeholder="C, B, SUR..."
-              required
-              {...form.getInputProps('zone')}
+              value={form.values.zone ?? ''}
+              onChange={(e) => form.setFieldValue('zone', e.currentTarget.value || null)}
+              error={form.errors.zone}
             />
           </Group>
 

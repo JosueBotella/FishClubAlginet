@@ -7,7 +7,7 @@ export interface CompetitionDto {
   startTime: string;
   endTime: string;
   venue: string;
-  zone: string;
+  zone: string | null;
   subspecialty: 'Mar' | 'AguaDulce';
   category: 'Seniors' | 'Juvenil';
   status: 'Planned' | 'RegistrationOpen' | 'Closed' | 'ResultsDraft' | 'ResultsValidated';
@@ -39,7 +39,7 @@ export interface CreateCompetitionRequest {
   startTime: string;
   endTime: string;
   venue: string;
-  zone: string;
+  zone: string | null;
   subspecialty: 'Mar' | 'AguaDulce';
   category: 'Seniors' | 'Juvenil';
   maxSpots: number;

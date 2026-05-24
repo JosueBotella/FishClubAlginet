@@ -9,7 +9,7 @@ public record CompetitionDto(
     TimeSpan StartTime,
     TimeSpan EndTime,
     string Venue,
-    string Zone,
+    string? Zone,
     string Subspecialty,
     string Category,
     string Status,

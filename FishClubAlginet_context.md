@@ -57,11 +57,11 @@ FishClubAlginet.Tests         → Unit tests (xUnit, Moq, FluentAssertions)
 - **League:** Id (Guid), Name, Year (int), IsActive, MinPoints (int, default 5 — puntos mínimos que recibe cada participante), WorstResultsToDiscard (int, default 0 — nº de peores resultados a restar en clasificación por puntos). → 1:N con Competitions.
   - Reglas de negocio:
     - Siempre se calculan DOS clasificaciones: por peso total acumulado (gramos) y por puntos (sistema resta).
-    - Sistema de puntos: el 1º recibe N puntos (N = nº participantes del concurso menos posiciones de empate), descendiendo 1 punto por posición. Mínimo = MinPoints (siempre 5, incluso con 0 capturas). Empates en peso → se reparten los puntos de las posiciones afectadas (ej: dos empatados en pos. 18-19 → (8+7)/2 = 7.5 cada uno).
+    - Sistema de puntos: el 1º recibe 20 puntos base de ranking, descendiendo 1 punto por cada puesto sucesivo (1º = 20, 2º = 19, 3º = 18, etc.) hasta la posición 20 (+1 punto). Además, cada asistente recibe MinPoints (default 5) de asistencia. En caso de empate en el top 20, se reparte 1 punto adicional entre los empatados (+1 / nEmpatados a cada uno). Ejemplo: 2º y 3º empatados sin contar asistencia reciben 19.5 y 18.5 puntos respectivamente (con MinPoints = 5, el total es 24.5 y 23.5).
     - Sistema resta: al total de puntos acumulados se le descuentan los N peores resultados (WorstResultsToDiscard).
     - No participar en un concurso = no recibir puntos (no se asigna MinPoints por ausencia).
 
-- **Competition:** Id (Guid), CompetitionNumber (int — nº ordinal dentro de la liga: 1º, 2º... 18º), Name, Date, StartTime, EndTime, Venue (string — escenario: "Bellús", "Pinedo", "Fortaleny"), Zone (string — zona: "Norte", "Sur", "C", "B", "A1-A2-A3"...), Subspecialty (string — "MAR", "AGUA DULCE"), Category (string — "SENIORS", "JUVENIL"), MaxSpots (int), ParticipantCount (int — nº real de participantes), **BiggestCatchMinWeightInGrams (int?, nullable — peso mínimo en gramos para que una captura se considere "pieza mayor"; sin valor = sin mínimo)**, LeagueId (FK). → Pertenece a League, 1:N con CompetitionResults.
+- **Competition:** Id (Guid), CompetitionNumber (int — nº ordinal dentro de la liga: 1º, 2º... 18º), Name, Date, StartTime, EndTime, Venue (string — escenario: "Bellús", "Pinedo", "Fortaleny"), Zone (string?, nullable — opcional, zona: "Norte", "Sur", "C", "B", "A1-A2-A3"...), Subspecialty (string — "MAR", "AGUA DULCE"), Category (string — "SENIORS", "JUVENIL"), MaxSpots (int), ParticipantCount (int — nº real de participantes), **BiggestCatchMinWeightInGrams (int?, nullable — peso mínimo en gramos para que una captura se considere "pieza mayor"; sin valor = sin mínimo)**, LeagueId (FK). → Pertenece a League, 1:N con CompetitionResults.
   - Método `SetBiggestCatchMinWeight(int?)` en el dominio.
   - Endpoint `PATCH /api/competitions/{id}/biggest-catch-config` body `{ minWeightInGrams: int? }` para actualizar el mínimo en cualquier momento.
 
@@ -116,20 +116,39 @@ POST /api/fishermen/add
 
 ## Estándares de Código Backend
 
-### Testing (AAA obligatorio)
+### Testing y Mockeo de Datos (AAA obligatorio)
+
+Las pruebas unitarias son críticas para asegurar la fiabilidad y regresiones. Se estructuran estrictamente bajo el patrón **Arrange, Act, Assert (AAA)**.
+
+#### 1. Nomenclatura Estándar de Tests
+El nombre de cada método de test debe ser autodescriptivo e indicar claramente el flujo y comportamiento esperado:
+`// Naming: NombreMetodo_EscenarioODe entrada_ComportamientoEsperado`
+*Ejemplo:* `Handle_DuplicateYear_ShouldReturnDuplicateYearErrorAndNotPersist`
+
+#### 2. FluentAssertions
+Se utiliza **FluentAssertions** de forma exclusiva para evaluar los resultados en los asserts:
 ```csharp
-// Naming: MethodName_StateUnderTest_ExpectedBehavior
-[Fact]
-public async Task Handle_WhenValidRequest_ShouldCreateFisherman()
-{
-    // Arrange
-    // Act
-    // Assert — FluentAssertions exclusivamente
-    result.IsSuccess.Should().BeTrue();
-}
+result.IsSuccess.Should().BeTrue();
+result.Value.Should().NotBeEmpty();
+result.FirstError.Code.Should().Be("League.DuplicateYear");
 ```
-- Result Pattern: `.IsSuccess`, `.IsFailure`, `.Value`, `.Errors`
-- Fixtures: usar y extender `FisherManFixture`
+*Evitar:* `Assert.True()`, `Assert.Equal()`.
+
+#### 3. Estándar de Mockeo (Moq)
+* **Testing del Core (Dominio):** Las entidades ricas (`League`, `Competition`, `CompetitionResult`) y los Value Objects deben probarse con tests unitarios directos **sin mockeo**. Son métodos mutadores puros de estado que no tocan infraestructura.
+* **Handlers e Infrastructure:** Se mockean las dependencias (`IGenericRepository<T, TId>`, `IUnitOfWork`, `ILogger`).
+  * **Verificación de Transaccionalidad:** En todo comando de escritura (Commands), se **debe** verificar que se guardaron los cambios llamando a `SaveChangesAsync` exactamente una vez:
+    `_mockUnitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);`
+  * **Mockeo de Guardado (UoW):**
+    * *Guardado Exitoso:* `_mockUnitOfWork.Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync((ErrorOr<int>)1);`
+    * *Error transaccional:* `_mockUnitOfWork.Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(Error.Conflict("Database.UniqueConstraintViolation", "..."));`
+
+#### 4. Fixtures y Builders de Datos para Pruebas
+* Para evitar código repetitivo y boilerplate en la instanciación de entidades dentro del bloque *Arrange*, se utiliza el **Builder Pattern** (`LeagueBuilder`, `CompetitionBuilder`) o se extienden las clases fixtures en `FishClubAlginet.Tests/Data/` (ej: `FisherManFixture`).
+* Ejemplo de uso de Builder en Arrange:
+  ```csharp
+  var league = new LeagueBuilder().WithId(Guid.NewGuid()).Active().Build();
+  ```
 
 ### C# preferido
 - Primary constructors, records para DTOs

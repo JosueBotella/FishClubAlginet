@@ -63,6 +63,7 @@
 ## 🔲 Fase 5.B - 5.E: Clasificación Detallada y Pieza Mayor (EN CURSO)
 
 ### 5.B — Clasificación Detallada (Matriz por Concurso)
+- [ ] **Zona de Concurso Opcional (NUEVO REQUERIMIENTO):** Modificar la obligatoriedad del campo `Zone` en `Competition` para que sea opcional (`string?` nullable) en base de datos, backend (validadores de creación) y frontend (formulario `CreateCompetitionModal`).
 - [ ] Ampliar `GetLeagueStandingsQuery` para devolver un desglose matricial: `FishermanId` -> `Dictionary<Guid, decimal>` (puntos/peso por cada `CompetitionId`).
 - [ ] Definir DTO `LeagueStandingsDetailDto` para estructurar la matriz de forma óptima.
 - [ ] Diseñar tests unitarios y de integración basándose en los datos reales de la temporada 2025 (`LIGA POR PESO 2025.xls`, ~43 pescadores, 18 concursos).
@@ -102,6 +103,11 @@
 - [ ] Gráficos evolutivos de pesca total (kg acumulados por año/escenario) con `recharts`.
 - [ ] Exportación directa de clasificaciones y grids a formato Excel (`.xlsx`).
 
+### 🔲 Fase de Revisión de Tests Unitarios y Mockeo (Plan en [test_review_plan.md](file:///C:/Users/spawndevuser/.gemini/antigravity/brain/a6d74e53-07f9-449b-8472-052cbb9ec34c/test_review_plan.md))
+- [x] **Fase A — Tests Unitarios de Dominio Puro (Core):** Crear pruebas directas enfocadas en la lógica rica de entidades de negocio (`CompetitionTests`, `LeagueTests`, `CompetitionResultTests`).
+- [ ] **Fase B — Fixture Builders:** Diseñar e integrar `LeagueBuilder` y `CompetitionBuilder` para eliminar boilerplate de Arrange.
+- [ ] **Fase C — Robustecimiento de Mocks (Handlers):** Estandarizar comprobaciones de transacción (`Verify` de `SaveChangesAsync` en commands) y pruebas de error de base de datos.
+
 ---
 
 ## Deuda Técnica Priorizada
@@ -113,6 +119,7 @@
 | 🟡 **Media** | Auditar historial git para asegurar la no exposición de claves secretas (`JWT_SECRET_KEY`). | DevOps | Pendiente |
 | 🟢 **Baja** | Eliminar la interfaz vacía `IFishermanRepository` si se usa exclusivamente el repositorio genérico. | Core | Pendiente |
 | 🟢 **Baja** | Aplicar índice único y restricción regex `^V-\d+$` en `Fisherman.FederationNumber`. | Core / DB | Pendiente |
+| ✅ **Resuelta** | Cambiar el campo `Zone` de obligatorio a opcional (nullable) en la creación de concursos. | Core / App / Front | **Resuelto** |
 | ✅ **Resuelta** | Corregir bug crítico de asignación de gramos como puntos en el cálculo de resultados. | Core / App | **Resuelto (5.A)** |
 | ✅ **Resuelta** | Refactorizar `Competition` de modelo anémico a Rich Domain Model. | Core | **Resuelto (4.A)** |
 | ✅ **Resuelta** | Registrar `ValidationBehavior` global en el pipeline de MediatR para validaciones automáticas. | Application | **Resuelto (3)** |

@@ -11,7 +11,7 @@ public class Competition : BaseEntity<Guid>
     public TimeSpan StartTime { get; set; }
     public TimeSpan EndTime { get; set; }
     public string Venue { get; set; } = string.Empty;
-    public string Zone { get; set; } = string.Empty;
+    public string? Zone { get; set; }
     public Subspecialty Subspecialty { get; set; }
     public Category Category { get; set; }
     public CompetitionStatus Status { get; set; } = CompetitionStatus.Planned;
