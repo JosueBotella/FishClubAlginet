@@ -122,4 +122,15 @@ public class LeaguesController : ApiController
             dto => Ok(dto),
             errors => Problem(errors));
     }
+
+    /// <summary>Returns the detailed league standings matrix by weight and by points (with worst-results discard).</summary>
+    [HttpGet("{id:guid}/standings-matrix")]
+    public async Task<IActionResult> GetStandingsMatrix(Guid id)
+    {
+        var query = new GetLeagueStandingsMatrixQuery(id);
+        var result = await _mediator.Send(query, default);
+        return result.Match(
+            dto => Ok(dto),
+            errors => Problem(errors));
+    }
 }

@@ -424,18 +424,18 @@ Implementación:
 - [x] Frontend — `CreateCompetitionModal`: nuevo `NumberInput` opcional "Peso mínimo pieza mayor".
 - [x] Frontend — `CompetitionResultsPage`: sección inline para leer/actualizar el mínimo en tiempo real.
 
-### 🔲 Pendiente — Fase 5.B-E: Clasificación detallada + Pieza Mayor + Frontend
+- [x] **Fase 5.B: Clasificación Detallada (Matriz por Concurso - COMPLETADO 2026-05-25)**
+  - [x] Crear `GetLeagueStandingsMatrixQuery` y su handler `GetLeagueStandingsMatrixQueryHandler` para devolver la matriz completa de la clasificación de la liga por puntos y peso.
+  - [x] Definir contratos DTOs matriciales: `CompetitionHeaderDto`, `CompetitionCellDto`, `FishermanMatrixRowDto` y `LeagueStandingsMatrixDto`.
+  - [x] Implementar lógica robusta de descartes secuenciales (`WorstResultsToDiscard`): se ordenan ascendentemente por puntos las jornadas asistidas por cada pescador, descartando las de menor puntaje e ignorando las inasistencias.
+  - [x] Mapear el nuevo endpoint `GET /api/leagues/{id}/standings-matrix` protegido bajo roles `Admin` y `Fisherman`.
+  - [x] Desarrollar suite de pruebas unitarias cubriendo todas las especificaciones sintácticas y semánticas, con 193/193 pruebas superadas.
+
+### 🔲 Pendiente — Fase 5.C-E: Pieza Mayor, Frontend de Matriz y Snapshots
 
 > **Análisis basado en `18º - CONCURSO.xls`, `LIGA POR PESO 2025.xls` y `LIGA RESTA 2025.xls`**.
 >
 > Las clasificaciones son **vistas calculadas** sobre los `CompetitionResult` ya validados. No se persisten (siempre frescas), pero se puede snapshotear al cerrar temporada.
-
-#### 5.B — Clasificación detallada (matriz por concurso)
-
-- [ ] Ampliar `GetLeagueStandingsQuery` para devolver desglose por concurso (matriz `FishermanId → [puntos/peso por concurso]`).
-- [ ] Nuevo DTO `LeagueStandingsDetailDto` con `Competitions: CompetitionHeaderDto[]` y por pescador `ResultsPerCompetition: Dictionary<Guid, decimal>`.
-- [ ] Tests con datos de `LIGA POR PESO 2025.xls` (43 pescadores, 18 concursos, total 1.071.845 g).
-- [ ] **Columna "RESTA"**: ⚠️ **PENDIENTE DEL CLIENTE** — En la temporada 2025 solo Juan Alcaraz tiene `RESTA = 2,5`, sin patrón deducible. No implementar hasta recibir la regla. Mostrar tooltip "Pendiente de definir".
 
 #### 5.C — Pieza Mayor
 

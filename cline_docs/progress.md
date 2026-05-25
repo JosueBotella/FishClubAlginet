@@ -60,14 +60,18 @@
 
 ---
 
-## 🔲 Fase 5.B - 5.E: Clasificación Detallada y Pieza Mayor (EN CURSO)
+## ✅ Fase 5.B: Clasificación Detallada (Matriz por Concurso - BACKEND COMPLETADO 2026-05-25)
 
 ### 5.B — Clasificación Detallada (Matriz por Concurso)
-- [ ] **Zona de Concurso Opcional (NUEVO REQUERIMIENTO):** Modificar la obligatoriedad del campo `Zone` en `Competition` para que sea opcional (`string?` nullable) en base de datos, backend (validadores de creación) y frontend (formulario `CreateCompetitionModal`).
-- [ ] Ampliar `GetLeagueStandingsQuery` para devolver un desglose matricial: `FishermanId` -> `Dictionary<Guid, decimal>` (puntos/peso por cada `CompetitionId`).
-- [ ] Definir DTO `LeagueStandingsDetailDto` para estructurar la matriz de forma óptima.
-- [ ] Diseñar tests unitarios y de integración basándose en los datos reales de la temporada 2025 (`LIGA POR PESO 2025.xls`, ~43 pescadores, 18 concursos).
-- [ ] **Columna "RESTA" (Descartes):** Pendiente de definir reglas por parte del cliente. De momento, mostrar tooltip *"Pendiente de definir"* en frontend.
+- [x] **Zona de Concurso Opcional:** Modificado la obligatoriedad del campo `Zone` en `Competition` para que sea opcional (`string?` nullable) en base de datos, backend (validadores de creación) y frontend (formulario `CreateCompetitionModal`).
+- [x] Crear consulta matricial `GetLeagueStandingsMatrixQuery` para devolver un desglose matricial ordenado por puntos y peso, incluyendo celdas para cada pescador y concurso (`FishermanId` -> `Dictionary<Guid, CompetitionCellDto>`).
+- [x] Definir DTOs del contrato matricial (`CompetitionHeaderDto`, `CompetitionCellDto`, `FishermanMatrixRowDto` y `LeagueStandingsMatrixDto`) para estructurar la matriz de forma óptima.
+- [x] Implementar la lógica avanzada de descartes de los N peores resultados (`WorstResultsToDiscard`) ordenando ascendentemente las puntuaciones de las jornadas asistidas.
+- [x] Diseñar suite robusta de pruebas unitarias (`GetLeagueStandingsMatrixQueryHandlerTests.cs`) con cobertura total para verificar comportamiento con ligas inexistentes, vacías, descartes secuenciales y no-asistencias.
+
+---
+
+## 🔲 Fase 5.C - 5.E: Piezas Mayores, Frontend de Matriz y Snapshots (EN CURSO)
 
 ### 5.C — Agregaciones de Pieza Mayor
 - [ ] Implementar query `GetSeasonBiggestCatchQuery(Guid leagueId)` para retornar la captura récord de la liga (Pescador, Concurso, Peso).

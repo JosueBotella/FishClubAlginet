@@ -11,35 +11,28 @@ También se ha completado la configuración del **mínimo de peso para Pieza May
 
 ---
 
-## 🔴 NUEVO REQUERIMIENTO — Zona de Concurso Opcional
+## Contexto Activo — Fase 5: Clasificación Detallada y Pieza Mayor (Fases 5.C - 5.E)
 
-- **Descripción:** El campo de zona (`Zone`) en la entidad `Competition` y en la interfaz de creación de concursos es actualmente **obligatorio**. Se requiere cambiarlo para que sea **opcional (nullable)**.
-- **Acciones técnicas requeridas:**
-  - **Core/Backend:** Cambiar tipo de `Zone` a `string?` en `Competition.cs`.
-  - **Application/Validators:** Modificar `CreateCompetitionCommandValidator` para omitir la regla de obligatoriedad en `Zone` y permitir valores nulos o vacíos.
-  - **Frontend:** En `CreateCompetitionModal.tsx`, ajustar el formulario de Mantine para no exigir "Zona" (hacerlo opcional quitando asteriscos de validación).
+## Estado actual
+Fases 1 a 5.B completamente completadas. El **bug crítico de puntos** (`Points = WeightInGrams`) ha sido resuelto exitosamente mediante la implementación del servicio de dominio `PointsCalculatorService` y la persistencia correcta de puntos por ranking y empates (sistema confirmado de 20 a 1 puntos + asistencia + reparto de empates).
+
+También se ha completado la configuración del **mínimo de peso para Pieza Mayor por competición** a nivel de base de datos, backend (PATCH endpoint) y frontend (Mantine input y actualización inline).
+
+Se ha completado en el Backend e Integración de Tests la **Fase 5.B: Clasificación Detallada (Matriz por Concurso)**. Esto incluye la creación de todos los DTOs de contrato matricial (`CompetitionHeaderDto`, `CompetitionCellDto`, `FishermanMatrixRowDto`, `LeagueStandingsMatrixDto`), el QueryHandler de MediatR `GetLeagueStandingsMatrixQueryHandler` (con la lógica avanzada de descartes secuenciales basándonos en `WorstResultsToDiscard`), la ruta del API Controller `GET /api/leagues/{id}/standings-matrix` y una robusta suite de pruebas unitarias cubriendo todas las especificaciones y edge cases, logrando 0 warnings y 193 pruebas exitosas en total.
 
 ---
 
-## 🔲 Foco de Trabajo Actual — Fase 5.B-E: Clasificación detallada + Pieza Mayor + Frontend
+## 🔲 Foco de Trabajo Actual — Fase 5.C-D: Pieza Mayor y Frontend de Matriz
 
 Estamos listos para abordar las siguientes sub-fases de clasificación avanzada:
 
-### 1. Fase 5.B — Clasificación Detallada (Matriz por concurso)
-- **Backend:**
-  - Ampliar `GetLeagueStandingsQuery` para devolver el desglose por concurso mediante una estructura de tipo matriz/diccionario: `FishermanId` -> `Dictionary<Guid, decimal>` (puntos o peso por cada `CompetitionId`).
-  - Crear nuevo DTO `LeagueStandingsDetailDto` para transportar esta información de forma eficiente.
-  - Diseñar tests con datos reales de la temporada 2025 (`LIGA POR PESO 2025.xls`, ~43 pescadores, 18 concursos).
-- **Columna "RESTA" (Descartes):**
-  - Mantener tooltip en frontend indicando *"Pendiente de definir por el cliente"*, ya que no hay un patrón computable definido para los descartes de la temporada 2025 (ej. Juan Alcaraz con resta de 2.5).
-
-### 2. Fase 5.C — Pieza Mayor Global e Individual
+### 1. Fase 5.C — Pieza Mayor Global e Individual
 - **Backend:**
   - Implementar query `GetSeasonBiggestCatchQuery(Guid leagueId)` que calcule el pescador, peso y concurso de la mayor captura de la temporada (ej: "PM CRISTIAN VOINESCU — 4870 gr" en 2025).
-  - Implementar query `GetCompetitionBiggestCatchQuery(Guid competitionId)` para obtener la mayor captura de un concurso específico.
+  - Implementar query `GetCompetitionBiggestCatchQuery(Guid competitionId)` para obtener la pieza mayor de un concurso específico.
   - Asegurar la integración del premio de "Pieza Mayor" en la respuesta del acta y en `CompetitionResultDto`.
 
-### 3. Fase 5.D — Frontend para Clasificación Detallada y Widgets
+### 2. Fase 5.D — Frontend para Clasificación Detallada y Widgets
 - **React (Mantine v7):**
   - Ampliar la UI de `LeagueStandingsPage.tsx` con una **matriz scrollable horizontal** con columnas: `Posición` | `Nombre` | `[C1]` `[C2]` ... `[CN]` | `Total`.
   - Agregar fila de totales agregados del concurso en el pie de la matriz.
