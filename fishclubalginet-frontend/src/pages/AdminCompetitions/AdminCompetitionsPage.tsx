@@ -40,6 +40,7 @@ import type { CompetitionDto } from '../../types';
 import { Routes } from '../../constants';
 import CreateCompetitionModal from './CreateCompetitionModal';
 import ConfirmationModal from '../../components/ConfirmationModal';
+import { getApiErrorMessage } from '../../utils/errorUtils';
 
 type ActionType =
   | 'openRegistration'
@@ -167,10 +168,10 @@ export default function AdminCompetitionsPage() {
       });
       setPendingAction(null);
       fetchCompetitions();
-    } catch {
+    } catch (err) {
       notifications.show({
         title: 'Error',
-        message: `No se pudo ejecutar la acción: ${config.title.toLowerCase()}.`,
+        message: getApiErrorMessage(err, `No se pudo ejecutar la acción: ${config.title.toLowerCase()}.`),
         color: 'red',
       });
     } finally {

@@ -3,6 +3,7 @@ import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { createCompetition } from '../../api/competitionsApi';
 import type { CreateCompetitionFormData } from '../../types';
+import { getApiErrorMessage } from '../../utils/errorUtils';
 
 interface Props {
   opened: boolean;
@@ -58,10 +59,10 @@ export default function CreateCompetitionModal({ opened, leagueId, onClose, onSu
       });
       form.reset();
       onSuccess();
-    } catch {
+    } catch (err) {
       notifications.show({
         title: 'Error',
-        message: 'No se pudo crear el concurso.',
+        message: getApiErrorMessage(err, 'No se pudo crear el concurso.'),
         color: 'red',
       });
     }
