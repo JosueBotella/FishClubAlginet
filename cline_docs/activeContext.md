@@ -20,19 +20,15 @@ También se ha completado la configuración del **mínimo de peso para Pieza May
 
 Se ha completado en el Backend e Integración de Tests la **Fase 5.B: Clasificación Detallada (Matriz por Concurso)**. Esto incluye la creación de todos los DTOs de contrato matricial (`CompetitionHeaderDto`, `CompetitionCellDto`, `FishermanMatrixRowDto`, `LeagueStandingsMatrixDto`), el QueryHandler de MediatR `GetLeagueStandingsMatrixQueryHandler` (con la lógica avanzada de descartes secuenciales basándonos en `WorstResultsToDiscard`), la ruta del API Controller `GET /api/leagues/{id}/standings-matrix` y una robusta suite de pruebas unitarias cubriendo todas las especificaciones y edge cases, logrando 0 warnings y 193 pruebas exitosas en total.
 
+Se ha completado en el Backend e Integración de Tests la **Fase 5.C: Agregaciones de Pieza Mayor (Global y por Jornada)**. Esto abarca la creación de los DTOs `SeasonBiggestCatchDto` y `CompetitionBiggestCatchDto`, el record modificado `CompetitionResultDto` con `IsBiggestCatch`, los QueryHandlers de MediatR `GetSeasonBiggestCatchQueryHandler` y `GetCompetitionBiggestCatchQueryHandler`, la integración del cálculo en vivo del ganador del trofeo en `GetCompetitionResultsQueryHandler`, las rutas de controlador `GET /api/leagues/{id}/biggest-catch` y `GET /api/competitions/{id}/biggest-catch`, y la implementación de sus respectivas pruebas unitarias con 0 fallos.
+
 ---
 
-## 🔲 Foco de Trabajo Actual — Fase 5.C-D: Pieza Mayor y Frontend de Matriz
+## 🔲 Foco de Trabajo Actual — Fase 5.D: Frontend de la Clasificación Detallada y Widgets
 
 Estamos listos para abordar las siguientes sub-fases de clasificación avanzada:
 
-### 1. Fase 5.C — Pieza Mayor Global e Individual
-- **Backend:**
-  - Implementar query `GetSeasonBiggestCatchQuery(Guid leagueId)` que calcule el pescador, peso y concurso de la mayor captura de la temporada (ej: "PM CRISTIAN VOINESCU — 4870 gr" en 2025).
-  - Implementar query `GetCompetitionBiggestCatchQuery(Guid competitionId)` para obtener la pieza mayor de un concurso específico.
-  - Asegurar la integración del premio de "Pieza Mayor" en la respuesta del acta y en `CompetitionResultDto`.
-
-### 2. Fase 5.D — Frontend para Clasificación Detallada y Widgets
+### 1. Fase 5.D — Frontend para Clasificación Detallada y Widgets
 - **React (Mantine v7):**
   - Ampliar la UI de `LeagueStandingsPage.tsx` con una **matriz scrollable horizontal** con columnas: `Posición` | `Nombre` | `[C1]` `[C2]` ... `[CN]` | `Total`.
   - Agregar fila de totales agregados del concurso en el pie de la matriz.

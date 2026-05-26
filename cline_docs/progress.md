@@ -73,10 +73,14 @@
 
 ## 🔲 Fase 5.C - 5.E: Piezas Mayores, Frontend de Matriz y Snapshots (EN CURSO)
 
+## ✅ Fase 5.C: Agregaciones de Pieza Mayor (BACKEND COMPLETADO 2026-05-26)
+
 ### 5.C — Agregaciones de Pieza Mayor
-- [ ] Implementar query `GetSeasonBiggestCatchQuery(Guid leagueId)` para retornar la captura récord de la liga (Pescador, Concurso, Peso).
-- [ ] Implementar query `GetCompetitionBiggestCatchQuery(Guid competitionId)` para obtener la pieza mayor de una jornada.
-- [ ] Incluir la marca y cálculo de pieza mayor en el acta de resultados oficial de cada concurso.
+- [x] Implementar query `GetSeasonBiggestCatchQuery(Guid leagueId)` para retornar la captura récord de la liga (Pescador, Concurso, Peso) respetando mínimos de competición.
+- [x] Implementar query `GetCompetitionBiggestCatchQuery(Guid competitionId)` para obtener la pieza mayor de una jornada validando umbrales mínimos.
+- [x] Mapear e integrar la marca `IsBiggestCatch` dentro de la respuesta `CompetitionResultDto` cargando y calculando el máximo sobre la marcha en los listados del concurso.
+- [x] Exponer las rutas de API REST `GET /api/leagues/{id}/biggest-catch` y `GET /api/competitions/{id}/biggest-catch`.
+- [x] Robustecer con tests unitarios dedicados en `GetSeasonBiggestCatchQueryHandlerTests` y `GetCompetitionBiggestCatchQueryHandlerTests`.
 
 ### 5.D — Frontend para Matriz Detallada
 - [ ] Modificar `LeagueStandingsPage.tsx` para renderizar una tabla scrollable horizontal que liste todos los concursos de la temporada como columnas (`[C1] [C2] ... [CN]`).
