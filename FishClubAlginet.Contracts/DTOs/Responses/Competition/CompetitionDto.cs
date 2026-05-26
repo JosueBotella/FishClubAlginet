@@ -29,4 +29,5 @@ public record CompetitionResultDto(
     decimal Points,
     int Ranking,
     bool IsValidated,
-    DateTime RegistrationDate);
+    DateTime RegistrationDate,
+    bool IsBiggestCatch = false);

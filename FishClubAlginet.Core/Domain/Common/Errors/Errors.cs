@@ -42,6 +42,10 @@ public static partial class Errors
         public static Error NotActive => Error.Validation(
             code: "League.NotActive",
             description: "The league is not active.");
+
+        public static Error NoCatchesRecorded => Error.NotFound(
+            code: "League.NoCatchesRecorded",
+            description: "No valid biggest catch recorded in this league.");
     }
 
     public static class Auth
@@ -97,6 +101,10 @@ public static partial class Errors
         public static Error NoResultsToAssign => Error.Validation(
             code: "Competition.NoResultsToAssign",
             description: "There are no registered fishermen to assign spots to.");
+
+        public static Error NoCatchesRecorded => Error.NotFound(
+            code: "Competition.NoCatchesRecorded",
+            description: "No valid biggest catch recorded in this competition.");
     }
 
     public static class LeagueErrors
