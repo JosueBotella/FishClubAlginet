@@ -184,6 +184,10 @@ export default function AdminCompetitionsPage() {
     fetchCompetitions();
   };
 
+  const nextCompetitionNumber = competitions.length > 0
+    ? Math.max(...competitions.map(c => c.competitionNumber)) + 1
+    : 1;
+
   const confirmConfig = pendingAction ? ACTION_CONFIG[pendingAction.type] : null;
 
   return (
@@ -337,6 +341,7 @@ export default function AdminCompetitionsPage() {
         <CreateCompetitionModal
           opened={modalOpen}
           leagueId={leagueId}
+          nextCompetitionNumber={nextCompetitionNumber}
           onClose={() => setModalOpen(false)}
           onSuccess={handleModalSuccess}
         />

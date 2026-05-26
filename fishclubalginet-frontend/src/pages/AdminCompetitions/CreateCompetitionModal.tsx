@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Modal, TextInput, NumberInput, Button, Group, Stack, Select } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
@@ -8,6 +9,7 @@ import { getApiErrorMessage } from '../../utils/errorUtils';
 interface Props {
   opened: boolean;
   leagueId: string;
+  nextCompetitionNumber: number;
   onClose: () => void;
   onSuccess: () => void;
 }
@@ -26,7 +28,7 @@ const DEFAULT_FORM: CreateCompetitionFormData = {
   biggestCatchMinWeightInGrams: null,
 };
 
-export default function CreateCompetitionModal({ opened, leagueId, onClose, onSuccess }: Props) {
+export default function CreateCompetitionModal({ opened, leagueId, nextCompetitionNumber, onClose, onSuccess }: Props) {
   const form = useForm<CreateCompetitionFormData>({
     initialValues: DEFAULT_FORM,
     validate: {
@@ -38,6 +40,12 @@ export default function CreateCompetitionModal({ opened, leagueId, onClose, onSu
       maxSpots: (v: number) => (v > 0 ? null : 'Debe ser > 0'),
     },
   });
+
+  useEffect(() => {
+    if (opened) {
+      form.setFieldValue('competitionNumber', nextCompetitionNumber);
+    }
+  }, [opened, nextCompetitionNumber]);
 
   const handleClose = () => {
     form.reset();
