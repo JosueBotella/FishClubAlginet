@@ -125,7 +125,7 @@
 | 🟡 **Media** | Controlar carrera de competidores en el último spot disponible en `RegisterFishermanCommandHandler`. | Application | Pendiente |
 | 🟡 **Media** | Integrar/squashar migraciones de desarrollo (`InitialSqlServer` + `Initial`) antes de producción. | Infrastructure | Pendiente |
 | 🟡 **Media** | Auditar historial git para asegurar la no exposición de claves secretas (`JWT_SECRET_KEY`). | DevOps | Pendiente |
-| 🟢 **Baja** | Eliminar la interfaz vacía `IFishermanRepository` si se usa exclusivamente el repositorio genérico. | Core | Pendiente |
+| 🟢 **Baja** | Eliminar la interfaz vacía `IFishermanRepository` si se usa exclusivamente el repositorio genérico. | Core | ✅ Completado |
 | 🟢 **Baja** | Aplicar índice único y restricción regex `^V-\d+$` en `Fisherman.FederationNumber`. | Core / DB | Pendiente |
 | ✅ **Resuelta** | Cambiar el campo `Zone` de obligatorio a opcional (nullable) en la creación de concursos. | Core / App / Front | **Resuelto** |
 | ✅ **Resuelta** | Corregir bug crítico de asignación de gramos como puntos en el cálculo de resultados. | Core / App | **Resuelto (5.A)** |

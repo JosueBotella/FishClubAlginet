@@ -370,6 +370,12 @@ docker compose exec db /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$SA_
 
 ## 13. Para la próxima IA / sesión
 
+### Deuda Técnica Prioritaria (Pendiente de arrancar)
+1. **Race Condition en Registro de Concursos (Alta Prioridad)**: Implementar control de concurrencia optimista (ej. `RowVersion` / Concurrency Tokens vía EF Core) en `RegisterFishermanCommandHandler` para evitar superar el aforo (`MaxSpots`) si ocurren peticiones concurrentes por el último hueco.
+2. **Tests Unitarios para Competitions (Media Prioridad)**: Escribir pruebas para los Handlers de `Competitions` usando el mismo patrón que el resto de componentes (xUnit + Moq + FluentAssertions).
+3. **Squash de Migraciones (Media Prioridad)**: Consolidar las migraciones de desarrollo (`InitialSqlServer` + `Initial`) en una migración limpia inicial antes del despliegue en producción.
+4. **NotebookLM**: Ejecutar `npx notebooklm-mcp-auth` en la terminal para reactivar el MCP Server y volver a acceder al cuaderno de arquitectura de ASP.NET Core si se precisa.
+
 **Si te pide arrancar Phase 2 (Ligas)**:
 1. Lee `FishClubAlginet_context.md` sección "Phase 2: Gestión de Ligas"
 2. Crea entidad `League` en `FishClubAlginet.Core/Domain/Entities/`

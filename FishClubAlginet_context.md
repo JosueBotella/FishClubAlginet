@@ -505,7 +505,7 @@ Implementación:
 | 🟡 Alta | Race condition en `RegisterFishermanCommandHandler` (último spot) | Pendiente |
 | 🟡 Alta | Squashar migraciones `InitialSqlServer` + `Initial` antes del primer deploy real | Pendiente |
 | 🟡 Alta | Verificar rotación de `JWT_SECRET_KEY` si llegó a remoto en historial git | Pendiente |
-| 🟢 Baja | Eliminar o implementar `IFishermanRepository` (interfaz vacía en `Core/Abstractions/`) | Pendiente |
+| 🟢 Baja | Eliminar o implementar `IFishermanRepository` (interfaz vacía en `Core/Abstractions/`) | ✅ Completado (Eliminada) |
 | 🟢 Baja | Índice único sobre `Fisherman.FederationNumber` + regex `^V-\d+$` | Pendiente |
 | ✅ Resuelta | `Points = WeightInGrams` bug — PointsCalculator rediseñado con escala fija | Hecho Fase 5.A (2026-05-22) |
 | ✅ Resuelta | `Competition` Anemic Model → Rich Domain Model | Hecho Fase 4.A |
