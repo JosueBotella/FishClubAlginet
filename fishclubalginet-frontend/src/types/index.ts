@@ -28,4 +28,9 @@ export type {
   UpdateBiggestCatchConfigRequest,
   LeagueFishermanStandingDto,
   LeagueStandingsDto,
+  CompetitionHeaderDto,
+  CompetitionCellDto,
+  FishermanMatrixRowDto,
+  LeagueStandingsMatrixDto,
+  SeasonBiggestCatchDto,
 } from './competition';

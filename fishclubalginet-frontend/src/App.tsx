@@ -67,7 +67,7 @@ function App() {
             <Route
               path={AppRoutes.LeagueStandings}
               element={
-                <ProtectedRoute requiredRoles={['Admin']}>
+                <ProtectedRoute requiredRoles={['Admin', 'Fisherman']}>
                   <LeagueStandingsPage />
                 </ProtectedRoute>
               }

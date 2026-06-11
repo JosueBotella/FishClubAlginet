@@ -1,6 +1,14 @@
 import { apiClient } from './apiClient';
 import { Endpoints } from '../constants';
-import type { LeagueDto, CreateLeagueRequest, UpdateLeagueRequest, PaginatedResult, LeagueStandingsDto } from '../types';
+import type {
+  LeagueDto,
+  CreateLeagueRequest,
+  UpdateLeagueRequest,
+  PaginatedResult,
+  LeagueStandingsDto,
+  LeagueStandingsMatrixDto,
+  SeasonBiggestCatchDto,
+} from '../types';
 
 export async function getLeagues(
   skip: number,
@@ -58,4 +66,26 @@ export async function unarchiveLeague(id: string): Promise<LeagueDto> {
 export async function getLeagueStandings(id: string): Promise<LeagueStandingsDto> {
   const { data } = await apiClient.get<LeagueStandingsDto>(Endpoints.Leagues.Standings(id));
   return data;
+}
+
+export async function getLeagueStandingsMatrix(id: string): Promise<LeagueStandingsMatrixDto> {
+  const { data } = await apiClient.get<LeagueStandingsMatrixDto>(Endpoints.Leagues.StandingsMatrix(id));
+  return data;
+}
+
+export async function getSeasonBiggestCatch(id: string): Promise<SeasonBiggestCatchDto | null> {
+  try {
+    const { data } = await apiClient.get<SeasonBiggestCatchDto>(Endpoints.Leagues.BiggestCatch(id));
+    return data;
+  } catch (err: unknown) {
+    if (
+      typeof err === 'object' &&
+      err !== null &&
+      'response' in err &&
+      (err as { response?: { status?: number } }).response?.status === 404
+    ) {
+      return null;
+    }
+    throw err;
+  }
 }

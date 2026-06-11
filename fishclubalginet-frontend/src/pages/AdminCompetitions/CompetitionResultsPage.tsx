@@ -305,9 +305,11 @@ export default function CompetitionResultsPage() {
             )}
           </Group>
         </Title>
-        <Button leftSection={<IconUserPlus size={18} />} ml="auto" variant="light" onClick={openModal}>
-          Inscribir pescadores
-        </Button>
+        {competition && competition.status === 'RegistrationOpen' && (
+          <Button leftSection={<IconUserPlus size={18} />} ml="auto" variant="light" onClick={openModal}>
+            Inscribir pescadores
+          </Button>
+        )}
       </Group>
 
       {/* Status guard informational alert */}
