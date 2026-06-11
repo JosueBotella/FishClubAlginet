@@ -24,18 +24,16 @@ Se ha completado en el Backend e Integración de Tests la **Fase 5.C: Agregacion
 
 ---
 
-## 🔲 Foco de Trabajo Actual — Fase 5.D: Frontend de la Clasificación Detallada y Widgets
+## ✅ Fase 5.D COMPLETADA (2026-06-11): Frontend de la Clasificación Detallada y Widgets
 
-Estamos listos para abordar las siguientes sub-fases de clasificación avanzada:
+- `LeagueStandingsPage.tsx`: matriz scrollable horizontal (`StandingsMatrixTable`) con tabs Puntos/Peso/Pieza Mayor, descartes tachados con tooltip, y pie de tabla con filas de Asistentes, Totales y Promedio.
+- `SeasonBiggestCatchView` integrada como tab "Pieza Mayor".
+- `HomePage.tsx`: widget de resumen de la liga activa con Top 3 puntos (`pointsAfterDiscard`), Top 3 peso y Pieza Mayor del año, con enlace a la clasificación completa.
+- Verificado con `tsc --noEmit` sin errores. Commits: `afee5cd` (matriz + tabs) y `5506ada` (widget HomePage).
 
-### 1. Fase 5.D — Frontend para Clasificación Detallada y Widgets
-- **React (Mantine v7):**
-  - Ampliar la UI de `LeagueStandingsPage.tsx` con una **matriz scrollable horizontal** con columnas: `Posición` | `Nombre` | `[C1]` `[C2]` ... `[CN]` | `Total`.
-  - Agregar fila de totales agregados del concurso en el pie de la matriz.
-  - Implementar la pestaña "Pieza Mayor" (`/leagues/{id}/biggest-catches`) para visualizar el podio de capturas.
-  - Añadir widget de resumen en `HomePage.tsx` que liste el top 3 de peso, top 3 de puntos y la pieza mayor del año.
+---
 
-### 4. Fase 5.E — Snapshots al Archivar Temporada
+## 🔲 Foco de Trabajo Actual — Fase 5.E — Snapshots al Archivar Temporada
 - **Backend:**
   - Crear entidad `LeagueSeasonSnapshot` (Guid, LeagueId, CapturedAt, JsonPayload) para persistir de manera inmutable el estado final de las clasificaciones al archivar una liga.
   - Implementar el comando `ArchiveLeagueWithSnapshotCommand` para congelar el estado de la temporada al archivarla.

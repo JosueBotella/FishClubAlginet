@@ -71,7 +71,7 @@
 
 ---
 
-## 🔲 Fase 5.C - 5.E: Piezas Mayores, Frontend de Matriz y Snapshots (EN CURSO)
+## 🔲 Fase 5.C - 5.E: Piezas Mayores, Frontend de Matriz y Snapshots (5.C y 5.D COMPLETADAS — falta 5.E)
 
 ## ✅ Fase 5.C: Agregaciones de Pieza Mayor (BACKEND COMPLETADO 2026-05-26)
 
@@ -82,11 +82,11 @@
 - [x] Exponer las rutas de API REST `GET /api/leagues/{id}/biggest-catch` y `GET /api/competitions/{id}/biggest-catch`.
 - [x] Robustecer con tests unitarios dedicados en `GetSeasonBiggestCatchQueryHandlerTests` y `GetCompetitionBiggestCatchQueryHandlerTests`.
 
-### 5.D — Frontend para Matriz Detallada
-- [ ] Modificar `LeagueStandingsPage.tsx` para renderizar una tabla scrollable horizontal que liste todos los concursos de la temporada como columnas (`[C1] [C2] ... [CN]`).
-- [ ] Agregar fila final con la suma total y promedios por jornada.
-- [ ] Diseñar la pestaña "Pieza Mayor" (`/leagues/{id}/biggest-catches`) en frontend.
-- [ ] Agregar widgets resumen de la liga en el panel principal (`HomePage.tsx`).
+### ✅ 5.D — Frontend para Matriz Detallada (COMPLETADO 2026-06-11)
+- [x] Modificar `LeagueStandingsPage.tsx` para renderizar una tabla scrollable horizontal que liste todos los concursos de la temporada como columnas (`[C1] [C2] ... [CN]`).
+- [x] Agregar fila final con la suma total y promedios por jornada (filas de Asistentes, Totales y Promedio en `Table.Tfoot`).
+- [x] Diseñar la pestaña "Pieza Mayor" (tab `biggestCatch` con `SeasonBiggestCatchView` en `LeagueStandingsPage.tsx`).
+- [x] Agregar widgets resumen de la liga en el panel principal (`HomePage.tsx`): Top 3 puntos, Top 3 peso y Pieza Mayor del año de la liga activa.
 
 ### 5.E — Snapshots de Temporada
 - [ ] Crear la entidad de persistencia `LeagueSeasonSnapshot` para guardar el estado final inmutable de la liga.
