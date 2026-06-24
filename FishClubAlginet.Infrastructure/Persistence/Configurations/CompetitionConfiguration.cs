@@ -21,7 +21,6 @@ public class CompetitionConfiguration : IEntityTypeConfiguration<Competition>
             .HasMaxLength(100);
 
         builder.Property(x => x.Zone)
-            .IsRequired()
             .HasMaxLength(50);
 
         builder.Property(x => x.Subspecialty)

@@ -8,7 +8,7 @@ public record CreateCompetitionRequest(
     TimeSpan StartTime,
     TimeSpan EndTime,
     string Venue,
-    string Zone,
+    string? Zone,
     Subspecialty Subspecialty,
     Category Category,
     int MaxSpots,

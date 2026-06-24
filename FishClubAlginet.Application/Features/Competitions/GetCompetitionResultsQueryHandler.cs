@@ -21,15 +21,17 @@ public sealed class GetCompetitionResultsQueryHandler
         GetCompetitionResultsQuery request,
         CancellationToken cancellationToken)
     {
-        var competitionExists = _competitionRepository
+        var competition = _competitionRepository
             .GetAll()
-            .Any(c => c.Id == request.CompetitionId && !c.IsDeleted);
+            .FirstOrDefault(c => c.Id == request.CompetitionId && !c.IsDeleted);
 
-        if (!competitionExists)
+        if (competition is null)
         {
             return Task.FromResult<ErrorOr<CompetitionResultDto[]>>(
                 Errors.Competition.NotFound);
         }
+
+        var minWeight = competition.BiggestCatchMinWeightInGrams ?? 0;
 
         // Load all results for the competition, ordered by weight descending
         // Ranking is calculated in-memory: ties share the same rank
@@ -53,6 +55,12 @@ public sealed class GetCompetitionResultsQueryHandler
             })
             .ToList();
 
+        // Calculate the maximum biggest catch weight in this competition meeting the minimum requirement
+        var maxBiggestCatchWeight = rawResults
+            .Where(r => r.DidAttend && (r.BiggestCatchWeight ?? 0) >= minWeight)
+            .Select(r => r.BiggestCatchWeight)
+            .Max() ?? 0;
+
         // Assign rankings in-memory: same Points + BiggestCatch = same rank
         var rank = 1;
         var dtos = new List<CompetitionResultDto>(rawResults.Count);
@@ -71,6 +79,8 @@ public sealed class GetCompetitionResultsQueryHandler
             }
 
             var r = rawResults[i];
+            var isBiggestCatch = maxBiggestCatchWeight > 0 && r.BiggestCatchWeight.HasValue && r.BiggestCatchWeight.Value == maxBiggestCatchWeight;
+
             dtos.Add(new CompetitionResultDto(
                 r.Id,
                 r.CompetitionId,
@@ -82,7 +92,8 @@ public sealed class GetCompetitionResultsQueryHandler
                 r.Points,
                 rank,
                 r.IsValidated,
-                r.RegistrationDate));
+                r.RegistrationDate,
+                isBiggestCatch));
         }
 
         return Task.FromResult<ErrorOr<CompetitionResultDto[]>>(dtos.ToArray());

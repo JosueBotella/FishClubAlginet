@@ -29,8 +29,9 @@
 - **Sistema de Puntuación (Fase 5.A):**
   - **Asistencia:** 5 puntos base mínimos para todo participante presente (`DidAttend = true`), pesque o no.
   - **Escala de Ranking:** El primero recibe +20 puntos, el segundo +19 puntos, ..., descendiendo hasta el 20º (+1 punto). Del 21º en adelante se añade +0 puntos.
-  - **Empates:** Si hay empates en peso en el top 20, los competidores empatados conservan la posición original del grupo y se reparten equitativamente un bonus adicional de `+1 / nEmpatados` (reparto de puntos federativos).
+  - **Empates:** Si hay empates en peso en el top 20, los competidores empatados conservan la posición original del grupo y se reparten equitativamente un bonus adicional de `+1 / nEmpatados`. Ejemplo: sin contar asistencia, un 2º (19 pts) y 3º (18 pts) empatados reciben **19.5** y **18.5** puntos respectivamente (con asistencia de 5 pts, los totales son 24.5 y 23.5).
   - **Ausencias:** 0 puntos de liga y clasificación 0. No se aplica el mínimo de asistencia.
+- **Zona Opcional:** En la entidad `Competition`, el escenario (`Venue`) es obligatorio, pero la zona (`Zone`) es **opcional (nullable)** al crear un concurso.
 - **Pieza Mayor (PM):** Por concurso o acumulada de la temporada. Puede configurarse un peso mínimo en gramos por jornada (`BiggestCatchMinWeightInGrams`); las capturas por debajo del umbral no califican para pieza mayor.
 
 ---

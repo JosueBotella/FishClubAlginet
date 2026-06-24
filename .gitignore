@@ -371,3 +371,5 @@ FodyWeavers.xsd
 
 #Env Docker for Visual Studio
 .env
+# Frontend build output
+fishclubalginet-frontend/dist/

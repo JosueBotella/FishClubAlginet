@@ -11,6 +11,7 @@ import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { createLeague, updateLeague } from '../../api/leaguesApi';
 import type { LeagueDto, LeagueFormData } from '../../types';
+import { getApiErrorMessage } from '../../utils/errorUtils';
 
 interface Props {
   opened: boolean;
@@ -77,10 +78,10 @@ export default function CreateEditLeagueModal({ opened, onClose, onSuccess, leag
         });
       }
       onSuccess();
-    } catch {
+    } catch (err) {
       notifications.show({
         title: 'Error',
-        message: isEditing ? 'No se pudo actualizar la liga.' : 'No se pudo crear la liga.',
+        message: getApiErrorMessage(err, isEditing ? 'No se pudo actualizar la liga.' : 'No se pudo crear la liga.'),
         color: 'red',
       });
     }

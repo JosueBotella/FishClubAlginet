@@ -60,24 +60,33 @@
 
 ---
 
-## 🔲 Fase 5.B - 5.E: Clasificación Detallada y Pieza Mayor (EN CURSO)
+## ✅ Fase 5.B: Clasificación Detallada (Matriz por Concurso - BACKEND COMPLETADO 2026-05-25)
 
 ### 5.B — Clasificación Detallada (Matriz por Concurso)
-- [ ] Ampliar `GetLeagueStandingsQuery` para devolver un desglose matricial: `FishermanId` -> `Dictionary<Guid, decimal>` (puntos/peso por cada `CompetitionId`).
-- [ ] Definir DTO `LeagueStandingsDetailDto` para estructurar la matriz de forma óptima.
-- [ ] Diseñar tests unitarios y de integración basándose en los datos reales de la temporada 2025 (`LIGA POR PESO 2025.xls`, ~43 pescadores, 18 concursos).
-- [ ] **Columna "RESTA" (Descartes):** Pendiente de definir reglas por parte del cliente. De momento, mostrar tooltip *"Pendiente de definir"* en frontend.
+- [x] **Zona de Concurso Opcional:** Modificado la obligatoriedad del campo `Zone` en `Competition` para que sea opcional (`string?` nullable) en base de datos, backend (validadores de creación) y frontend (formulario `CreateCompetitionModal`).
+- [x] Crear consulta matricial `GetLeagueStandingsMatrixQuery` para devolver un desglose matricial ordenado por puntos y peso, incluyendo celdas para cada pescador y concurso (`FishermanId` -> `Dictionary<Guid, CompetitionCellDto>`).
+- [x] Definir DTOs del contrato matricial (`CompetitionHeaderDto`, `CompetitionCellDto`, `FishermanMatrixRowDto` y `LeagueStandingsMatrixDto`) para estructurar la matriz de forma óptima.
+- [x] Implementar la lógica avanzada de descartes de los N peores resultados (`WorstResultsToDiscard`) ordenando ascendentemente las puntuaciones de las jornadas asistidas.
+- [x] Diseñar suite robusta de pruebas unitarias (`GetLeagueStandingsMatrixQueryHandlerTests.cs`) con cobertura total para verificar comportamiento con ligas inexistentes, vacías, descartes secuenciales y no-asistencias.
+
+---
+
+## 🔲 Fase 5.C - 5.E: Piezas Mayores, Frontend de Matriz y Snapshots (5.C y 5.D COMPLETADAS — falta 5.E)
+
+## ✅ Fase 5.C: Agregaciones de Pieza Mayor (BACKEND COMPLETADO 2026-05-26)
 
 ### 5.C — Agregaciones de Pieza Mayor
-- [ ] Implementar query `GetSeasonBiggestCatchQuery(Guid leagueId)` para retornar la captura récord de la liga (Pescador, Concurso, Peso).
-- [ ] Implementar query `GetCompetitionBiggestCatchQuery(Guid competitionId)` para obtener la pieza mayor de una jornada.
-- [ ] Incluir la marca y cálculo de pieza mayor en el acta de resultados oficial de cada concurso.
+- [x] Implementar query `GetSeasonBiggestCatchQuery(Guid leagueId)` para retornar la captura récord de la liga (Pescador, Concurso, Peso) respetando mínimos de competición.
+- [x] Implementar query `GetCompetitionBiggestCatchQuery(Guid competitionId)` para obtener la pieza mayor de una jornada validando umbrales mínimos.
+- [x] Mapear e integrar la marca `IsBiggestCatch` dentro de la respuesta `CompetitionResultDto` cargando y calculando el máximo sobre la marcha en los listados del concurso.
+- [x] Exponer las rutas de API REST `GET /api/leagues/{id}/biggest-catch` y `GET /api/competitions/{id}/biggest-catch`.
+- [x] Robustecer con tests unitarios dedicados en `GetSeasonBiggestCatchQueryHandlerTests` y `GetCompetitionBiggestCatchQueryHandlerTests`.
 
-### 5.D — Frontend para Matriz Detallada
-- [ ] Modificar `LeagueStandingsPage.tsx` para renderizar una tabla scrollable horizontal que liste todos los concursos de la temporada como columnas (`[C1] [C2] ... [CN]`).
-- [ ] Agregar fila final con la suma total y promedios por jornada.
-- [ ] Diseñar la pestaña "Pieza Mayor" (`/leagues/{id}/biggest-catches`) en frontend.
-- [ ] Agregar widgets resumen de la liga en el panel principal (`HomePage.tsx`).
+### ✅ 5.D — Frontend para Matriz Detallada (COMPLETADO 2026-06-11)
+- [x] Modificar `LeagueStandingsPage.tsx` para renderizar una tabla scrollable horizontal que liste todos los concursos de la temporada como columnas (`[C1] [C2] ... [CN]`).
+- [x] Agregar fila final con la suma total y promedios por jornada (filas de Asistentes, Totales y Promedio en `Table.Tfoot`).
+- [x] Diseñar la pestaña "Pieza Mayor" (tab `biggestCatch` con `SeasonBiggestCatchView` en `LeagueStandingsPage.tsx`).
+- [x] Agregar widgets resumen de la liga en el panel principal (`HomePage.tsx`): Top 3 puntos, Top 3 peso y Pieza Mayor del año de la liga activa.
 
 ### 5.E — Snapshots de Temporada
 - [ ] Crear la entidad de persistencia `LeagueSeasonSnapshot` para guardar el estado final inmutable de la liga.
@@ -102,6 +111,11 @@
 - [ ] Gráficos evolutivos de pesca total (kg acumulados por año/escenario) con `recharts`.
 - [ ] Exportación directa de clasificaciones y grids a formato Excel (`.xlsx`).
 
+### 🔲 Fase de Revisión de Tests Unitarios y Mockeo (Plan en [test_review_plan.md](file:///C:/Users/spawndevuser/.gemini/antigravity/brain/a6d74e53-07f9-449b-8472-052cbb9ec34c/test_review_plan.md))
+- [x] **Fase A — Tests Unitarios de Dominio Puro (Core):** Crear pruebas directas enfocadas en la lógica rica de entidades de negocio (`CompetitionTests`, `LeagueTests`, `CompetitionResultTests`).
+- [ ] **Fase B — Fixture Builders:** Diseñar e integrar `LeagueBuilder` y `CompetitionBuilder` para eliminar boilerplate de Arrange.
+- [ ] **Fase C — Robustecimiento de Mocks (Handlers):** Estandarizar comprobaciones de transacción (`Verify` de `SaveChangesAsync` en commands) y pruebas de error de base de datos.
+
 ---
 
 ## Deuda Técnica Priorizada
@@ -111,8 +125,9 @@
 | 🟡 **Media** | Controlar carrera de competidores en el último spot disponible en `RegisterFishermanCommandHandler`. | Application | Pendiente |
 | 🟡 **Media** | Integrar/squashar migraciones de desarrollo (`InitialSqlServer` + `Initial`) antes de producción. | Infrastructure | Pendiente |
 | 🟡 **Media** | Auditar historial git para asegurar la no exposición de claves secretas (`JWT_SECRET_KEY`). | DevOps | Pendiente |
-| 🟢 **Baja** | Eliminar la interfaz vacía `IFishermanRepository` si se usa exclusivamente el repositorio genérico. | Core | Pendiente |
+| 🟢 **Baja** | Eliminar la interfaz vacía `IFishermanRepository` si se usa exclusivamente el repositorio genérico. | Core | ✅ Completado |
 | 🟢 **Baja** | Aplicar índice único y restricción regex `^V-\d+$` en `Fisherman.FederationNumber`. | Core / DB | Pendiente |
+| ✅ **Resuelta** | Cambiar el campo `Zone` de obligatorio a opcional (nullable) en la creación de concursos. | Core / App / Front | **Resuelto** |
 | ✅ **Resuelta** | Corregir bug crítico de asignación de gramos como puntos en el cálculo de resultados. | Core / App | **Resuelto (5.A)** |
 | ✅ **Resuelta** | Refactorizar `Competition` de modelo anémico a Rich Domain Model. | Core | **Resuelto (4.A)** |
 | ✅ **Resuelta** | Registrar `ValidationBehavior` global en el pipeline de MediatR para validaciones automáticas. | Application | **Resuelto (3)** |

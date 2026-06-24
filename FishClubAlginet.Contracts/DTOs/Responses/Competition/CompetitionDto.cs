@@ -9,7 +9,7 @@ public record CompetitionDto(
     TimeSpan StartTime,
     TimeSpan EndTime,
     string Venue,
-    string Zone,
+    string? Zone,
     string Subspecialty,
     string Category,
     string Status,
@@ -29,4 +29,5 @@ public record CompetitionResultDto(
     decimal Points,
     int Ranking,
     bool IsValidated,
-    DateTime RegistrationDate);
+    DateTime RegistrationDate,
+    bool IsBiggestCatch = false);

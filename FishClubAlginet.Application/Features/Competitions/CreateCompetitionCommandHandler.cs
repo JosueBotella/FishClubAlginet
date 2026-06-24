@@ -8,7 +8,7 @@ public record CreateCompetitionCommand(
     TimeSpan StartTime,
     TimeSpan EndTime,
     string Venue,
-    string Zone,
+    string? Zone,
     Subspecialty Subspecialty,
     Category Category,
     int MaxSpots,
@@ -135,9 +135,6 @@ public class CreateCompetitionCommandValidator : AbstractValidator<CreateCompeti
             .WithMessage("Venue must not exceed 100 characters.");
 
         RuleFor(x => x.Zone)
-            .NotEmpty()
-            .WithErrorCode("Competition.Zone.Required")
-            .WithMessage("Zone is required.")
             .MaximumLength(50)
             .WithErrorCode("Competition.Zone.MaxLength")
             .WithMessage("Zone must not exceed 50 characters.");

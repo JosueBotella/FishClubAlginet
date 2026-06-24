@@ -38,6 +38,8 @@ export const Endpoints = {
     Archive: (id: string) => `api/leagues/${id}/archive`,
     Unarchive: (id: string) => `api/leagues/${id}/unarchive`,
     Standings: (id: string) => `api/leagues/${id}/standings`,
+    StandingsMatrix: (id: string) => `api/leagues/${id}/standings-matrix`,
+    BiggestCatch: (id: string) => `api/leagues/${id}/biggest-catch`,
     GetAllPaged: (skip: number, take: number, year?: number, archived?: boolean) => {
       let url = `api/leagues?skip=${skip}&take=${take}`;
       if (year !== undefined) url += `&year=${year}`;

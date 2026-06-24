@@ -33,6 +33,7 @@ import {
   IconInfoCircle,
 } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
+import { getApiErrorMessage } from '../../utils/errorUtils';
 import {
   getCompetitionById,
   getCompetitionResults,
@@ -141,8 +142,8 @@ export default function CompetitionResultsPage() {
       notifications.show({ title: 'Inscripción eliminada', message: '', color: 'orange' });
       setDeleteResultId(null);
       fetchAll();
-    } catch {
-      notifications.show({ title: 'Error', message: 'No se pudo eliminar la inscripción.', color: 'red' });
+    } catch (err) {
+      notifications.show({ title: 'Error', message: getApiErrorMessage(err, 'No se pudo eliminar la inscripción.'), color: 'red' });
     } finally {
       setDeleting(false);
     }
@@ -155,8 +156,8 @@ export default function CompetitionResultsPage() {
     try {
       await updateBiggestCatchConfig(competitionId, { minWeightInGrams: biggestCatchMinWeight });
       notifications.show({ title: 'Configuración guardada', message: 'Mínimo pieza mayor actualizado.', color: 'green' });
-    } catch {
-      notifications.show({ title: 'Error', message: 'No se pudo guardar la configuración.', color: 'red' });
+    } catch (err) {
+      notifications.show({ title: 'Error', message: getApiErrorMessage(err, 'No se pudo guardar la configuración.'), color: 'red' });
     } finally {
       setSavingConfig(false);
     }
@@ -187,8 +188,8 @@ export default function CompetitionResultsPage() {
       notifications.show({ title: 'Resultado actualizado', message: '', color: 'green' });
       setEditState(null);
       fetchAll();
-    } catch {
-      notifications.show({ title: 'Error', message: 'No se pudo actualizar el resultado.', color: 'red' });
+    } catch (err) {
+      notifications.show({ title: 'Error', message: getApiErrorMessage(err, 'No se pudo actualizar el resultado.'), color: 'red' });
     } finally {
       setSaving(false);
     }
@@ -202,8 +203,8 @@ export default function CompetitionResultsPage() {
       const result = await getFishermen(skip, PAGE_SIZE, search || undefined, false);
       setFishermen(result.items);
       setFishermenTotal(result.totalCount);
-    } catch {
-      notifications.show({ title: 'Error', message: 'No se pudieron cargar los pescadores.', color: 'red' });
+    } catch (err) {
+      notifications.show({ title: 'Error', message: getApiErrorMessage(err, 'No se pudieron cargar los pescadores.'), color: 'red' });
     } finally {
       setLoadingFishermen(false);
     }
@@ -304,9 +305,11 @@ export default function CompetitionResultsPage() {
             )}
           </Group>
         </Title>
-        <Button leftSection={<IconUserPlus size={18} />} ml="auto" variant="light" onClick={openModal}>
-          Inscribir pescadores
-        </Button>
+        {competition && competition.status === 'RegistrationOpen' && (
+          <Button leftSection={<IconUserPlus size={18} />} ml="auto" variant="light" onClick={openModal}>
+            Inscribir pescadores
+          </Button>
+        )}
       </Group>
 
       {/* Status guard informational alert */}

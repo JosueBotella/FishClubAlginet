@@ -40,6 +40,7 @@ import type { CompetitionDto } from '../../types';
 import { Routes } from '../../constants';
 import CreateCompetitionModal from './CreateCompetitionModal';
 import ConfirmationModal from '../../components/ConfirmationModal';
+import { getApiErrorMessage } from '../../utils/errorUtils';
 
 type ActionType =
   | 'openRegistration'
@@ -167,10 +168,10 @@ export default function AdminCompetitionsPage() {
       });
       setPendingAction(null);
       fetchCompetitions();
-    } catch {
+    } catch (err) {
       notifications.show({
         title: 'Error',
-        message: `No se pudo ejecutar la acción: ${config.title.toLowerCase()}.`,
+        message: getApiErrorMessage(err, `No se pudo ejecutar la acción: ${config.title.toLowerCase()}.`),
         color: 'red',
       });
     } finally {
@@ -182,6 +183,10 @@ export default function AdminCompetitionsPage() {
     setModalOpen(false);
     fetchCompetitions();
   };
+
+  const nextCompetitionNumber = competitions.length > 0
+    ? Math.max(...competitions.map(c => c.competitionNumber)) + 1
+    : 1;
 
   const confirmConfig = pendingAction ? ACTION_CONFIG[pendingAction.type] : null;
 
@@ -336,6 +341,7 @@ export default function AdminCompetitionsPage() {
         <CreateCompetitionModal
           opened={modalOpen}
           leagueId={leagueId}
+          nextCompetitionNumber={nextCompetitionNumber}
           onClose={() => setModalOpen(false)}
           onSuccess={handleModalSuccess}
         />

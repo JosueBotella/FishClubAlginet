@@ -187,4 +187,15 @@ public class CompetitionsController : ApiController
             dtos => Ok(dtos),
             errors => Problem(errors));
     }
+
+    /// <summary>Returns the biggest catch for a specific competition.</summary>
+    [HttpGet("{id:guid}/biggest-catch")]
+    public async Task<IActionResult> GetCompetitionBiggestCatch(Guid id)
+    {
+        var query = new GetCompetitionBiggestCatchQuery(id);
+        var result = await _mediator.Send(query, default);
+        return result.Match(
+            dto => Ok(dto),
+            errors => Problem(errors));
+    }
 }
