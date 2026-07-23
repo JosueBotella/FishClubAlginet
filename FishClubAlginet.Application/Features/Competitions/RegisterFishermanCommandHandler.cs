@@ -65,8 +65,10 @@ public sealed class RegisterFishermanCommandHandler
 
         await _resultRepository.AddAsync(result);
 
-        competition.ParticipantCount++;
-        competition.LastUpdateUtc = DateTime.UtcNow;
+        if (!competition.IncrementParticipantCount())
+        {
+            return Errors.Competition.MaxSpotsReached;
+        }
 
         var saveResult = await _unitOfWork.SaveChangesAsync(cancellationToken);
         if (saveResult.IsError)

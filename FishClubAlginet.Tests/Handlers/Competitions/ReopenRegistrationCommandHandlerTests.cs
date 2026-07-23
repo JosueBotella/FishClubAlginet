@@ -17,15 +17,10 @@ public class ReopenRegistrationCommandHandlerTests
     }
 
     private static Competition BuildClosed(DateTime? lastUpdate = null) =>
-        new Competition
-        {
-            Id = Guid.NewGuid(),
-            LeagueId = Guid.NewGuid(),
-            CompetitionNumber = 1,
-            Status = CompetitionStatus.Closed,
-            // ≤30 days ago by default (within window)
-            LastUpdateUtc = lastUpdate ?? DateTime.UtcNow.AddDays(-5)
-        };
+        Competition.Create(
+            Guid.NewGuid(), 1, "Comp 1", DateTime.UtcNow.AddDays(1),
+            TimeSpan.FromHours(8), TimeSpan.FromHours(14), "Venue", null,
+            Subspecialty.AguaDulce, Category.Seniors, 10, status: CompetitionStatus.Closed, lastUpdateUtc: lastUpdate ?? DateTime.UtcNow.AddDays(-5));
 
     [Fact]
     public async Task Handle_ClosedWithinWindow_ShouldTransitionToRegistrationOpen()
@@ -85,14 +80,10 @@ public class ReopenRegistrationCommandHandlerTests
     public async Task Handle_WrongStatus_ShouldReturnInvalidStatusTransitionError(CompetitionStatus status)
     {
         // Arrange
-        var competition = new Competition
-        {
-            Id = Guid.NewGuid(),
-            LeagueId = Guid.NewGuid(),
-            CompetitionNumber = 1,
-            Status = status,
-            LastUpdateUtc = DateTime.UtcNow
-        };
+        var competition = Competition.Create(
+            Guid.NewGuid(), 1, "Comp 1", DateTime.UtcNow.AddDays(1),
+            TimeSpan.FromHours(8), TimeSpan.FromHours(14), "Venue", null,
+            Subspecialty.AguaDulce, Category.Seniors, 10, status: status);
         _mockRepo.Setup(r => r.GetById(competition.Id)).ReturnsAsync(competition);
 
         // Act

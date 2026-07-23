@@ -34,11 +34,10 @@ public class MoveToResultsDraftCommandHandlerTests
     }
 
     private static Competition Build(CompetitionStatus status) =>
-        new Competition
-        {
-            Id = Guid.NewGuid(), LeagueId = Guid.NewGuid(),
-            CompetitionNumber = 1, Status = status, LastUpdateUtc = DateTime.UtcNow
-        };
+        Competition.Create(
+            Guid.NewGuid(), 1, "Comp 1", DateTime.UtcNow.AddDays(1),
+            TimeSpan.FromHours(8), TimeSpan.FromHours(14), "Venue", null,
+            Subspecialty.AguaDulce, Category.Seniors, 10, status: status);
 
     [Fact]
     public async Task Handle_ClosedCompetition_ShouldTransitionToResultsDraft()
@@ -142,7 +141,10 @@ public class ValidateResultsCommandHandlerTests
     }
 
     private static Competition Build(CompetitionStatus status) =>
-        new Competition { Id = Guid.NewGuid(), LeagueId = Guid.NewGuid(), CompetitionNumber = 1, Status = status, LastUpdateUtc = DateTime.UtcNow };
+        Competition.Create(
+            Guid.NewGuid(), 1, "Comp 1", DateTime.UtcNow.AddDays(1),
+            TimeSpan.FromHours(8), TimeSpan.FromHours(14), "Venue", null,
+            Subspecialty.AguaDulce, Category.Seniors, 10, status: status);
 
     [Fact]
     public async Task Handle_ResultsDraftCompetition_ShouldTransitionToResultsValidated()

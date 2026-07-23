@@ -63,25 +63,19 @@ public sealed class CreateCompetitionCommandHandler
             return Errors.Competition.DuplicateNumber;
         }
 
-        var competition = new Competition
-        {
-            Id = Guid.NewGuid(),
-            LeagueId = request.LeagueId,
-            CompetitionNumber = request.CompetitionNumber,
-            Name = request.Name ?? string.Empty,
-            Date = request.Date,
-            StartTime = request.StartTime,
-            EndTime = request.EndTime,
-            Venue = request.Venue,
-            Zone = request.Zone,
-            Subspecialty = request.Subspecialty,
-            Category = request.Category,
-            Status = CompetitionStatus.Planned,
-            MaxSpots = request.MaxSpots,
-            ParticipantCount = 0,
-            BiggestCatchMinWeightInGrams = request.BiggestCatchMinWeightInGrams,
-            LastUpdateUtc = DateTime.UtcNow
-        };
+        var competition = Competition.Create(
+            request.LeagueId,
+            request.CompetitionNumber,
+            request.Name,
+            request.Date,
+            request.StartTime,
+            request.EndTime,
+            request.Venue,
+            request.Zone,
+            request.Subspecialty,
+            request.Category,
+            request.MaxSpots,
+            request.BiggestCatchMinWeightInGrams);
 
         await _competitionRepository.AddAsync(competition);
 

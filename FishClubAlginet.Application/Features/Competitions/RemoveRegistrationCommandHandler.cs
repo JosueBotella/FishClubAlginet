@@ -33,11 +33,7 @@ public sealed class RemoveRegistrationCommandHandler
         result.DeletedTimeUtc = DateTime.UtcNow;
         result.LastUpdateUtc = DateTime.UtcNow;
 
-        if (competition is not null && competition.ParticipantCount > 0)
-        {
-            competition.ParticipantCount--;
-            competition.LastUpdateUtc = DateTime.UtcNow;
-        }
+        competition?.DecrementParticipantCount();
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         return Result.Success;

@@ -53,25 +53,15 @@ public class GetLeagueStandingsMatrixQueryHandlerTests
         league.Id = leagueId;
         league.IsActive = true;
 
-        var comp1 = new Competition
-        {
-            Id = Guid.NewGuid(),
-            LeagueId = leagueId,
-            CompetitionNumber = 1,
-            Name = "Concurso 1",
-            Date = DateTime.UtcNow.AddDays(-10),
-            Status = CompetitionStatus.ResultsValidated
-        };
+        var comp1 = Competition.Create(
+            leagueId, 1, "Concurso 1", DateTime.UtcNow.AddDays(-10),
+            TimeSpan.FromHours(8), TimeSpan.FromHours(14), "Venue", null,
+            Subspecialty.AguaDulce, Category.Seniors, 10, status: CompetitionStatus.ResultsValidated);
 
-        var comp2 = new Competition
-        {
-            Id = Guid.NewGuid(),
-            LeagueId = leagueId,
-            CompetitionNumber = 2,
-            Name = "Concurso 2",
-            Date = DateTime.UtcNow.AddDays(-5),
-            Status = CompetitionStatus.ResultsValidated
-        };
+        var comp2 = Competition.Create(
+            leagueId, 2, "Concurso 2", DateTime.UtcNow.AddDays(-5),
+            TimeSpan.FromHours(8), TimeSpan.FromHours(14), "Venue", null,
+            Subspecialty.AguaDulce, Category.Seniors, 10, status: CompetitionStatus.ResultsValidated);
 
         var fishermanId = 12;
         var fisherman = new Fisherman
@@ -167,15 +157,10 @@ public class GetLeagueStandingsMatrixQueryHandlerTests
         league.Id = leagueId;
         league.IsActive = true;
 
-        var comp1 = new Competition
-        {
-            Id = Guid.NewGuid(),
-            LeagueId = leagueId,
-            CompetitionNumber = 1,
-            Name = "Concurso 1",
-            Date = DateTime.UtcNow.AddDays(-10),
-            Status = CompetitionStatus.ResultsValidated
-        };
+        var comp1 = Competition.Create(
+            leagueId, 1, "Concurso 1", DateTime.UtcNow.AddDays(-10),
+            TimeSpan.FromHours(8), TimeSpan.FromHours(14), "Venue", null,
+            Subspecialty.AguaDulce, Category.Seniors, 10, status: CompetitionStatus.ResultsValidated);
 
         var fishermanId = 5;
         var fisherman = new Fisherman

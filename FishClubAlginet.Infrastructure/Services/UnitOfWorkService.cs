@@ -87,7 +87,8 @@ public class UnitOfWorkService : IUnitOfWork
         var repositoryType = typeof(GenericRepository<,>);
         var closedGenericType = repositoryType.MakeGenericType(typeof(T), typeof(TId));
 
-        var repository = Activator.CreateInstance(closedGenericType, _context);
+        var repository = Activator.CreateInstance(closedGenericType, _context)
+            ?? throw new InvalidOperationException($"Could not create repository instance for type {entityType.Name}");
 
         _repositories.Add(entityType, repository);
         return (IGenericRepository<T, TId>)repository;

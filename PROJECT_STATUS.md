@@ -154,27 +154,17 @@ Mark ProcessedOnUtc = UtcNow
 
 3. **Competitions** — handlers escritos (Create, OpenRegistration, CloseRegistration, RegisterFisherman, RemoveRegistration, UpdateResult, GetResults, GetByLeague) **pero sin tests**. Falta también revisar concurrencia en `RegisterFishermanCommandHandler` (riesgo de race si dos pescadores reservan el último spot — no verificado a fondo).
 
-4. **Validación automática vía MediatR pipeline** — `FluentValidation` está registrado (`AddValidatorsFromAssembly`) pero **no veo un `ValidationBehavior<TRequest,TResponse>`** registrado. Esto significa que las validations existen como clases pero no se disparan automáticamente al enviar un Command; el handler tiene que invocarlas a mano. *Confianza media: solo he revisado `Program.cs`, no he hecho grep exhaustivo.*
+4. **Validación automática vía MediatR pipeline** — **Resuelto:** `ValidationPipelineBehavior<TRequest, TResponse>` implementado y registrado en `DependencyInjection.cs` con tests unitarios pasando.
 
-### 🔴 Bugs / Race conditions detectados durante esta auditoría
+### 🔴 Bugs / Race conditions auditados y resueltos
 
-> **Aclaración honesta:** estos bugs los he encontrado yo al revisar el código para generar este manifest. **No los habíamos discutido previamente.**
+#### **BUG-1: Outbox solo captura eventos de `Fisherman` — RESUELTO**
+* **Solución:** `BaseEntity<TId>` implementa `IHasDomainEvents` y el interceptor `ConvertDomainEventsToOutboxMessagesInterceptor` escanea `.Entries<IHasDomainEvents>()`, capturando correctamente eventos de `Fisherman` (`int`), `League`, `Competition` y `CompetitionResult` (`Guid`).
 
-#### **BUG-1: Outbox solo captura eventos de `Fisherman` (CRÍTICO)**
-
-* **Ubicación:** `FishClubAlginet.Infrastructure/Persistence/Interceptors/ConvertDomainEventsToOutboxMessagesInterceptor.cs:19`
-* **Síntoma:** El interceptor escanea únicamente `dbContext.ChangeTracker.Entries<BaseEntity<int>>()`.
-* **Causa:** Solo `Fisherman` hereda de `BaseEntity<int>`. `League`, `Competition`, `CompetitionResult` y `OutboxMessage` heredan de `BaseEntity<Guid>`. Por lo tanto, **cualquier `RaiseDomainEvent()` invocado en League/Competition se pierde silenciosamente** (se limpia del entity al guardar pero nunca llega al Outbox).
-* **Impacto:** Cualquier consumidor de eventos de dominio en Leagues/Competitions (notificaciones, proyecciones, side effects) jamás se ejecutará.
-
-#### **BUG-2: ProcessOutboxMessagesJob solo deserializa tipos del namespace Fishermen**
-
-* **Ubicación:** `FishClubAlginet.API/Infrastructure/BackgroundJobs/ProcessOutboxMessagesJob.cs:53`
-* **Síntoma:** Hardcoded `var typeName = $"FishClubAlginet.Application.Features.Events.Commands.Fishermen.{outboxMessage.Type}, FishClubAlginet.Application";`
-* **Impacto:** Aunque arreglemos BUG-1, los eventos de otros bounded contexts seguirán fallando con "Type not found".
+#### **BUG-2: ProcessOutboxMessagesJob solo deserializa tipos de Fishermen — RESUELTO**
+* **Solución:** `ProcessOutboxMessagesJob` escanea dinámicamente todos los ensamblados cargados filtrando por `t.Name == outboxMessage.Type && typeof(IDomainEvent).IsAssignableFrom(t)`. Admite eventos de cualquier bounded context.
 
 #### **OBSERVACIÓN-3: Migración con nombre confuso**
-
 * Existen `InitialSqlServer` (2026-04-14) e `Initial` (2026-05-06). El segundo, con nombre "Initial", es post-inicial. Revisar si fue un rebuild manual de migraciones; si sí, conviene squashar antes de production.
 
 ---

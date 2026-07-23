@@ -54,15 +54,10 @@ public class GetCompetitionBiggestCatchQueryHandlerTests
     {
         // Arrange
         var competitionId = Guid.NewGuid();
-        var comp = new Competition
-        {
-            Id = competitionId,
-            LeagueId = Guid.NewGuid(),
-            CompetitionNumber = 1,
-            Name = "Concurso 1",
-            Date = DateTime.UtcNow,
-            Status = CompetitionStatus.ResultsValidated
-        };
+        var comp = Competition.Create(
+            Guid.NewGuid(), 1, "Concurso 1", DateTime.UtcNow,
+            TimeSpan.FromHours(8), TimeSpan.FromHours(14), "Venue", null,
+            Subspecialty.AguaDulce, Category.Seniors, 10, id: competitionId, status: CompetitionStatus.ResultsValidated);
 
         _mockCompetitionRepo.Setup(r => r.GetAll())
             .Returns(new List<Competition> { comp }.AsQueryable());
@@ -98,16 +93,10 @@ public class GetCompetitionBiggestCatchQueryHandlerTests
     {
         // Arrange
         var competitionId = Guid.NewGuid();
-        var comp = new Competition
-        {
-            Id = competitionId,
-            LeagueId = Guid.NewGuid(),
-            CompetitionNumber = 1,
-            Name = "Concurso 1",
-            Date = DateTime.UtcNow,
-            Status = CompetitionStatus.ResultsValidated,
-            BiggestCatchMinWeightInGrams = 1500 // Min weight is 1.5kg
-        };
+        var comp = Competition.Create(
+            Guid.NewGuid(), 1, "Concurso 1", DateTime.UtcNow,
+            TimeSpan.FromHours(8), TimeSpan.FromHours(14), "Venue", null,
+            Subspecialty.AguaDulce, Category.Seniors, 10, biggestCatchMinWeightInGrams: 1500, id: competitionId, status: CompetitionStatus.ResultsValidated);
 
         var f1 = new Fisherman { Id = 1, FirstName = "Toni", LastName = "Bello" };
         var f2 = new Fisherman { Id = 2, FirstName = "Carlos", LastName = "Algarra" };

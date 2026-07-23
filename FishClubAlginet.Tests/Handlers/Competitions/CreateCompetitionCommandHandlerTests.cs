@@ -150,13 +150,10 @@ public class CreateCompetitionCommandHandlerTests
     {
         var league = BuildActiveLeague();
 
-        var existing = new Competition
-        {
-            Id                = Guid.NewGuid(),
-            LeagueId          = league.Id,
-            CompetitionNumber = 1,
-            LastUpdateUtc     = DateTime.UtcNow
-        };
+        var existing = Competition.Create(
+            league.Id, 1, "Comp 1", DateTime.UtcNow.AddDays(1),
+            TimeSpan.FromHours(8), TimeSpan.FromHours(14), "Venue", null,
+            Subspecialty.AguaDulce, Category.Seniors, 10);
 
         _mockLeagueRepo.Setup(r => r.GetById(league.Id)).ReturnsAsync(league);
         _mockCompetitionRepo.Setup(r => r.GetAll())
@@ -174,14 +171,11 @@ public class CreateCompetitionCommandHandlerTests
     {
         var league = BuildActiveLeague();
 
-        var deleted = new Competition
-        {
-            Id                = Guid.NewGuid(),
-            LeagueId          = league.Id,
-            CompetitionNumber = 1,
-            IsDeleted         = true,
-            LastUpdateUtc     = DateTime.UtcNow
-        };
+        var deleted = Competition.Create(
+            league.Id, 1, "Comp 1", DateTime.UtcNow.AddDays(1),
+            TimeSpan.FromHours(8), TimeSpan.FromHours(14), "Venue", null,
+            Subspecialty.AguaDulce, Category.Seniors, 10);
+        deleted.IsDeleted = true;
 
         _mockLeagueRepo.Setup(r => r.GetById(league.Id)).ReturnsAsync(league);
         _mockCompetitionRepo.Setup(r => r.GetAll())

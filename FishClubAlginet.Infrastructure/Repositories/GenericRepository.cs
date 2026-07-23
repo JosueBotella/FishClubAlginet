@@ -23,7 +23,7 @@ public class GenericRepository<T, TId> : IGenericRepository<T, TId>
 
     public virtual async Task<T?> GetById(TId id)
         => await _context.Set<T>()
-            .FirstAsync(a => a.Id.Equals(id));
+            .FirstOrDefaultAsync(a => Equals(a.Id, id));
 
 
     public IQueryable<T> GetAll()

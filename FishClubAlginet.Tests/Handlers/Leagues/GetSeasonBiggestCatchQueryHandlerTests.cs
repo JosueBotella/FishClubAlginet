@@ -61,15 +61,10 @@ public class GetSeasonBiggestCatchQueryHandlerTests
         league.Id = leagueId;
         league.IsActive = true;
 
-        var comp1 = new Competition
-        {
-            Id = Guid.NewGuid(),
-            LeagueId = leagueId,
-            CompetitionNumber = 1,
-            Name = "Concurso 1",
-            Date = DateTime.UtcNow.AddDays(-10),
-            Status = CompetitionStatus.ResultsValidated
-        };
+        var comp1 = Competition.Create(
+            leagueId, 1, "Concurso 1", DateTime.UtcNow.AddDays(-10),
+            TimeSpan.FromHours(8), TimeSpan.FromHours(14), "Venue", null,
+            Subspecialty.AguaDulce, Category.Seniors, 10, status: CompetitionStatus.ResultsValidated);
 
         _mockLeagueRepo.Setup(r => r.GetAll())
             .Returns(new List<League> { league }.AsQueryable());
@@ -112,27 +107,15 @@ public class GetSeasonBiggestCatchQueryHandlerTests
         league.Id = leagueId;
         league.IsActive = true;
 
-        var comp1 = new Competition
-        {
-            Id = Guid.NewGuid(),
-            LeagueId = leagueId,
-            CompetitionNumber = 1,
-            Name = "Concurso 1",
-            Date = DateTime.UtcNow.AddDays(-10),
-            Status = CompetitionStatus.ResultsValidated,
-            BiggestCatchMinWeightInGrams = 2000 // Min weight is 2kg
-        };
+        var comp1 = Competition.Create(
+            leagueId, 1, "Concurso 1", DateTime.UtcNow.AddDays(-10),
+            TimeSpan.FromHours(8), TimeSpan.FromHours(14), "Venue", null,
+            Subspecialty.AguaDulce, Category.Seniors, 10, biggestCatchMinWeightInGrams: 2000, status: CompetitionStatus.ResultsValidated);
 
-        var comp2 = new Competition
-        {
-            Id = Guid.NewGuid(),
-            LeagueId = leagueId,
-            CompetitionNumber = 2,
-            Name = "Concurso 2",
-            Date = DateTime.UtcNow.AddDays(-5),
-            Status = CompetitionStatus.ResultsValidated,
-            BiggestCatchMinWeightInGrams = null // No min weight
-        };
+        var comp2 = Competition.Create(
+            leagueId, 2, "Concurso 2", DateTime.UtcNow.AddDays(-5),
+            TimeSpan.FromHours(8), TimeSpan.FromHours(14), "Venue", null,
+            Subspecialty.AguaDulce, Category.Seniors, 10, biggestCatchMinWeightInGrams: null, status: CompetitionStatus.ResultsValidated);
 
         var f1 = new Fisherman { Id = 1, FirstName = "Juan", LastName = "Gomez" };
         var f2 = new Fisherman { Id = 2, FirstName = "Pedro", LastName = "Ruiz" };

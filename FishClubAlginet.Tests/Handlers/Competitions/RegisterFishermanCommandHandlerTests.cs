@@ -30,17 +30,15 @@ public class RegisterFishermanCommandHandlerTests
 
     // ── fixtures ──────────────────────────────────────────────────────────────
 
-    private static Competition BuildOpenCompetition(Guid? id = null, int maxSpots = 30, int current = 0) =>
-        new Competition
-        {
-            Id               = id ?? Guid.NewGuid(),
-            LeagueId         = Guid.NewGuid(),
-            CompetitionNumber = 1,
-            Status           = CompetitionStatus.RegistrationOpen,
-            MaxSpots         = maxSpots,
-            ParticipantCount = current,
-            LastUpdateUtc    = DateTime.UtcNow
-        };
+    private static Competition BuildOpenCompetition(Guid? id = null, int maxSpots = 30, int current = 0, CompetitionStatus status = CompetitionStatus.RegistrationOpen)
+    {
+        var comp = Competition.Create(
+            Guid.NewGuid(), 1, "Comp 1", DateTime.UtcNow.AddDays(1),
+            TimeSpan.FromHours(8), TimeSpan.FromHours(14), "Venue", null,
+            Subspecialty.AguaDulce, Category.Seniors, maxSpots, id: id, status: status);
+        for (int i = 0; i < current; i++) comp.IncrementParticipantCount();
+        return comp;
+    }
 
     private static Fisherman BuildFisherman(int id = 1) =>
         Fisherman.Create(
@@ -98,8 +96,7 @@ public class RegisterFishermanCommandHandlerTests
     [Fact]
     public async Task Handle_CompetitionNotOpen_ShouldReturnRegistrationNotOpenError()
     {
-        var competition = BuildOpenCompetition();
-        competition.Status = CompetitionStatus.Planned; // not open
+        var competition = BuildOpenCompetition(status: CompetitionStatus.Planned); // not open
 
         _mockCompetitionRepo.Setup(r => r.GetById(competition.Id)).ReturnsAsync(competition);
 
