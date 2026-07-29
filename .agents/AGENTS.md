@@ -56,3 +56,9 @@ Para levantar la infraestructura completa mediante contenedores Docker:
 | **SQL Server 2022** | `1433` | `1433` | `localhost,1433` — Usuario: `sa` |
 | **Portainer (opcional)** | `19100` | `9000` | [http://localhost:19100](http://localhost:19100) |
 <!-- STACK_LAUNCH_RULE_END -->
+
+<!-- OBSIDIAN_LOG_RULE_START -->
+## Registro en Obsidian (Diario de a Bordo)
+
+Al finalizar una conversación, al alcanzar un hito importante, o al terminar una sesión de trabajo, DEBES actualizar el archivo de bitácora en Obsidian ubicado en \G:\Mi unidad\Obsidian\DigitalLife\Proyectos\Fishing\DiarioDeAbordo.md\ con la fecha actual, lo que se ha completado, y cuál es el siguiente paso. Esto permite al usuario recuperar el contexto rápidamente en sesiones futuras.
+<!-- OBSIDIAN_LOG_RULE_END -->
