@@ -84,6 +84,11 @@ public sealed class RegisterFishermanCommandHandler
                 return Errors.Competition.AlreadyRegistered;
             }
 
+            if (saveResult.FirstError.Code == "Database.Concurrency")
+            {
+                return Errors.Competition.ConcurrentUpdate;
+            }
+
             return Error.Failure(
                 code: "REGISTRATION_SAVE_FAILED",
                 description: "Could not register the fisherman. Please try again.");

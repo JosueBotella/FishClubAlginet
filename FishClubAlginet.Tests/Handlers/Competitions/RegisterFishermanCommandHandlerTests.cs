@@ -202,4 +202,25 @@ public class RegisterFishermanCommandHandlerTests
         result.IsError.Should().BeTrue();
         result.FirstError.Code.Should().Be("REGISTRATION_SAVE_FAILED");
     }
+
+    [Fact]
+    public async Task Handle_ConcurrencyConflictOnSave_ShouldReturnConcurrentUpdateError()
+    {
+        var competition = BuildOpenCompetition();
+        var fisherman   = BuildFisherman();
+        fisherman.Id    = 1;
+
+        _mockCompetitionRepo.Setup(r => r.GetById(competition.Id)).ReturnsAsync(competition);
+        _mockFishermanRepo.Setup(r => r.GetById(fisherman.Id)).ReturnsAsync(fisherman);
+        _mockResultRepo.Setup(r => r.GetAll()).Returns(new List<CompetitionResult>().AsQueryable());
+        _mockResultRepo.Setup(r => r.AddAsync(It.IsAny<CompetitionResult>()))
+            .ReturnsAsync((CompetitionResult cr) => cr);
+        _mockUnitOfWork.Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Error.Conflict(code: "Database.Concurrency", description: "..."));
+
+        var result = await _handler.Handle(new RegisterFishermanCommand(competition.Id, fisherman.Id), CancellationToken.None);
+
+        result.IsError.Should().BeTrue();
+        result.FirstError.Code.Should().Be("Competition.ConcurrentUpdate");
+    }
 }

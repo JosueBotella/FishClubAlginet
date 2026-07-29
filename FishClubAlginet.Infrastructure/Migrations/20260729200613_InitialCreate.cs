@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace FishClubAlginet.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialSqlServer : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -62,6 +62,7 @@ namespace FishClubAlginet.Infrastructure.Migrations
                     DocumentType = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
                     DocumentNumber = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     FederationLicense = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    FederationNumber = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
                     RegionalLicense = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Address_Street = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Address_Number = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -77,6 +78,26 @@ namespace FishClubAlginet.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Fishermen", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Leagues",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Year = table.Column<int>(type: "int", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
+                    IsArchived = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
+                    MinPoints = table.Column<int>(type: "int", nullable: false, defaultValue: 5),
+                    WorstResultsToDiscard = table.Column<int>(type: "int", nullable: false, defaultValue: 0),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedTimeUtc = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    LastUpdateUtc = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Leagues", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -201,6 +222,77 @@ namespace FishClubAlginet.Infrastructure.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Competitions",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LeagueId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CompetitionNumber = table.Column<int>(type: "int", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    Date = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    StartTime = table.Column<TimeSpan>(type: "time", nullable: false),
+                    EndTime = table.Column<TimeSpan>(type: "time", nullable: false),
+                    Venue = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Zone = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    Subspecialty = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    Category = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false, defaultValue: "Planned"),
+                    MaxSpots = table.Column<int>(type: "int", nullable: false),
+                    ParticipantCount = table.Column<int>(type: "int", nullable: false),
+                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false),
+                    BiggestCatchMinWeightInGrams = table.Column<int>(type: "int", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedTimeUtc = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    LastUpdateUtc = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Competitions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Competitions_Leagues_LeagueId",
+                        column: x => x.LeagueId,
+                        principalTable: "Leagues",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CompetitionResults",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CompetitionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    FishermanId = table.Column<int>(type: "int", nullable: false),
+                    AssignedSpotNumber = table.Column<int>(type: "int", nullable: true),
+                    RegistrationDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsValidated = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
+                    DidAttend = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
+                    WeightInGrams = table.Column<int>(type: "int", nullable: false, defaultValue: 0),
+                    BiggestCatchWeight = table.Column<int>(type: "int", nullable: true),
+                    Points = table.Column<decimal>(type: "decimal(18,2)", nullable: false, defaultValue: 0m),
+                    Ranking = table.Column<int>(type: "int", nullable: false, defaultValue: 0),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedTimeUtc = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    LastUpdateUtc = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CompetitionResults", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CompetitionResults_Competitions_CompetitionId",
+                        column: x => x.CompetitionId,
+                        principalTable: "Competitions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CompetitionResults_Fishermen_FishermanId",
+                        column: x => x.FishermanId,
+                        principalTable: "Fishermen",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -241,9 +333,46 @@ namespace FishClubAlginet.Infrastructure.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_CompetitionResults_CompetitionId_FishermanId",
+                table: "CompetitionResults",
+                columns: new[] { "CompetitionId", "FishermanId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CompetitionResults_CompetitionId_SpotNumber",
+                table: "CompetitionResults",
+                columns: new[] { "CompetitionId", "AssignedSpotNumber" },
+                unique: true,
+                filter: "[AssignedSpotNumber] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CompetitionResults_FishermanId",
+                table: "CompetitionResults",
+                column: "FishermanId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Competitions_LeagueId_CompetitionNumber",
+                table: "Competitions",
+                columns: new[] { "LeagueId", "CompetitionNumber" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Fishermen_FederationLicense",
                 table: "Fishermen",
                 column: "FederationLicense",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Fishermen_FederationNumber",
+                table: "Fishermen",
+                column: "FederationNumber",
+                unique: true,
+                filter: "[FederationNumber] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Leagues_Year",
+                table: "Leagues",
+                column: "Year",
                 unique: true);
         }
 
@@ -266,7 +395,7 @@ namespace FishClubAlginet.Infrastructure.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Fishermen");
+                name: "CompetitionResults");
 
             migrationBuilder.DropTable(
                 name: "OutboxMessages");
@@ -276,6 +405,15 @@ namespace FishClubAlginet.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "Competitions");
+
+            migrationBuilder.DropTable(
+                name: "Fishermen");
+
+            migrationBuilder.DropTable(
+                name: "Leagues");
         }
     }
 }

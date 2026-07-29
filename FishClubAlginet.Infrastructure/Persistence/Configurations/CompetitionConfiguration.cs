@@ -54,5 +54,9 @@ public class CompetitionConfiguration : IEntityTypeConfiguration<Competition>
         builder.HasIndex(x => new { x.LeagueId, x.CompetitionNumber })
             .IsUnique()
             .HasDatabaseName("IX_Competitions_LeagueId_CompetitionNumber");
+
+        // Optimistic concurrency control token
+        builder.Property(x => x.RowVersion)
+            .IsRowVersion();
     }
 }

@@ -12,18 +12,174 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FishClubAlginet.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260414144815_InitialSqlServer")]
-    partial class InitialSqlServer
+    [Migration("20260729200613_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.1")
+                .HasAnnotation("ProductVersion", "10.0.7")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("FishClubAlginet.Core.Domain.Entities.Competition", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("BiggestCatchMinWeightInGrams")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("CompetitionNumber")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedTimeUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<TimeSpan>("EndTime")
+                        .HasColumnType("time");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("LastUpdateUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("LeagueId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("MaxSpots")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("ParticipantCount")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<TimeSpan>("StartTime")
+                        .HasColumnType("time");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)")
+                        .HasDefaultValue("Planned");
+
+                    b.Property<string>("Subspecialty")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Venue")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Zone")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LeagueId", "CompetitionNumber")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Competitions_LeagueId_CompetitionNumber");
+
+                    b.ToTable("Competitions", (string)null);
+                });
+
+            modelBuilder.Entity("FishClubAlginet.Core.Domain.Entities.CompetitionResult", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("AssignedSpotNumber")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("BiggestCatchWeight")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("CompetitionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("DeletedTimeUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("DidAttend")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<int>("FishermanId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsValidated")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<DateTime>("LastUpdateUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("Points")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("decimal(18,2)")
+                        .HasDefaultValue(0m);
+
+                    b.Property<int>("Ranking")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<DateTime>("RegistrationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("WeightInGrams")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FishermanId");
+
+                    b.HasIndex("CompetitionId", "AssignedSpotNumber")
+                        .IsUnique()
+                        .HasDatabaseName("IX_CompetitionResults_CompetitionId_SpotNumber")
+                        .HasFilter("[AssignedSpotNumber] IS NOT NULL");
+
+                    b.HasIndex("CompetitionId", "FishermanId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_CompetitionResults_CompetitionId_FishermanId");
+
+                    b.ToTable("CompetitionResults", (string)null);
+                });
 
             modelBuilder.Entity("FishClubAlginet.Core.Domain.Entities.Fisherman", b =>
                 {
@@ -51,6 +207,10 @@ namespace FishClubAlginet.Infrastructure.Migrations
 
                     b.Property<string>("FederationLicense")
                         .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("FederationNumber")
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
@@ -82,7 +242,64 @@ namespace FishClubAlginet.Infrastructure.Migrations
                     b.HasIndex("FederationLicense")
                         .IsUnique();
 
+                    b.HasIndex("FederationNumber")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Fishermen_FederationNumber")
+                        .HasFilter("[FederationNumber] IS NOT NULL");
+
                     b.ToTable("Fishermen", (string)null);
+                });
+
+            modelBuilder.Entity("FishClubAlginet.Core.Domain.Entities.League", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("DeletedTimeUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<bool>("IsArchived")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("LastUpdateUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("MinPoints")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(5);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("WorstResultsToDiscard")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<int>("Year")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Year")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Leagues_Year");
+
+                    b.ToTable("Leagues", (string)null);
                 });
 
             modelBuilder.Entity("FishClubAlginet.Core.Domain.Entities.OutboxMessage", b =>
@@ -311,6 +528,36 @@ namespace FishClubAlginet.Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("FishClubAlginet.Core.Domain.Entities.Competition", b =>
+                {
+                    b.HasOne("FishClubAlginet.Core.Domain.Entities.League", "League")
+                        .WithMany("Competitions")
+                        .HasForeignKey("LeagueId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("League");
+                });
+
+            modelBuilder.Entity("FishClubAlginet.Core.Domain.Entities.CompetitionResult", b =>
+                {
+                    b.HasOne("FishClubAlginet.Core.Domain.Entities.Competition", "Competition")
+                        .WithMany()
+                        .HasForeignKey("CompetitionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FishClubAlginet.Core.Domain.Entities.Fisherman", "Fisherman")
+                        .WithMany()
+                        .HasForeignKey("FishermanId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Competition");
+
+                    b.Navigation("Fisherman");
+                });
+
             modelBuilder.Entity("FishClubAlginet.Core.Domain.Entities.Fisherman", b =>
                 {
                     b.OwnsOne("FishClubAlginet.Core.Domain.ValueObjects.Address", "Address", b1 =>
@@ -411,6 +658,11 @@ namespace FishClubAlginet.Infrastructure.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("FishClubAlginet.Core.Domain.Entities.League", b =>
+                {
+                    b.Navigation("Competitions");
                 });
 #pragma warning restore 612, 618
         }

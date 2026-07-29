@@ -21,17 +21,21 @@ public static class FishermanSeed
     private static List<Fisherman> GenerateFishermen()
     {
         var fishermen = new List<Fisherman>();
-        var firstNames = new[]
+        var realNames = new[]
         {
-            "Juan", "Carlos", "Miguel", "José", "Francisco", "Antonio", "Manuel", "Pablo", "Luis", "Jorge",
-            "Rafael", "Ricardo", "Roberto", "Raúl", "Sergio", "Salvador", "Santiago", "Tomás", "Valentín", "Vicente",
-            "Víctor", "Emilio", "Enrique", "Eugenio", "Esteban", "Eduardo", "Ernesto", "Elier", "Elías", "Eliseo"
-        };
-
-        var lastNames = new[]
-        {
-            "García", "Rodríguez", "Martínez", "Hernández", "López", "González", "Pérez", "Sánchez", "Ramírez", "Torres",
-            "Flores", "Rivera", "Moreno", "Gutiérrez", "Ortiz", "Jiménez", "Díaz", "Castillo", "Navarro", "Vargas"
+            "LORENZO MONGE ALVAREZ", "ANTONIO MARTINEZ MEDRANO", "MIGUEL JUAN MARTINEZ", "CRISTIAN VOINESCU",
+            "JUAN ALCARAZ VIUDEZ", "JUAN MANUEL GARCIA ALOS", "PEDRO VIUDES SOLER", "EMILIO GALAN DIRANZO",
+            "ANTONIO RUBIO RUIZ", "FRANCISCO JAVIER MINGUEZ LOPEZ", "DAVID ROIG FERNANDEZ", "JOSE SALVADOR GUIJARRO MACHI",
+            "SALVADOR CASTELLOTE BAIXAULI", "JOSE VICENTE PALAU REGAL", "JUAN VICENTE GUARDIOLA RIVES", "VICENTE QUIJAL LOPEZ",
+            "SALVADOR CASTELLOTE RUEDA", "SALVADOR BAYARRI CATALA", "STAVAR NAVALICI", "DAVID SOLER SATORRES",
+            "MIGUEL ESPERT JUAN", "VIRGIL COTMEANA", "ANDRES SOLER SATORRES", "JUAN RAFAEL HERNAIZ RUESCAS",
+            "PEDRO JOSE GARCIA PALLAS", "JOSE GABRIEL BOTELLA DIRANZO", "SERGIO VALCACER LOPEZ", "LAURENTIU ILIE",
+            "VICENTE ALIAGA REGAL", "MARIUS LAURENTIU DUMITRIU", "JORGE FERRANDO CANET", "SALVADOR NAVARRO BELMONT",
+            "BERNARDO SOLER ESCUTIA", "JUAN BAUTISTA BOSCH SOLER", "IVAN MARTINEZ VELLÓ", "CALIXTO DALMAU GALLART",
+            "FERNADO MARTINEZ SANCHEZ", "TEODORO FERNANDEZ SERRANO", "JOSE ORTA GADEA", "JOSE MIGUEL GALIAN VILLANUEVA",
+            "ISAIAS DEL RIO AGUILAR", "SALVADOR GOMARIS ROSELLÓ", "CASIMIRO GIL CHOLVI", "FRANCISCO VIDAL CALABUIG",
+            "JOSE ANTONIO CAÑAMERO JIMENEZ", "JUAN BAUTISTA BOSCH LOPEZ", "JUAN GARRIDO PARRA", "JUAN VICENTE ROIG SANCHIS",
+            "PEDRO ESCRIBANO MORALES", "RUBEN BOSCH ESTEVE", "ALEJANDRO VICENTE PIQUERAS", "ALEXANDRE PAVIA TEN"
         };
 
         var cities = new[]
@@ -55,18 +59,21 @@ public static class FishermanSeed
 
         var random = new Random(42);
 
-        for (int i = 1; i <= 50; i++)
+        for (int i = 0; i < realNames.Length; i++)
         {
-            var firstName = firstNames[random.Next(firstNames.Length)];
-            var lastName = lastNames[random.Next(lastNames.Length)];
+            var fullName = realNames[i];
+            var nameParts = fullName.Split(' ', 2);
+            var firstName = nameParts.Length > 0 ? nameParts[0] : "Unknown";
+            var lastName = nameParts.Length > 1 ? nameParts[1] : "Unknown";
+
             var cityIndex = random.Next(cities.Length);
             var city = cities[cityIndex];
             var province = provinces[cityIndex];
             var documentType = documentTypes[random.Next(documentTypes.Length)];
 
             var birthDate = GenerateRandomBirthDate(random);
-            var documentNumber = GenerateDocumentNumber(documentType, random, i);
-            var federationLicense = $"FED{i:D5}";
+            var documentNumber = GenerateDocumentNumber(documentType, random, i + 1);
+            var federationLicense = $"FED{(i + 1):D5}";
             var zipCode = $"{random.Next(10000, 52000):D5}";
 
             var fisherman = new Fisherman
@@ -80,7 +87,7 @@ public static class FishermanSeed
                 FederationLicense = federationLicense,
                 Address = new Address
                 {
-                    Street = $"Calle {lastName} {i}",
+                    Street = $"Calle {lastName} {i + 1}",
                     City = city,
                     ZipCode = zipCode,
                     Province = province

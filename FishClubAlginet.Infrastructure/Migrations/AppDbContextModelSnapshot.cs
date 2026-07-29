@@ -68,6 +68,12 @@ namespace FishClubAlginet.Infrastructure.Migrations
                     b.Property<int>("ParticipantCount")
                         .HasColumnType("int");
 
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
                     b.Property<TimeSpan>("StartTime")
                         .HasColumnType("time");
 

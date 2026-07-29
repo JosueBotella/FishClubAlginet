@@ -81,6 +81,10 @@ public static partial class Errors
             code: "Competition.MaxSpotsReached",
             description: "The competition has reached maximum capacity.");
 
+        public static Error ConcurrentUpdate => Error.Conflict(
+            code: "Competition.ConcurrentUpdate",
+            description: "The competition was modified by another process. Please refresh and try again.");
+
         /// <summary>Reabrir inscripción solo está permitido dentro de los 30 días siguientes al cierre.</summary>
         public static Error ReopenWindowExpired => Error.Validation(
             code: "Competition.ReopenWindowExpired",

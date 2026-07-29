@@ -17,6 +17,8 @@ public class Competition : BaseEntity<Guid>
     public CompetitionStatus Status { get; private set; } = CompetitionStatus.Planned;
     public int MaxSpots { get; private set; }
     public int ParticipantCount { get; private set; }
+    
+    public byte[] RowVersion { get; set; } = [];
 
     /// <summary>
     /// Optional minimum weight (in grams) for a catch to qualify as "pieza mayor".
