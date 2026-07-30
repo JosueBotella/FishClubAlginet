@@ -373,3 +373,6 @@ FodyWeavers.xsd
 .env
 # Frontend build output
 fishclubalginet-frontend/dist/
+
+# SonarQube temporary output
+.sonarqube/

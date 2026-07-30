@@ -1,4 +1,4 @@
-﻿global using FishClubAlginet.Application.Constants;
+global using FishClubAlginet.Application.Constants;
 global using FluentValidation.TestHelper;
 global using Xunit;
 global using FishClubAlginet.Contracts.Enums;
@@ -18,3 +18,4 @@ global using FishClubAlginet.Core.Domain.ValueObjects;
 global using Microsoft.AspNetCore.Identity;
 global using Microsoft.Extensions.Logging;
 global using FishClubAlginet.Application.Features.Events.Commands.Fishermen;
+global using FluentAssertions;

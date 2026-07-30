@@ -62,3 +62,22 @@ Para levantar la infraestructura completa mediante contenedores Docker:
 
 Al finalizar una conversación, al alcanzar un hito importante, o al terminar una sesión de trabajo, DEBES actualizar el archivo de bitácora en Obsidian ubicado en \G:\Mi unidad\Obsidian\DigitalLife\Proyectos\Fishing\DiarioDeAbordo.md\ con la fecha actual, lo que se ha completado, y cuál es el siguiente paso. Esto permite al usuario recuperar el contexto rápidamente en sesiones futuras.
 <!-- OBSIDIAN_LOG_RULE_END -->
+
+<!-- GLOBAL_USINGS_RULE_START -->
+## Regla de Usings Globales (.NET / C#)
+
+Para mantener el código limpio, DRY y consistente en la solución backend de .NET:
+- **Centralización en `GlobalUsing.cs`**: Todos los namespaces comunes y repetidos dentro de un proyecto C# (como `ErrorOr`, `MediatR`, `FluentAssertions`, `Moq`, entidades de dominio comunes, DTOs frecuentemente usados, etc.) deben declararse como `global using` en el archivo `GlobalUsing.cs` situado en la raíz de cada proyecto.
+- **Evitar `using` redundantes**: No incluir directivas `using` individuales al inicio de los archivos `.cs` si ya están declaradas globalmente en el `GlobalUsing.cs` del proyecto.
+<!-- GLOBAL_USINGS_RULE_END -->
+
+<!-- SONARQUBE_QUALITY_RULE_START -->
+## Regla de Calidad de Código y SonarQube
+
+Para asegurar cero deuda técnica, cero vulnerabilidades y cero code smells en la aplicación:
+- **Arranque de SonarQube**: SonarQube está disponible en `http://localhost:9000` ejecutando `docker compose -f docker-compose.tools.yml up -d`.
+- **Análisis Previo a Commits / Push**: Antes de subir cambios a remoto o dar por finalizados refactorizaciones/features significativas, se debe ejecutar el análisis con `.\sonar-analysis.ps1 -Token "TU_TOKEN_DE_SONAR"`.
+- **Zero Issues Guarantee**: Ningún cambio con alertas críticas, bugs, ni vulnerabilidades reportadas por el Quality Gate de SonarQube debe ser integrado en el código principal.
+<!-- SONARQUBE_QUALITY_RULE_END -->
+
+
