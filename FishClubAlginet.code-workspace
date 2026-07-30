@@ -1,0 +1,39 @@
+{
+  "folders": [
+    {
+      "path": ".",
+      "name": "Root"
+    },
+    {
+      "path": "fishclubalginet-frontend",
+      "name": "Frontend"
+    },
+    {
+      "path": "FishClubAlginet.API",
+      "name": "API"
+    },
+    {
+      "path": "FishClubAlginet.Application",
+      "name": "Application"
+    },
+    {
+      "path": "FishClubAlginet.Contracts",
+      "name": "Contracts"
+    },
+    {
+      "path": "FishClubAlginet.Core",
+      "name": "Core"
+    },
+    {
+      "path": "FishClubAlginet.Infrastructure",
+      "name": "Infrastructure"
+    },
+    {
+      "path": "FishClubAlginet.Tests",
+      "name": "Tests"
+    }
+  ],
+  "settings": {
+    "editor.formatOnSave": true
+  }
+}
