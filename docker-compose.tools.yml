@@ -8,7 +8,7 @@
 #
 # Acceso UI:
 #   Portainer: http://localhost:19100 (configurable via PORTAINER_PORT)
-#   SonarQube: http://localhost:9000  (configurable via SONARQUBE_PORT)
+#   SonarQube: http://localhost:9000  (configurable via SONARQUBE_PORT / SONAR_PORT)
 # =============================================================
 
 services:
@@ -28,7 +28,7 @@ services:
     container_name: sonarqube
     restart: unless-stopped
     ports:
-      - "${SONARQUBE_PORT:-9000}:9000"
+      - "${SONARQUBE_PORT:-${SONAR_PORT:-9000}}:9000"
     environment:
       - SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
     volumes:
