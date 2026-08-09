@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithProviders } from '../../../test/renderWithProviders';
 import CreateEditLeagueModal from '../CreateEditLeagueModal';
@@ -156,8 +156,8 @@ describe('CreateEditLeagueModal', () => {
       />,
     );
 
-    // Sin escribir nombre, intentar enviar
-    await user.click(screen.getByRole('button', { name: /^Crear$/i }));
+    const formElement = screen.getByRole('button', { name: /^Crear$/i }).closest('form')!;
+    fireEvent.submit(formElement);
 
     expect(
       screen.getByText(/El nombre es obligatorio/i),

@@ -120,4 +120,16 @@ public static partial class Errors
             code: "League.NotArchived",
             description: "The league is not archived.");
     }
+
+    public static class Snapshot
+    {
+        public static Error NotFound => Error.NotFound(
+            code: "Snapshot.NotFound",
+            description: "No snapshot found for the requested league.");
+
+        public static Error AlreadyExists => Error.Conflict(
+            code: "Snapshot.AlreadyExists",
+            description: "A snapshot for this league already exists.");
+    }
 }
+
