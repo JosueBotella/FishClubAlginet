@@ -62,3 +62,15 @@ Para levantar la infraestructura completa mediante contenedores Docker:
 
 Al finalizar una conversación, al alcanzar un hito importante, o al terminar una sesión de trabajo, DEBES actualizar el archivo de bitácora en Obsidian ubicado en \G:\Mi unidad\Obsidian\DigitalLife\Proyectos\Fishing\DiarioDeAbordo.md\ con la fecha actual, lo que se ha completado, y cuál es el siguiente paso. Esto permite al usuario recuperar el contexto rápidamente en sesiones futuras.
 <!-- OBSIDIAN_LOG_RULE_END -->
+
+<!-- GIT_BRANCHING_RULE_START -->
+## Estrategia de Ramas de Git (Feature Branches)
+
+Siempre que vayas a implementar una nueva funcionalidad, refactorización o corrección de error:
+1. **Aislamiento Obligatorio**: Crear y cambiarse a una nueva rama de características desde `main` ANTES de modificar código:
+   - Características: `feat/nombre-corto-funcionalidad`
+   - Correcciones de errores: `fix/nombre-corto-issue`
+   - Refactorizaciones: `refactor/nombre-corto-tarea`
+2. **TDD y Barrera de Pruebas**: Ejecutar la suite de pruebas automatizadas (`dotnet test`, `npm test`) y asegurar que todo pase limpio antes y después de los cambios.
+3. **Commits y Push a Remoto**: Realizar commits atómicos con formato de Conventional Commits (`feat: ...`, `fix: ...`, `refactor: ...`) y subir la rama a remoto (`git push -u origin <nombre-rama>`).
+<!-- GIT_BRANCHING_RULE_END -->

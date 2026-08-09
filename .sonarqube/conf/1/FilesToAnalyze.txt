@@ -1,0 +1,14 @@
+﻿C:\GIT\FishClubAlginet\FishClubAlginet.Core\Abstractions\IDomainEvent.cs
+C:\GIT\FishClubAlginet\FishClubAlginet.Core\Abstractions\IGenericRepository.cs
+C:\GIT\FishClubAlginet\FishClubAlginet.Core\Abstractions\IUnitOfWork.cs
+C:\GIT\FishClubAlginet\FishClubAlginet.Core\Domain\Common\Errors\Errors.cs
+C:\GIT\FishClubAlginet\FishClubAlginet.Core\Domain\Entities\BaseEntity.cs
+C:\GIT\FishClubAlginet\FishClubAlginet.Core\Domain\Entities\Competition.cs
+C:\GIT\FishClubAlginet\FishClubAlginet.Core\Domain\Entities\CompetitionResult.cs
+C:\GIT\FishClubAlginet\FishClubAlginet.Core\Domain\Entities\Fisherman.cs
+C:\GIT\FishClubAlginet\FishClubAlginet.Core\Domain\Entities\League.cs
+C:\GIT\FishClubAlginet\FishClubAlginet.Core\Domain\Entities\LeagueSeasonSnapshot.cs
+C:\GIT\FishClubAlginet\FishClubAlginet.Core\Domain\Entities\OutboxMessage.cs
+C:\GIT\FishClubAlginet\FishClubAlginet.Core\Domain\Services\IPointsCalculator.cs
+C:\GIT\FishClubAlginet\FishClubAlginet.Core\Domain\ValueObjects\Address.cs
+C:\GIT\FishClubAlginet\FishClubAlginet.Core\GlobalUsing.cs
