@@ -1,8 +1,22 @@
 param(
-    [string]$Token = "squ_34a47cd6f1e5aabd66dfbff41bf4ce7efae694fe",
-    [string]$SonarUrl = "http://localhost:9000",
+    [string]$Token = $env:SONAR_TOKEN,
+    [string]$SonarUrl = $env:SONAR_HOST_URL,
     [string]$ProjectKey = "FishClubAlginet"
 )
+
+if ([string]::IsNullOrWhiteSpace($SonarUrl)) {
+    $SonarUrl = "http://localhost:9000"
+}
+
+if ([string]::IsNullOrWhiteSpace($Token)) {
+    Write-Host "ADVERTENCIA: No se especificó el token mediante -Token ni `$env:SONAR_TOKEN." -ForegroundColor Yellow
+    $Token = Read-Host -Prompt "Introduce tu token de SonarQube"
+}
+
+if ([string]::IsNullOrWhiteSpace($Token)) {
+    Write-Error "Error: Se requiere un token válido de SonarQube para realizar el análisis."
+    exit 1
+}
 
 Write-Host "=== Iniciando Análisis de SonarQube para FishClubAlginet ===" -ForegroundColor Cyan
 
