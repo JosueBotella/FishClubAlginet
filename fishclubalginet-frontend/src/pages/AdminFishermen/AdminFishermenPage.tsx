@@ -204,6 +204,120 @@ export default function AdminFishermenPage() {
       day: '2-digit', month: '2-digit', year: 'numeric',
     });
 
+  const renderMainContent = () => {
+    if (loading) {
+      return (
+        <Center py="xl">
+          <Loader size="lg" />
+        </Center>
+      );
+    }
+
+    if (fishermen.length === 0) {
+      return (
+        <Text c="dimmed" ta="center" py="xl">
+          No se encontraron pescadores.
+        </Text>
+      );
+    }
+
+    return (
+      <>
+        <Table striped highlightOnHover withTableBorder>
+          <Table.Thead>
+            <Table.Tr>
+              <Table.Th>Nombre</Table.Th>
+              <Table.Th>Documento</Table.Th>
+              <Table.Th>Licencia Fed.</Table.Th>
+              <Table.Th>Fecha nac.</Table.Th>
+              <Table.Th>Ciudad</Table.Th>
+              {showDeleted && <Table.Th>Estado</Table.Th>}
+              <Table.Th style={{ width: 90 }}>Acciones</Table.Th>
+            </Table.Tr>
+          </Table.Thead>
+          <Table.Tbody>
+            {fishermen.map((f) => (
+              <Table.Tr key={f.id}>
+                <Table.Td>
+                  <Text size="sm" fw={500}>
+                    {f.lastName}, {f.firstName}
+                  </Text>
+                </Table.Td>
+                <Table.Td>
+                  <Group gap={4}>
+                    <Badge size="xs" variant="light" color="gray">
+                      {DocumentTypeLabels[f.documentType] || f.documentType}
+                    </Badge>
+                    <Text size="sm">{f.documentNumber}</Text>
+                  </Group>
+                </Table.Td>
+                <Table.Td>
+                  <Text size="sm">{f.federationLicense || '—'}</Text>
+                </Table.Td>
+                <Table.Td>
+                  <Text size="sm">{formatDate(f.dateOfBirth)}</Text>
+                </Table.Td>
+                <Table.Td>
+                  <Text size="sm">{f.addressCity}</Text>
+                </Table.Td>
+                {showDeleted && (
+                  <Table.Td>
+                    <Badge size="sm" color="red" variant="light">
+                      Eliminado
+                    </Badge>
+                  </Table.Td>
+                )}
+                <Table.Td>
+                  {f.isDeleted ? (
+                    <Tooltip label="Restaurar pescador">
+                      <ActionIcon
+                        variant="subtle"
+                        color="green"
+                        onClick={() => setRestoreTarget(f)}
+                      >
+                        <IconArrowBackUp size={16} />
+                      </ActionIcon>
+                    </Tooltip>
+                  ) : (
+                    <Group gap={4}>
+                      <Tooltip label="Editar pescador">
+                        <ActionIcon
+                          variant="subtle"
+                          color="blue"
+                          onClick={() => setEditState(buildEditState(f))}
+                        >
+                          <IconPencil size={16} />
+                        </ActionIcon>
+                      </Tooltip>
+                      <Tooltip label="Eliminar pescador">
+                        <ActionIcon
+                          variant="subtle"
+                          color="red"
+                          onClick={() => setDeleteTarget(f)}
+                        >
+                          <IconTrash size={16} />
+                        </ActionIcon>
+                      </Tooltip>
+                    </Group>
+                  )}
+                </Table.Td>
+              </Table.Tr>
+            ))}
+          </Table.Tbody>
+        </Table>
+
+        {totalPages > 1 && (
+          <Group justify="center" mt="md">
+            <Pagination total={totalPages} value={page} onChange={setPage} size="sm" />
+            <Text size="xs" c="dimmed">
+              {totalCount} pescador{totalCount !== 1 ? 'es' : ''} en total
+            </Text>
+          </Group>
+        )}
+      </>
+    );
+  };
+
   return (
     <Container size="lg" py="md">
       <Group justify="space-between" mb="md">
@@ -245,101 +359,7 @@ export default function AdminFishermenPage() {
 
       {error && <Alert color="red" mb="md">{error}</Alert>}
 
-      {loading ? (
-        <Center py="xl"><Loader size="lg" /></Center>
-      ) : fishermen.length === 0 ? (
-        <Text c="dimmed" ta="center" py="xl">No se encontraron pescadores.</Text>
-      ) : (
-        <>
-          <Table striped highlightOnHover withTableBorder>
-            <Table.Thead>
-              <Table.Tr>
-                <Table.Th>Nombre</Table.Th>
-                <Table.Th>Documento</Table.Th>
-                <Table.Th>Licencia Fed.</Table.Th>
-                <Table.Th>Fecha nac.</Table.Th>
-                <Table.Th>Ciudad</Table.Th>
-                {showDeleted && <Table.Th>Estado</Table.Th>}
-                <Table.Th style={{ width: 90 }}>Acciones</Table.Th>
-              </Table.Tr>
-            </Table.Thead>
-            <Table.Tbody>
-              {fishermen.map((f) => (
-                <Table.Tr key={f.id}>
-                  <Table.Td>
-                    <Text size="sm" fw={500}>{f.lastName}, {f.firstName}</Text>
-                  </Table.Td>
-                  <Table.Td>
-                    <Group gap={4}>
-                      <Badge size="xs" variant="light" color="gray">
-                        {DocumentTypeLabels[f.documentType] || f.documentType}
-                      </Badge>
-                      <Text size="sm">{f.documentNumber}</Text>
-                    </Group>
-                  </Table.Td>
-                  <Table.Td>
-                    <Text size="sm">{f.federationLicense || '—'}</Text>
-                  </Table.Td>
-                  <Table.Td>
-                    <Text size="sm">{formatDate(f.dateOfBirth)}</Text>
-                  </Table.Td>
-                  <Table.Td>
-                    <Text size="sm">{f.addressCity}</Text>
-                  </Table.Td>
-                  {showDeleted && (
-                    <Table.Td>
-                      <Badge size="sm" color="red" variant="light">Eliminado</Badge>
-                    </Table.Td>
-                  )}
-                  <Table.Td>
-                    {f.isDeleted ? (
-                      <Tooltip label="Restaurar pescador">
-                        <ActionIcon
-                          variant="subtle"
-                          color="green"
-                          onClick={() => setRestoreTarget(f)}
-                        >
-                          <IconArrowBackUp size={16} />
-                        </ActionIcon>
-                      </Tooltip>
-                    ) : (
-                      <Group gap={4}>
-                        <Tooltip label="Editar pescador">
-                          <ActionIcon
-                            variant="subtle"
-                            color="blue"
-                            onClick={() => setEditState(buildEditState(f))}
-                          >
-                            <IconPencil size={16} />
-                          </ActionIcon>
-                        </Tooltip>
-                        <Tooltip label="Eliminar pescador">
-                          <ActionIcon
-                            variant="subtle"
-                            color="red"
-                            onClick={() => setDeleteTarget(f)}
-                          >
-                            <IconTrash size={16} />
-                          </ActionIcon>
-                        </Tooltip>
-                      </Group>
-                    )}
-                  </Table.Td>
-                </Table.Tr>
-              ))}
-            </Table.Tbody>
-          </Table>
-
-          {totalPages > 1 && (
-            <Group justify="center" mt="md">
-              <Pagination total={totalPages} value={page} onChange={setPage} size="sm" />
-              <Text size="xs" c="dimmed">
-                {totalCount} pescador{totalCount !== 1 ? 'es' : ''} en total
-              </Text>
-            </Group>
-          )}
-        </>
-      )}
+      {renderMainContent()}
 
       {/* ── Modal editar ── */}
       <Modal
