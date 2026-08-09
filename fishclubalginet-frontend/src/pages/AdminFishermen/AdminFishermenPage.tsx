@@ -24,9 +24,10 @@ import {
   IconRefresh,
   IconHistory,
   IconPencil,
+  IconArrowBackUp,
 } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
-import { getFishermen, deleteFisherman, updateFisherman } from '../../api/fishermenApi';
+import { getFishermen, deleteFisherman, updateFisherman, restoreFisherman } from '../../api/fishermenApi';
 import type { UpdateFishermanRequest } from '../../api/fishermenApi';
 import { DocumentTypeLabels } from '../../types';
 import type { FishermanDto } from '../../types';
@@ -69,6 +70,10 @@ export default function AdminFishermenPage() {
   // Delete confirmation
   const [deleteTarget, setDeleteTarget] = useState<FishermanDto | null>(null);
   const [deleting, setDeleting] = useState(false);
+
+  // Restore confirmation
+  const [restoreTarget, setRestoreTarget] = useState<FishermanDto | null>(null);
+  const [restoring, setRestoring] = useState(false);
 
   // Edit modal
   const [editState, setEditState] = useState<EditState | null>(null);
@@ -128,6 +133,30 @@ export default function AdminFishermenPage() {
       });
     } finally {
       setDeleting(false);
+    }
+  };
+
+  // ── Restore ───────────────────────────────────────────────────────────────
+  const handleConfirmRestore = async () => {
+    if (!restoreTarget) return;
+    setRestoring(true);
+    try {
+      await restoreFisherman(restoreTarget.id);
+      notifications.show({
+        title: 'Pescador restaurado',
+        message: `${restoreTarget.firstName} ${restoreTarget.lastName}`,
+        color: 'green',
+      });
+      setRestoreTarget(null);
+      await fetchFishermen();
+    } catch {
+      notifications.show({
+        title: 'Error',
+        message: 'No se pudo restaurar el pescador.',
+        color: 'red',
+      });
+    } finally {
+      setRestoring(false);
     }
   };
 
@@ -263,7 +292,17 @@ export default function AdminFishermenPage() {
                     </Table.Td>
                   )}
                   <Table.Td>
-                    {!f.isDeleted && (
+                    {f.isDeleted ? (
+                      <Tooltip label="Restaurar pescador">
+                        <ActionIcon
+                          variant="subtle"
+                          color="green"
+                          onClick={() => setRestoreTarget(f)}
+                        >
+                          <IconArrowBackUp size={16} />
+                        </ActionIcon>
+                      </Tooltip>
+                    ) : (
                       <Group gap={4}>
                         <Tooltip label="Editar pescador">
                           <ActionIcon
@@ -384,6 +423,25 @@ export default function AdminFishermenPage() {
         <Group justify="flex-end" mt="lg">
           <Button variant="default" onClick={() => setDeleteTarget(null)}>Cancelar</Button>
           <Button color="red" loading={deleting} onClick={handleConfirmDelete}>Eliminar</Button>
+        </Group>
+      </Modal>
+
+      {/* ── Modal confirmar restaurar ── */}
+      <Modal
+        opened={restoreTarget !== null}
+        onClose={() => setRestoreTarget(null)}
+        title="Confirmar restauración"
+        centered
+        size="sm"
+      >
+        <Text size="sm">
+          Vas a restaurar a{' '}
+          <Text span fw={700}>{restoreTarget?.firstName} {restoreTarget?.lastName}</Text>.
+          {' '}El pescador volverá a estar activo en la plataforma.
+        </Text>
+        <Group justify="flex-end" mt="lg">
+          <Button variant="default" onClick={() => setRestoreTarget(null)}>Cancelar</Button>
+          <Button color="green" loading={restoring} onClick={handleConfirmRestore}>Restaurar</Button>
         </Group>
       </Modal>
     </Container>

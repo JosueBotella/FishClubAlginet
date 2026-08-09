@@ -1,4 +1,4 @@
-﻿namespace FishClubAlginet.Core.Domain.Entities;
+namespace FishClubAlginet.Core.Domain.Entities;
 
 public class Fisherman : BaseEntity<int>
 {
@@ -77,6 +77,18 @@ public class Fisherman : BaseEntity<int>
     {
         IsDeleted = true;
         DeletedTimeUtc = DateTime.UtcNow;
+    }
+
+    /// <summary>
+    /// Restores a soft-deleted fisherman.
+    /// The caller (command handler) is responsible for raising FishermanRestoredDomainEvent
+    /// before saving, following the same pattern as Fisherman.Create().
+    /// </summary>
+    public void Restore()
+    {
+        IsDeleted = false;
+        DeletedTimeUtc = null;
+        LastUpdateUtc = DateTime.UtcNow;
     }
 }
 public static class  FisherManConstraints

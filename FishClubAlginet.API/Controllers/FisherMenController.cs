@@ -85,6 +85,19 @@ public class FisherMenController : ApiController
         );
     }
 
+    [HttpPost("{id:int}/restore")]
+    [Authorize(Roles = ApplicationConstants.Roles.Admin)]
+    public async Task<IActionResult> Restore(int id)
+    {
+        var command = new RestoreFishermanCommand(id);
+        var result = await _mediator.Send(command, default);
+
+        return result.Match(
+            _ => NoContent(),
+            errors => Problem(errors)
+        );
+    }
+
     [HttpGet("my-profile")]
     public async Task<IActionResult> MyProfile()
     {

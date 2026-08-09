@@ -31,6 +31,10 @@ export async function deleteFisherman(id: number): Promise<void> {
   await apiClient.delete(Endpoints.Fishermen.Delete(id));
 }
 
+export async function restoreFisherman(id: number): Promise<void> {
+  await apiClient.post(Endpoints.Fishermen.Restore(id));
+}
+
 /**
  * Obtiene los datos del Fisherman asociado al usuario autenticado.
  * Devuelve null cuando el usuario no tiene ficha (típico de Admins puros).
