@@ -1,11 +1,15 @@
 using FluentAssertions;
 using FishClubAlginet.Application.Features.Leagues;
+using FishClubAlginet.Contracts.Dtos.Responses.Competition;
+using MediatR;
 
 namespace FishClubAlginet.Tests.Handlers.Leagues;
 
 public class ArchiveLeagueCommandHandlerTests
 {
     private readonly Mock<IGenericRepository<League, Guid>> _mockRepository;
+    private readonly Mock<IGenericRepository<LeagueSeasonSnapshot, Guid>> _mockSnapshotRepository;
+    private readonly Mock<ISender> _mockSender;
     private readonly Mock<IUnitOfWork> _mockUnitOfWork;
     private readonly Mock<ILogger<ArchiveLeagueCommandHandler>> _mockLogger;
     private readonly ArchiveLeagueCommandHandler _handler;
@@ -13,16 +17,21 @@ public class ArchiveLeagueCommandHandlerTests
     public ArchiveLeagueCommandHandlerTests()
     {
         _mockRepository = new Mock<IGenericRepository<League, Guid>>();
+        _mockSnapshotRepository = new Mock<IGenericRepository<LeagueSeasonSnapshot, Guid>>();
+        _mockSender = new Mock<ISender>();
         _mockUnitOfWork = new Mock<IUnitOfWork>();
         _mockLogger = new Mock<ILogger<ArchiveLeagueCommandHandler>>();
+
         _handler = new ArchiveLeagueCommandHandler(
             _mockRepository.Object,
+            _mockSnapshotRepository.Object,
+            _mockSender.Object,
             _mockUnitOfWork.Object,
             _mockLogger.Object);
     }
 
     [Fact]
-    public async Task Handle_ArchiveActiveLeague_ShouldArchiveAndPersist()
+    public async Task Handle_ArchiveActiveLeague_ShouldArchiveAndCreateSnapshot()
     {
         // Arrange
         var league = League.Create("Liga 2024", 2024);
@@ -31,6 +40,18 @@ public class ArchiveLeagueCommandHandlerTests
             .Returns(new List<League> { league }.AsQueryable());
         _mockUnitOfWork.Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync((ErrorOr<int>)1);
+
+        var matrixDto = new LeagueStandingsMatrixDto(
+            league.Id,
+            league.Name,
+            league.Year,
+            league.WorstResultsToDiscard,
+            new List<CompetitionHeaderDto>(),
+            new List<FishermanMatrixRowDto>(),
+            new List<FishermanMatrixRowDto>());
+
+        _mockSender.Setup(s => s.Send(It.IsAny<GetLeagueStandingsMatrixQuery>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(matrixDto);
 
         var command = new ArchiveLeagueCommand(league.Id);
 
@@ -43,6 +64,9 @@ public class ArchiveLeagueCommandHandlerTests
         result.Value.IsActive.Should().BeFalse();
         league.IsArchived.Should().BeTrue();
         league.IsActive.Should().BeFalse();
+
+        _mockSnapshotRepository.Verify(s => s.AddAsync(It.Is<LeagueSeasonSnapshot>(
+            snap => snap.LeagueId == league.Id && snap.Year == league.Year)), Times.Once);
         _mockUnitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 

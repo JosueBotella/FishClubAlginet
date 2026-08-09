@@ -18,7 +18,7 @@ if ([string]::IsNullOrWhiteSpace($Token)) {
     exit 1
 }
 
-Write-Host "=== Iniciando Análisis de SonarQube para FishClubAlginet ===" -ForegroundColor Cyan
+Write-Host "=== Iniciando Análisis de SonarQube para $ProjectKey ===" -ForegroundColor Cyan
 
 # 1. Comenzar análisis de SonarScanner para .NET Backend
 Write-Host "1. Ejecutando sonarscanner begin..." -ForegroundColor Yellow
@@ -26,6 +26,7 @@ dotnet sonarscanner begin `
     /k:"$ProjectKey" `
     /d:sonar.host.url="$SonarUrl" `
     /d:sonar.token="$Token" `
+    /d:sonar.cs.vstest.reportsPaths="**/*.trx" `
     /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" `
     /d:sonar.coverage.exclusions="**/Migrations/**,**/Program.cs,**/FishClubAlginet.Tests/**"
 
@@ -45,7 +46,7 @@ if ($LASTEXITCODE -ne 0) {
 
 # 3. Ejecutar pruebas con reporte de cobertura OpenCover
 Write-Host "3. Ejecutando pruebas unitarias y de integración..." -ForegroundColor Yellow
-dotnet test --no-build --collect:"XPlat Code Coverage;Format=opencover"
+dotnet test --no-build --logger "trx" --collect:"XPlat Code Coverage;Format=opencover"
 
 if ($LASTEXITCODE -ne 0) {
     Write-Error "Fallo en la ejecución de pruebas."

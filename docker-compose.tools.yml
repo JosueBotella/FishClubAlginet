@@ -1,12 +1,14 @@
 # =============================================================
-# docker-compose.tools.yml - Herramientas opcionales (Portainer + SonarQube)
+# docker-compose.tools.yml - Herramientas opcionales (Portainer & SonarQube)
 #
-# No se levanta por defecto. Lánzalo junto al compose principal:
+# No se levantan por defecto. Lánzalo junto al compose principal:
 #   docker compose -f docker-compose.yml -f docker-compose.tools.yml up -d
+# O solo las herramientas (sin levantar la app):
+#   docker compose -f docker-compose.tools.yml up -d
 #
-# Accesos UI:
-#   - Portainer: http://localhost:19100
-#   - SonarQube: http://localhost:9000 (admin / admin)
+# Acceso UI:
+#   Portainer: http://localhost:19100 (configurable via PORTAINER_PORT)
+#   SonarQube: http://localhost:9000  (configurable via SONARQUBE_PORT / SONAR_PORT)
 # =============================================================
 
 services:
@@ -26,7 +28,7 @@ services:
     container_name: sonarqube
     restart: unless-stopped
     ports:
-      - "${SONAR_PORT:-9000}:9000"
+      - "${SONARQUBE_PORT:-${SONAR_PORT:-9000}}:9000"
     environment:
       - SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
     volumes:
