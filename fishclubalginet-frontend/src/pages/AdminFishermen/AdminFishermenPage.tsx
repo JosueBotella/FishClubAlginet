@@ -24,9 +24,10 @@ import {
   IconRefresh,
   IconHistory,
   IconPencil,
+  IconArrowBackUp,
 } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
-import { getFishermen, deleteFisherman, updateFisherman } from '../../api/fishermenApi';
+import { getFishermen, deleteFisherman, updateFisherman, restoreFisherman } from '../../api/fishermenApi';
 import type { UpdateFishermanRequest } from '../../api/fishermenApi';
 import { DocumentTypeLabels } from '../../types';
 import type { FishermanDto } from '../../types';
@@ -69,6 +70,10 @@ export default function AdminFishermenPage() {
   // Delete confirmation
   const [deleteTarget, setDeleteTarget] = useState<FishermanDto | null>(null);
   const [deleting, setDeleting] = useState(false);
+
+  // Restore confirmation
+  const [restoreTarget, setRestoreTarget] = useState<FishermanDto | null>(null);
+  const [restoring, setRestoring] = useState(false);
 
   // Edit modal
   const [editState, setEditState] = useState<EditState | null>(null);
@@ -131,6 +136,30 @@ export default function AdminFishermenPage() {
     }
   };
 
+  // ── Restore ───────────────────────────────────────────────────────────────
+  const handleConfirmRestore = async () => {
+    if (!restoreTarget) return;
+    setRestoring(true);
+    try {
+      await restoreFisherman(restoreTarget.id);
+      notifications.show({
+        title: 'Pescador restaurado',
+        message: `${restoreTarget.firstName} ${restoreTarget.lastName}`,
+        color: 'green',
+      });
+      setRestoreTarget(null);
+      await fetchFishermen();
+    } catch {
+      notifications.show({
+        title: 'Error',
+        message: 'No se pudo restaurar el pescador.',
+        color: 'red',
+      });
+    } finally {
+      setRestoring(false);
+    }
+  };
+
   // ── Edit ──────────────────────────────────────────────────────────────────
   const handleSave = async () => {
     if (!editState) return;
@@ -175,6 +204,120 @@ export default function AdminFishermenPage() {
       day: '2-digit', month: '2-digit', year: 'numeric',
     });
 
+  const renderMainContent = () => {
+    if (loading) {
+      return (
+        <Center py="xl">
+          <Loader size="lg" />
+        </Center>
+      );
+    }
+
+    if (fishermen.length === 0) {
+      return (
+        <Text c="dimmed" ta="center" py="xl">
+          No se encontraron pescadores.
+        </Text>
+      );
+    }
+
+    return (
+      <>
+        <Table striped highlightOnHover withTableBorder>
+          <Table.Thead>
+            <Table.Tr>
+              <Table.Th>Nombre</Table.Th>
+              <Table.Th>Documento</Table.Th>
+              <Table.Th>Licencia Fed.</Table.Th>
+              <Table.Th>Fecha nac.</Table.Th>
+              <Table.Th>Ciudad</Table.Th>
+              {showDeleted && <Table.Th>Estado</Table.Th>}
+              <Table.Th style={{ width: 90 }}>Acciones</Table.Th>
+            </Table.Tr>
+          </Table.Thead>
+          <Table.Tbody>
+            {fishermen.map((f) => (
+              <Table.Tr key={f.id}>
+                <Table.Td>
+                  <Text size="sm" fw={500}>
+                    {f.lastName}, {f.firstName}
+                  </Text>
+                </Table.Td>
+                <Table.Td>
+                  <Group gap={4}>
+                    <Badge size="xs" variant="light" color="gray">
+                      {DocumentTypeLabels[f.documentType] || f.documentType}
+                    </Badge>
+                    <Text size="sm">{f.documentNumber}</Text>
+                  </Group>
+                </Table.Td>
+                <Table.Td>
+                  <Text size="sm">{f.federationLicense || '—'}</Text>
+                </Table.Td>
+                <Table.Td>
+                  <Text size="sm">{formatDate(f.dateOfBirth)}</Text>
+                </Table.Td>
+                <Table.Td>
+                  <Text size="sm">{f.addressCity}</Text>
+                </Table.Td>
+                {showDeleted && (
+                  <Table.Td>
+                    <Badge size="sm" color="red" variant="light">
+                      Eliminado
+                    </Badge>
+                  </Table.Td>
+                )}
+                <Table.Td>
+                  {f.isDeleted ? (
+                    <Tooltip label="Restaurar pescador">
+                      <ActionIcon
+                        variant="subtle"
+                        color="green"
+                        onClick={() => setRestoreTarget(f)}
+                      >
+                        <IconArrowBackUp size={16} />
+                      </ActionIcon>
+                    </Tooltip>
+                  ) : (
+                    <Group gap={4}>
+                      <Tooltip label="Editar pescador">
+                        <ActionIcon
+                          variant="subtle"
+                          color="blue"
+                          onClick={() => setEditState(buildEditState(f))}
+                        >
+                          <IconPencil size={16} />
+                        </ActionIcon>
+                      </Tooltip>
+                      <Tooltip label="Eliminar pescador">
+                        <ActionIcon
+                          variant="subtle"
+                          color="red"
+                          onClick={() => setDeleteTarget(f)}
+                        >
+                          <IconTrash size={16} />
+                        </ActionIcon>
+                      </Tooltip>
+                    </Group>
+                  )}
+                </Table.Td>
+              </Table.Tr>
+            ))}
+          </Table.Tbody>
+        </Table>
+
+        {totalPages > 1 && (
+          <Group justify="center" mt="md">
+            <Pagination total={totalPages} value={page} onChange={setPage} size="sm" />
+            <Text size="xs" c="dimmed">
+              {totalCount} pescador{totalCount !== 1 ? 'es' : ''} en total
+            </Text>
+          </Group>
+        )}
+      </>
+    );
+  };
+
   return (
     <Container size="lg" py="md">
       <Group justify="space-between" mb="md">
@@ -216,91 +359,7 @@ export default function AdminFishermenPage() {
 
       {error && <Alert color="red" mb="md">{error}</Alert>}
 
-      {loading ? (
-        <Center py="xl"><Loader size="lg" /></Center>
-      ) : fishermen.length === 0 ? (
-        <Text c="dimmed" ta="center" py="xl">No se encontraron pescadores.</Text>
-      ) : (
-        <>
-          <Table striped highlightOnHover withTableBorder>
-            <Table.Thead>
-              <Table.Tr>
-                <Table.Th>Nombre</Table.Th>
-                <Table.Th>Documento</Table.Th>
-                <Table.Th>Licencia Fed.</Table.Th>
-                <Table.Th>Fecha nac.</Table.Th>
-                <Table.Th>Ciudad</Table.Th>
-                {showDeleted && <Table.Th>Estado</Table.Th>}
-                <Table.Th style={{ width: 90 }}>Acciones</Table.Th>
-              </Table.Tr>
-            </Table.Thead>
-            <Table.Tbody>
-              {fishermen.map((f) => (
-                <Table.Tr key={f.id}>
-                  <Table.Td>
-                    <Text size="sm" fw={500}>{f.lastName}, {f.firstName}</Text>
-                  </Table.Td>
-                  <Table.Td>
-                    <Group gap={4}>
-                      <Badge size="xs" variant="light" color="gray">
-                        {DocumentTypeLabels[f.documentType] || f.documentType}
-                      </Badge>
-                      <Text size="sm">{f.documentNumber}</Text>
-                    </Group>
-                  </Table.Td>
-                  <Table.Td>
-                    <Text size="sm">{f.federationLicense || '—'}</Text>
-                  </Table.Td>
-                  <Table.Td>
-                    <Text size="sm">{formatDate(f.dateOfBirth)}</Text>
-                  </Table.Td>
-                  <Table.Td>
-                    <Text size="sm">{f.addressCity}</Text>
-                  </Table.Td>
-                  {showDeleted && (
-                    <Table.Td>
-                      <Badge size="sm" color="red" variant="light">Eliminado</Badge>
-                    </Table.Td>
-                  )}
-                  <Table.Td>
-                    {!f.isDeleted && (
-                      <Group gap={4}>
-                        <Tooltip label="Editar pescador">
-                          <ActionIcon
-                            variant="subtle"
-                            color="blue"
-                            onClick={() => setEditState(buildEditState(f))}
-                          >
-                            <IconPencil size={16} />
-                          </ActionIcon>
-                        </Tooltip>
-                        <Tooltip label="Eliminar pescador">
-                          <ActionIcon
-                            variant="subtle"
-                            color="red"
-                            onClick={() => setDeleteTarget(f)}
-                          >
-                            <IconTrash size={16} />
-                          </ActionIcon>
-                        </Tooltip>
-                      </Group>
-                    )}
-                  </Table.Td>
-                </Table.Tr>
-              ))}
-            </Table.Tbody>
-          </Table>
-
-          {totalPages > 1 && (
-            <Group justify="center" mt="md">
-              <Pagination total={totalPages} value={page} onChange={setPage} size="sm" />
-              <Text size="xs" c="dimmed">
-                {totalCount} pescador{totalCount !== 1 ? 'es' : ''} en total
-              </Text>
-            </Group>
-          )}
-        </>
-      )}
+      {renderMainContent()}
 
       {/* ── Modal editar ── */}
       <Modal
@@ -384,6 +443,25 @@ export default function AdminFishermenPage() {
         <Group justify="flex-end" mt="lg">
           <Button variant="default" onClick={() => setDeleteTarget(null)}>Cancelar</Button>
           <Button color="red" loading={deleting} onClick={handleConfirmDelete}>Eliminar</Button>
+        </Group>
+      </Modal>
+
+      {/* ── Modal confirmar restaurar ── */}
+      <Modal
+        opened={restoreTarget !== null}
+        onClose={() => setRestoreTarget(null)}
+        title="Confirmar restauración"
+        centered
+        size="sm"
+      >
+        <Text size="sm">
+          Vas a restaurar a{' '}
+          <Text span fw={700}>{restoreTarget?.firstName} {restoreTarget?.lastName}</Text>.
+          {' '}El pescador volverá a estar activo en la plataforma.
+        </Text>
+        <Group justify="flex-end" mt="lg">
+          <Button variant="default" onClick={() => setRestoreTarget(null)}>Cancelar</Button>
+          <Button color="green" loading={restoring} onClick={handleConfirmRestore}>Restaurar</Button>
         </Group>
       </Modal>
     </Container>

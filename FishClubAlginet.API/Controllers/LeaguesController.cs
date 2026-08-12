@@ -66,6 +66,18 @@ public class LeaguesController : ApiController
             errors => Problem(errors));
     }
 
+    /// <summary>Returns the immutable snapshot of an archived league.</summary>
+    [HttpGet("{id:guid}/snapshot")]
+    public async Task<IActionResult> GetSnapshot(Guid id)
+    {
+        var query = new GetLeagueSeasonSnapshotQuery(id);
+        var result = await _mediator.Send(query, default);
+        return result.Match(
+            dto => Ok(dto),
+            errors => Problem(errors));
+    }
+
+
     /// <summary>Unarchives a league (IsArchived → false, IsActive stays false). Admin only.</summary>
     [HttpPut("{id:guid}/unarchive")]
     [Authorize(Roles = ApplicationConstants.Roles.Admin)]

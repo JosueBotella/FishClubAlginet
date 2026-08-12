@@ -1,12 +1,14 @@
 # =============================================================
-# docker-compose.tools.yml - Herramientas opcionales (Portainer)
+# docker-compose.tools.yml - Herramientas opcionales (Portainer & SonarQube)
 #
-# No se levanta por defecto. Lanzalo junto al compose principal:
+# No se levantan por defecto. Lánzalo junto al compose principal:
 #   docker compose -f docker-compose.yml -f docker-compose.tools.yml up -d
-# O solo Portainer (sin levantar la app):
+# O solo las herramientas (sin levantar la app):
 #   docker compose -f docker-compose.tools.yml up -d
 #
-# Acceso UI: http://localhost:PORTAINER_PORT  (por defecto 19100)
+# Acceso UI:
+#   Portainer: http://localhost:19100 (configurable via PORTAINER_PORT)
+#   SonarQube: http://localhost:9000  (configurable via SONARQUBE_PORT / SONAR_PORT)
 # =============================================================
 
 services:
@@ -16,13 +18,30 @@ services:
     container_name: portainer
     restart: unless-stopped
     ports:
-      # Lado izquierdo (host) configurable via .env (PORTAINER_PORT).
-      # Lado derecho (interno del contenedor) es 9000 y NO se cambia.
       - "${PORTAINER_PORT:-19100}:9000"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - portainer_data:/data
 
+  sonarqube:
+    image: sonarqube:community
+    container_name: sonarqube
+    restart: unless-stopped
+    ports:
+      - "${SONARQUBE_PORT:-${SONAR_PORT:-9000}}:9000"
+    environment:
+      - SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/logs
+
 volumes:
   portainer_data:
+    driver: local
+  sonarqube_data:
+    driver: local
+  sonarqube_extensions:
+    driver: local
+  sonarqube_logs:
     driver: local

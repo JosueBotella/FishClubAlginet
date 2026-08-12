@@ -11,7 +11,7 @@ Write-Host "Frontend arrancado (PID: $($frontend.Id)) en http://localhost:5173" 
 Write-Host "Arrancando API en https://localhost:7179..." -ForegroundColor Green
 
 try {
-    dotnet run --project FishClubAlginet.API
+    dotnet run --project FishClubAlginet.API --launch-profile https
 } finally {
     # Al parar el backend (Ctrl+C), parar tambien el frontend
     if (!$frontend.HasExited) {

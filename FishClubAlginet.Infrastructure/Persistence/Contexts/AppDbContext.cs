@@ -1,4 +1,4 @@
-﻿namespace FishClubAlginet.Infrastructure.Persistence.Contexts;
+namespace FishClubAlginet.Infrastructure.Persistence.Contexts;
 
 public class AppDbContext : IdentityDbContext
 {
@@ -6,6 +6,7 @@ public class AppDbContext : IdentityDbContext
     public DbSet<League> Leagues { get; set; }
     public DbSet<CompetitionResult> CompetitionResults { get; set; }
     public DbSet<Competition> Competitions { get; set; }
+    public DbSet<LeagueSeasonSnapshot> LeagueSeasonSnapshots { get; set; }
     public DbSet<OutboxMessage> OutboxMessages { get; set; }
     public AppDbContext(DbContextOptions<AppDbContext> context)
         : base(context)
