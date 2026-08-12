@@ -34,6 +34,7 @@
     }
   ],
   "settings": {
-    "editor.formatOnSave": true
+    "editor.formatOnSave": true,
+    "powershell.cwd": "Root"
   }
 }
