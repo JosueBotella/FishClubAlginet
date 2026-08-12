@@ -72,12 +72,39 @@ Para mantener el código limpio, DRY y consistente en la solución backend de .N
 <!-- GLOBAL_USINGS_RULE_END -->
 
 <!-- SONARQUBE_QUALITY_RULE_START -->
-## Regla de Calidad de Código y SonarQube
+## Regla de Calidad de Código y SonarQube (AUTOMÁTICO)
 
 Para asegurar cero deuda técnica, cero vulnerabilidades y cero code smells en la aplicación:
-- **Arranque de SonarQube**: SonarQube está disponible en `http://localhost:9000` ejecutando `docker compose -f docker-compose.tools.yml up -d`.
-- **Análisis Previo a Commits / Push**: Antes de subir cambios a remoto o dar por finalizados refactorizaciones/features significativas, se debe ejecutar el análisis con `.\sonar-analysis.ps1 -Token "TU_TOKEN_DE_SONAR"`.
+- **Conexión y Token Automatizado**: SonarQube está conectado localmente en `http://localhost:9000` con el token configurado por defecto (`squ_03ef7c610f8383e21e566c4af77e9bc725483c4e`).
+- **Análisis Automático Obligatorio**: El asistente de IA DEBE ejecutar automáticamente `.\sonar-analysis.ps1` al completar cualquier feature, hotfix o refactorización antes de dar por finalizado el trabajo.
 - **Zero Issues Guarantee**: Ningún cambio con alertas críticas, bugs, ni vulnerabilidades reportadas por el Quality Gate de SonarQube debe ser integrado en el código principal.
 <!-- SONARQUBE_QUALITY_RULE_END -->
+
+
+<!-- GIT_BRANCHING_STANDARD_RULE_START -->
+## Regla de Ramas Git y Estándares de GitHub
+
+Cualquier nuevo desarrollo, corrección o tarea DEBE ser creado en una rama dedicada respetando estrictamente la terminología estándar de GitHub y la industria:
+
+- **Features / Características nuevas**: `feature/nombre-de-la-feature` (ej: `feature/socios-gestion-licencias`, `feature/pesaje-concursos`)
+- **Correcciones Urgentes (Hotfixes)**: `hotfix/descripcion-del-fix` (ej: `hotfix/jwt-auth-expiration`)
+- **Correcciones de Bugs (Bugfixes)**: `bugfix/descripcion-del-bug` (ej: `bugfix/sql-connection-retry`)
+- **Refactorización de Código**: `refactor/nombre-del-componente` (ej: `refactor/fisherman-cqrs-handler`)
+- **Mantenimiento y Herramientas**: `chore/nombre-tarea` (ej: `chore/sonar-analysis-script`)
+- **Documentación**: `docs/nombre-doc` (ej: `docs/architecture-guide`)
+
+**Reglas de Flujo Git**:
+1. Cero commits directos en la rama principal (`main` o `master`).
+2. Crear la rama correspondiente antes de realizar cambios de código.
+3. Verificar análisis en SonarQube antes de solicitar merge.
+<!-- GIT_BRANCHING_STANDARD_RULE_END -->
+
+<!-- NOTEBOOKLM_PRAGMATIC_RULE_START -->
+## Regla de Buenas Prácticas y Conocimiento con NotebookLM
+
+- **Cuaderno de Referencia**: Apoyarse en el cuaderno **`FULL ASP.NET Core`** (`full-asp-net-core` / ID: `f2e3c464-f0c4-4168-85d2-8ab1299c5c2e`) usando la CLI `notebook` o MCP.
+- **Programador Pragmático**: Aplicar patrones limpios, DRY (Don't Repeat Yourself), desacoplamiento, Clean Architecture, CQRS e inyección de dependencias siguiendo la guía y estándares de ASP.NET Core.
+<!-- NOTEBOOKLM_PRAGMATIC_RULE_END -->
+
 
 

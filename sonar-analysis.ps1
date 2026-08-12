@@ -4,9 +4,14 @@ param(
     [string]$ProjectKey = "FishClubAlginet"
 )
 
+if ([string]::IsNullOrWhiteSpace($Token)) {
+    $Token = "squ_03ef7c610f8383e21e566c4af77e9bc725483c4e"
+}
+
 if ([string]::IsNullOrWhiteSpace($SonarUrl)) {
     $SonarUrl = "http://localhost:9000"
 }
+
 
 if ([string]::IsNullOrWhiteSpace($Token)) {
     Write-Host "ADVERTENCIA: No se especificó el token mediante -Token ni `$env:SONAR_TOKEN." -ForegroundColor Yellow

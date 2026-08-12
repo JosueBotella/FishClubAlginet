@@ -18,4 +18,6 @@ global using FishClubAlginet.Core.Domain.ValueObjects;
 global using Microsoft.AspNetCore.Identity;
 global using Microsoft.Extensions.Logging;
 global using FishClubAlginet.Application.Features.Events.Commands.Fishermen;
+global using FishClubAlginet.Core.Domain.Common.Errors;
 global using FluentAssertions;
+
