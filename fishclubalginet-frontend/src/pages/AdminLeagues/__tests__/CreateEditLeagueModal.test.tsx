@@ -145,7 +145,6 @@ describe('CreateEditLeagueModal', () => {
   });
 
   it('valida que el nombre no esté vacío', async () => {
-    const user = userEvent.setup();
 
     renderWithProviders(
       <CreateEditLeagueModal

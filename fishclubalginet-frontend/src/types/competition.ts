@@ -29,6 +29,7 @@ export interface CompetitionResultDto {
   ranking: number;
   isValidated: boolean;
   registrationDate: string;
+  isBiggestCatch?: boolean;
 }
 
 export interface CreateCompetitionRequest {
