@@ -223,4 +223,52 @@ public class RegisterFishermanCommandHandlerTests
         result.IsError.Should().BeTrue();
         result.FirstError.Code.Should().Be("Competition.ConcurrentUpdate");
     }
+
+    [Fact]
+    public async Task Handle_ConcurrentRegistrationsOnLastSpot_ShouldAllowFirstAndFailSecondWithConcurrencyError()
+    {
+        // Arrange: Concurso con maxSpots=5, actualmente 4 inscritos (1 plaza libre)
+        var competition = BuildOpenCompetition(maxSpots: 5, current: 4);
+        var fisherman1 = BuildFisherman(id: 10);
+        fisherman1.Id = 10;
+        var fisherman2 = BuildFisherman(id: 20);
+        fisherman2.Id = 20;
+
+        _mockCompetitionRepo.Setup(r => r.GetById(competition.Id)).ReturnsAsync(competition);
+        _mockFishermanRepo.Setup(r => r.GetById(fisherman1.Id)).ReturnsAsync(fisherman1);
+        _mockFishermanRepo.Setup(r => r.GetById(fisherman2.Id)).ReturnsAsync(fisherman2);
+        _mockResultRepo.Setup(r => r.GetAll()).Returns(new List<CompetitionResult>().AsQueryable());
+        _mockResultRepo.Setup(r => r.AddAsync(It.IsAny<CompetitionResult>()))
+            .ReturnsAsync((CompetitionResult cr) => cr);
+
+        // Primer guardado -> Éxito
+        // Segundo guardado concurrente (mismo RowVersion original en BD) -> Error de concurrencia
+        var saveCallCount = 0;
+        _mockUnitOfWork.Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(() =>
+            {
+                saveCallCount++;
+                if (saveCallCount == 1) return (ErrorOr<int>)1;
+                return Error.Conflict(code: "Database.Concurrency", description: "RowVersion mismatch");
+            });
+
+        // Act
+        var result1Task = _handler.Handle(new RegisterFishermanCommand(competition.Id, fisherman1.Id), CancellationToken.None);
+        var result2Task = _handler.Handle(new RegisterFishermanCommand(competition.Id, fisherman2.Id), CancellationToken.None);
+
+        var results = await Task.WhenAll(result1Task, result2Task);
+
+        // Assert: Una solicitud debe ser exitosa y la otra debe devolver error de concurrencia
+        var successResult = results.FirstOrDefault(r => !r.IsError);
+        var errorResult = results.FirstOrDefault(r => r.IsError);
+
+        successResult.Should().NotBeNull();
+        successResult!.Value.Should().NotBeEmpty();
+
+        errorResult.Should().NotBeNull();
+        errorResult!.FirstError.Code.Should().Match(code =>
+            code == "Competition.ConcurrentUpdate" || code == "Competition.MaxSpotsReached");
+    }
 }
+
+

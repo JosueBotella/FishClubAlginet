@@ -86,8 +86,14 @@ public sealed class RegisterFishermanCommandHandler
 
             if (saveResult.FirstError.Code == "Database.Concurrency")
             {
+                _logger.LogWarning(
+                    "Concurrency conflict detected while registering fisherman {FishermanId} to competition {CompetitionId}. RowVersion mismatch.",
+                    request.FishermanId,
+                    request.CompetitionId);
+
                 return Errors.Competition.ConcurrentUpdate;
             }
+
 
             return Error.Failure(
                 code: "REGISTRATION_SAVE_FAILED",
