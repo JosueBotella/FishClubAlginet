@@ -1,13 +1,18 @@
-﻿namespace FishClubAlginet.API.Infrastructure.BackgroundJobs;
+namespace FishClubAlginet.API.Infrastructure.BackgroundJobs;
 
 public class ProcessOutboxMessagesJob : BackgroundService
 {
     private readonly IServiceProvider _serviceProvider;
+    private readonly IDomainEventTypeResolver _typeResolver;
     private readonly ILogger<ProcessOutboxMessagesJob> _logger;
 
-    public ProcessOutboxMessagesJob(IServiceProvider serviceProvider, ILogger<ProcessOutboxMessagesJob> logger)
+    public ProcessOutboxMessagesJob(
+        IServiceProvider serviceProvider,
+        IDomainEventTypeResolver typeResolver,
+        ILogger<ProcessOutboxMessagesJob> logger)
     {
         _serviceProvider = serviceProvider;
+        _typeResolver = typeResolver;
         _logger = logger;
     }
 
@@ -49,21 +54,10 @@ public class ProcessOutboxMessagesJob : BackgroundService
         {
             try
             {
-                // Resolvemos el tipo buscando en todos los ensamblados cargados por nombre simple.
-                // Ventajas frente al namespace hardcodeado:
-                //   - Funciona con eventos en cualquier namespace / bounded context.
-                //   - No requiere migración (Type sigue almacenando el Name simple → retrocompatible).
-                // El doble filtro IDomainEvent + !IsAbstract elimina colisiones de nombres accidentales.
-                var type = AppDomain.CurrentDomain
-                    .GetAssemblies()
-                    .SelectMany(a =>
-                    {
-                        try { return a.GetTypes(); }
-                        catch { return []; } // ignora ensamblados dinámicos que no exponen tipos
-                    })
-                    .FirstOrDefault(t => t.Name == outboxMessage.Type
-                                     && typeof(IDomainEvent).IsAssignableFrom(t)
-                                     && !t.IsAbstract);
+                // Resuelve dinámicamente el tipo a través del resolver optimizado con caché (O(1))
+                // Funciona con eventos en cualquier namespace / bounded context y admite tanto
+                // nombre simple como nombre completo/AssemblyQualifiedName.
+                var type = _typeResolver.Resolve(outboxMessage.Type);
 
                 if (type is null)
                 {

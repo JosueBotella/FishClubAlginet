@@ -10,6 +10,7 @@ var configuration = builder.Configuration;
 // El interceptor se registra como Singleton para permitir inyección de dependencias futura
 // (loggers, clocks, etc.) sin cambiar la firma del constructor de AppDbContext.
 builder.Services.AddSingleton<ConvertDomainEventsToOutboxMessagesInterceptor>();
+builder.Services.AddSingleton<IDomainEventTypeResolver, DomainEventTypeResolver>();
 
 builder.Services.AddDbContext<AppDbContext>((sp, options) =>
 {

@@ -63,6 +63,18 @@ Para levantar la infraestructura completa mediante contenedores Docker:
 Al finalizar una conversación, al alcanzar un hito importante, o al terminar una sesión de trabajo, DEBES actualizar el archivo de bitácora en Obsidian ubicado en \G:\Mi unidad\Obsidian\DigitalLife\Proyectos\Fishing\DiarioDeAbordo.md\ con la fecha actual, lo que se ha completado, y cuál es el siguiente paso. Esto permite al usuario recuperar el contexto rápidamente en sesiones futuras.
 <!-- OBSIDIAN_LOG_RULE_END -->
 
+<!-- GIT_BRANCHING_RULE_START -->
+## Estrategia de Ramas de Git (Feature Branches)
+
+Siempre que vayas a implementar una nueva funcionalidad, refactorización o corrección de error:
+1. **Aislamiento Obligatorio**: Crear y cambiarse a una nueva rama de características desde `main` ANTES de modificar código:
+   - Características: `feature/nombre-corto-funcionalidad`
+   - Correcciones de errores: `bugfix/nombre-corto-issue` o `hotfix/nombre-corto-issue`
+   - Refactorizaciones: `refactor/nombre-corto-tarea`
+2. **TDD y Barrera de Pruebas**: Ejecutar la suite de pruebas automatizadas (`dotnet test`, `npm test`) y asegurar que todo pase limpio antes y después de los cambios.
+3. **Commits y Push a Remoto**: Realizar commits atómicos con formato de Conventional Commits (`feat: ...`, `fix: ...`, `refactor: ...`) y subir la rama a remoto (`git push -u origin <nombre-rama>`).
+<!-- GIT_BRANCHING_RULE_END -->
+
 <!-- GLOBAL_USINGS_RULE_START -->
 ## Regla de Usings Globales (.NET / C#)
 
@@ -80,31 +92,10 @@ Para asegurar cero deuda técnica, cero vulnerabilidades y cero code smells en l
 - **Zero Issues Guarantee**: Ningún cambio con alertas críticas, bugs, ni vulnerabilidades reportadas por el Quality Gate de SonarQube debe ser integrado en el código principal.
 <!-- SONARQUBE_QUALITY_RULE_END -->
 
-
-<!-- GIT_BRANCHING_STANDARD_RULE_START -->
-## Regla de Ramas Git y Estándares de GitHub
-
-Cualquier nuevo desarrollo, corrección o tarea DEBE ser creado en una rama dedicada respetando estrictamente la terminología estándar de GitHub y la industria:
-
-- **Features / Características nuevas**: `feature/nombre-de-la-feature` (ej: `feature/socios-gestion-licencias`, `feature/pesaje-concursos`)
-- **Correcciones Urgentes (Hotfixes)**: `hotfix/descripcion-del-fix` (ej: `hotfix/jwt-auth-expiration`)
-- **Correcciones de Bugs (Bugfixes)**: `bugfix/descripcion-del-bug` (ej: `bugfix/sql-connection-retry`)
-- **Refactorización de Código**: `refactor/nombre-del-componente` (ej: `refactor/fisherman-cqrs-handler`)
-- **Mantenimiento y Herramientas**: `chore/nombre-tarea` (ej: `chore/sonar-analysis-script`)
-- **Documentación**: `docs/nombre-doc` (ej: `docs/architecture-guide`)
-
-**Reglas de Flujo Git**:
-1. Cero commits directos en la rama principal (`main` o `master`).
-2. Crear la rama correspondiente antes de realizar cambios de código.
-3. Verificar análisis en SonarQube antes de solicitar merge.
-<!-- GIT_BRANCHING_STANDARD_RULE_END -->
-
 <!-- NOTEBOOKLM_PRAGMATIC_RULE_START -->
 ## Regla de Buenas Prácticas y Conocimiento con NotebookLM
 
 - **Cuaderno de Referencia**: Apoyarse en el cuaderno **`FULL ASP.NET Core`** (`full-asp-net-core` / ID: `f2e3c464-f0c4-4168-85d2-8ab1299c5c2e`) usando la CLI `notebook` o MCP.
 - **Programador Pragmático**: Aplicar patrones limpios, DRY (Don't Repeat Yourself), desacoplamiento, Clean Architecture, CQRS e inyección de dependencias siguiendo la guía y estándares de ASP.NET Core.
 <!-- NOTEBOOKLM_PRAGMATIC_RULE_END -->
-
-
 
