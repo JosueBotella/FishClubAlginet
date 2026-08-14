@@ -56,4 +56,49 @@ public class ConvertDomainEventsToOutboxMessagesInterceptorTests
         fisherman.GetDomainEvents().Should().BeEmpty();
         league.GetDomainEvents().Should().BeEmpty();
     }
+
+    [Fact]
+    public async Task SavingChangesAsync_ShouldConvertAllFishermanDomainEventsToOutboxMessages()
+    {
+        // Arrange
+        var options = new DbContextOptionsBuilder<AppDbContext>()
+            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+            .AddInterceptors(new ConvertDomainEventsToOutboxMessagesInterceptor())
+            .Options;
+
+        using var dbContext = new AppDbContext(options);
+
+        var fisherman = Fisherman.Create(
+            firstName: "Jose",
+            lastName: "Botella",
+            dateOfBirth: new DateTime(1988, 3, 15),
+            documentType: TypeNationalIdentifier.Dni,
+            documentNumber: "87654321B",
+            federationLicense: "FED-999",
+            address: new Address { Street = "Calle Principal 5", City = "Alginet", ZipCode = "46230", Province = "Valencia" }
+        );
+
+        fisherman.RaiseDomainEvent(new FishermanAddedDomainEvent { Id = 1, FirstName = "Jose", LastName = "Botella" });
+        fisherman.RaiseDomainEvent(new FishermanUpdatedDomainEvent { Id = 1, FirstName = "Jose", LastName = "Botella" });
+        fisherman.RaiseDomainEvent(new FishermanDeletedDomainEvent { Id = 1 });
+        fisherman.RaiseDomainEvent(new FishermanRestoredDomainEvent { Id = 1 });
+
+        dbContext.Fishermen.Add(fisherman);
+
+        // Act
+        await dbContext.SaveChangesAsync();
+
+        // Assert
+        var outboxMessages = await dbContext.OutboxMessages.ToListAsync();
+        outboxMessages.Should().HaveCount(4);
+
+        outboxMessages.Should().Contain(m => m.Type == nameof(FishermanAddedDomainEvent));
+        outboxMessages.Should().Contain(m => m.Type == nameof(FishermanUpdatedDomainEvent));
+        outboxMessages.Should().Contain(m => m.Type == nameof(FishermanDeletedDomainEvent));
+        outboxMessages.Should().Contain(m => m.Type == nameof(FishermanRestoredDomainEvent));
+
+        // Verify entity's domain event queue is cleared
+        fisherman.GetDomainEvents().Should().BeEmpty();
+    }
 }
+
