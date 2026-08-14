@@ -1,9 +1,10 @@
-﻿global using FishClubAlginet.Application.Abstractions;
+global using FishClubAlginet.Application.Abstractions;
 global using FishClubAlginet.Application.Constants;
 global using FishClubAlginet.Contracts.Dtos.Requests.Identity;
 global using FishClubAlginet.Contracts.Enums;
 global using FishClubAlginet.Core.Abstractions;
 global using FishClubAlginet.Core.Domain.Entities;
+global using FishClubAlginet.Core.Domain.ValueObjects;
 global using FishClubAlginet.Infrastructure.Persistence.Constants;
 global using FishClubAlginet.Infrastructure.Persistence.Contexts;
 global using FishClubAlginet.Infrastructure.Persistence.Interceptors;
@@ -24,4 +25,5 @@ global using System.IdentityModel.Tokens.Jwt;
 global using System.Security.Claims;
 global using System.Text;
 global using System.Text.Json;
+global using System.Diagnostics.CodeAnalysis;
 

@@ -1,8 +1,8 @@
-using FishClubAlginet.Application.Features.Events.Handlers;
-
 namespace FishClubAlginet.Tests.Handlers;
 
+[SuppressMessage("Performance", "CA1873:Avoid potentially expensive evaluations on logging calls", Justification = "Test assertions on logger invocations")]
 public class FishermanDomainEventHandlersTests
+
 {
     [Fact]
     public async Task FishermanAddedDomainEventHandler_ShouldLogInformation_WhenHandled()

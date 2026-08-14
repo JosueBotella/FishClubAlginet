@@ -1,10 +1,8 @@
-using FishClubAlginet.Core.Domain.Entities;
-using FishClubAlginet.Core.Domain.ValueObjects;
-using FishClubAlginet.Contracts.Enums;
-
 namespace FishClubAlginet.Infrastructure.Persistence.Seeds;
 
+[SuppressMessage("Security", "S2245:Using weak random number generators", Justification = "Deterministic seed generation for local development and test database seeding only")]
 public static class FishermanSeed
+
 {
     public static async Task SeedAsync(AppDbContext context)
     {

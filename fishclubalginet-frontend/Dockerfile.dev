@@ -12,5 +12,8 @@ RUN npm install
 
 EXPOSE 5173
 
+USER node
+
 # --host 0.0.0.0 para que Vite acepte conexiones desde fuera del contenedor
 CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+

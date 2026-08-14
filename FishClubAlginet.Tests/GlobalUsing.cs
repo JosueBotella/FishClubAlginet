@@ -24,3 +24,7 @@ global using ErrorOr;
 global using Microsoft.AspNetCore.Identity;
 global using Microsoft.Extensions.Logging;
 global using FishClubAlginet.Core.Domain.Common.Errors;
+global using FishClubAlginet.Application.Features.Events.Handlers;
+global using System.Diagnostics.CodeAnalysis;
+
+

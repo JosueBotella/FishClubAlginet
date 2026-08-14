@@ -2,6 +2,8 @@ namespace FishClubAlginet.Application.Validators;
 
 public static class SpanishIdValidator
 {
+    private static readonly TimeSpan RegexTimeout = TimeSpan.FromMilliseconds(250);
+
     /// <summary>
     /// FluentValidation extension to validate Spanish identification documents (DNI/NIE/Passport).
     /// </summary>
@@ -24,7 +26,7 @@ public static class SpanishIdValidator
         if (string.IsNullOrWhiteSpace(documentNumber))
             return false;
 
-        var sanitizedDoc = documentNumber.ToUpper().Trim();
+        var sanitizedDoc = documentNumber.ToUpperInvariant().Trim();
 
         return type switch
         {
@@ -37,7 +39,7 @@ public static class SpanishIdValidator
 
     private static bool ValidateDni(string dni)
     {
-        if (!Regex.IsMatch(dni, @"^\d{8}[A-Z]$"))
+        if (!Regex.IsMatch(dni, @"^\d{8}[A-Z]$", RegexOptions.None, RegexTimeout))
             return false;
 
         return CheckControlLetter(dni[..8], dni[^1]);
@@ -46,7 +48,7 @@ public static class SpanishIdValidator
     private static bool ValidateNie(string nie)
     {
         // Format: X/Y/Z + 7 digits + 1 letter (e.g., X1234567Z)
-        if (!Regex.IsMatch(nie, @"^[XYZ]\d{7}[A-Z]$"))
+        if (!Regex.IsMatch(nie, @"^[XYZ]\d{7}[A-Z]$", RegexOptions.None, RegexTimeout))
             return false;
 
         // Replace prefix: X->0, Y->1, Z->2
@@ -64,7 +66,7 @@ public static class SpanishIdValidator
 
     private static bool ValidatePassport(string passport)
     {
-        return Regex.IsMatch(passport, @"^[A-Z0-9]{5,20}$");
+        return Regex.IsMatch(passport, @"^[A-Z0-9]{5,20}$", RegexOptions.None, RegexTimeout);
     }
 
     private static bool CheckControlLetter(string numberString, char providedLetter)
@@ -76,3 +78,4 @@ public static class SpanishIdValidator
         return ValidatorsConstants.ControlLetters[calculatedIndex] == providedLetter;
     }
 }
+

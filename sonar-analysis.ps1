@@ -4,14 +4,20 @@ param(
     [string]$ProjectKey = "FishClubAlginet"
 )
 
-if ([string]::IsNullOrWhiteSpace($Token)) {
-    $Token = "squ_03ef7c610f8383e21e566c4af77e9bc725483c4e"
-}
-
 if ([string]::IsNullOrWhiteSpace($SonarUrl)) {
     $SonarUrl = "http://localhost:9000"
 }
 
+# Read from .env if present and token not passed
+if ([string]::IsNullOrWhiteSpace($Token) -and (Test-Path ".env")) {
+    $envLines = Get-Content ".env"
+    foreach ($line in $envLines) {
+        if ($line -match '^SONAR_TOKEN=(.*)$') {
+            $Token = $matches[1].Trim('"', "'")
+            break
+        }
+    }
+}
 
 if ([string]::IsNullOrWhiteSpace($Token)) {
     Write-Host "ADVERTENCIA: No se especificó el token mediante -Token ni `$env:SONAR_TOKEN." -ForegroundColor Yellow
@@ -22,6 +28,7 @@ if ([string]::IsNullOrWhiteSpace($Token)) {
     Write-Error "Error: Se requiere un token válido de SonarQube para realizar el análisis."
     exit 1
 }
+
 
 Write-Host "=== Iniciando Análisis de SonarQube para $ProjectKey ===" -ForegroundColor Cyan
 

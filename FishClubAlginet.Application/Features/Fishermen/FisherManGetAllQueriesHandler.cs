@@ -37,13 +37,14 @@ public class FisherManGetAllQueryHandler : IRequestHandler<FisherManGetAllQuery,
 
             if (!string.IsNullOrWhiteSpace(request.Search))
             {
-                var search = request.Search.ToLower();
+                var search = request.Search.Trim();
                 query = query.Where(f =>
-                    f.FirstName.ToLower().Contains(search) ||
-                    f.LastName.ToLower().Contains(search) ||
-                    f.DocumentNumber.ToLower().Contains(search) ||
-                    f.FederationLicense != null && f.FederationLicense.ToLower().Contains(search));
+                    f.FirstName.Contains(search) ||
+                    f.LastName.Contains(search) ||
+                    f.DocumentNumber.Contains(search) ||
+                    (f.FederationLicense != null && f.FederationLicense.Contains(search)));
             }
+
 
             var totalCount = query.Count();
 

@@ -12,7 +12,7 @@ public class DomainEventTypeResolverTests
 
         // Assert
         type.Should().NotBeNull();
-        type.Should().Be(typeof(FishermanAddedDomainEvent));
+        type.Should().Be<FishermanAddedDomainEvent>();
     }
 
     [Fact]
@@ -24,7 +24,8 @@ public class DomainEventTypeResolverTests
 
         // Assert
         type.Should().NotBeNull();
-        type.Should().Be(typeof(FishermanAddedDomainEvent));
+        type.Should().Be<FishermanAddedDomainEvent>();
+
     }
 
     [Fact]

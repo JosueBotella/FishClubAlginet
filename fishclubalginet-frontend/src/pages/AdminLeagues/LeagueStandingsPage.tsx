@@ -487,6 +487,76 @@ export default function LeagueStandingsPage() {
     }
   }, [currentLeagueId, loadingLeagues, fetchStandingsData]);
 
+  const getLeagueOptionLabel = (l: LeagueDto): string => {
+    let badge = '';
+    if (l.isActive) {
+      badge = ' 🟢';
+    } else if (l.isArchived) {
+      badge = ' 📦';
+    }
+    return `${l.name} (${l.year})${badge}`;
+  };
+
+  const renderContent = () => {
+    if (loading) {
+      return (
+        <Center py="xl">
+          <Loader size="lg" />
+        </Center>
+      );
+    }
+
+    if (!currentLeagueId && !loadingLeagues) {
+      return (
+        <Alert color="blue" variant="light" mt="lg">
+          No hay ninguna liga disponible para consultar clasificaciones.
+        </Alert>
+      );
+    }
+
+    if (!matrix) {
+      return null;
+    }
+
+    return (
+      <Tabs defaultValue="points">
+        <Tabs.List>
+          <Tabs.Tab value="points" leftSection={<IconMedal size={16} />}>
+            Por puntos (Matriz)
+          </Tabs.Tab>
+          <Tabs.Tab value="weight" leftSection={<IconWeight size={16} />}>
+            Por peso (Matriz)
+          </Tabs.Tab>
+          <Tabs.Tab value="biggestCatch" leftSection={<IconCrown size={16} />}>
+            Pieza Mayor
+          </Tabs.Tab>
+        </Tabs.List>
+
+        <Tabs.Panel value="points">
+          <StandingsMatrixTable
+            competitions={matrix.competitions}
+            rows={matrix.byPoints}
+            mode="points"
+            worstResultsToDiscard={matrix.worstResultsToDiscard}
+          />
+        </Tabs.Panel>
+
+        <Tabs.Panel value="weight">
+          <StandingsMatrixTable
+            competitions={matrix.competitions}
+            rows={matrix.byWeight}
+            mode="weight"
+            worstResultsToDiscard={matrix.worstResultsToDiscard}
+          />
+        </Tabs.Panel>
+
+        <Tabs.Panel value="biggestCatch">
+          <SeasonBiggestCatchView biggestCatch={biggestCatch} />
+        </Tabs.Panel>
+      </Tabs>
+    );
+  };
+
   return (
     <Container size="lg" py="md">
       <Group justify="space-between" mb="md" wrap="wrap" gap="sm">
@@ -521,7 +591,7 @@ export default function LeagueStandingsPage() {
             }}
             data={leagues.map((l) => ({
               value: l.id,
-              label: `${l.name} (${l.year})${l.isActive ? ' 🟢' : l.isArchived ? ' 📦' : ''}`,
+              label: getLeagueOptionLabel(l),
             }))}
           />
         )}
@@ -537,52 +607,10 @@ export default function LeagueStandingsPage() {
 
       {error && <Alert color="red" mb="md">{error}</Alert>}
 
-      {loading ? (
-        <Center py="xl">
-          <Loader size="lg" />
-        </Center>
-      ) : !currentLeagueId && !loadingLeagues ? (
-        <Alert color="blue" variant="light" mt="lg">
-          No hay ninguna liga disponible para consultar clasificaciones.
-        </Alert>
-      ) : matrix ? (
-        <Tabs defaultValue="points">
-          <Tabs.List>
-            <Tabs.Tab value="points" leftSection={<IconMedal size={16} />}>
-              Por puntos (Matriz)
-            </Tabs.Tab>
-            <Tabs.Tab value="weight" leftSection={<IconWeight size={16} />}>
-              Por peso (Matriz)
-            </Tabs.Tab>
-            <Tabs.Tab value="biggestCatch" leftSection={<IconCrown size={16} />}>
-              Pieza Mayor
-            </Tabs.Tab>
-          </Tabs.List>
-
-          <Tabs.Panel value="points">
-            <StandingsMatrixTable
-              competitions={matrix.competitions}
-              rows={matrix.byPoints}
-              mode="points"
-              worstResultsToDiscard={matrix.worstResultsToDiscard}
-            />
-          </Tabs.Panel>
-
-          <Tabs.Panel value="weight">
-            <StandingsMatrixTable
-              competitions={matrix.competitions}
-              rows={matrix.byWeight}
-              mode="weight"
-              worstResultsToDiscard={matrix.worstResultsToDiscard}
-            />
-          </Tabs.Panel>
-
-          <Tabs.Panel value="biggestCatch">
-            <SeasonBiggestCatchView biggestCatch={biggestCatch} />
-          </Tabs.Panel>
-        </Tabs>
-      ) : null}
+      {renderContent()}
     </Container>
   );
 }
+
+
 
