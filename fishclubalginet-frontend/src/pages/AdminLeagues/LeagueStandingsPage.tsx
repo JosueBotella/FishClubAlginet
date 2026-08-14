@@ -17,6 +17,7 @@ import {
   Divider,
   Stack,
   ThemeIcon,
+  Select,
 } from '@mantine/core';
 import {
   IconChevronLeft,
@@ -28,12 +29,18 @@ import {
   IconCalendar,
   IconAnchor,
 } from '@tabler/icons-react';
-import { getLeagueStandingsMatrix, getSeasonBiggestCatch } from '../../api/leaguesApi';
+import {
+  getLeagueStandingsMatrix,
+  getSeasonBiggestCatch,
+  getActiveLeague,
+  getLeagues,
+} from '../../api/leaguesApi';
 import type {
   LeagueStandingsMatrixDto,
   FishermanMatrixRowDto,
   CompetitionHeaderDto,
   SeasonBiggestCatchDto,
+  LeagueDto,
 } from '../../types';
 
 function podiumBadge(position: number) {
@@ -394,22 +401,74 @@ function SeasonBiggestCatchView({ biggestCatch }: SeasonBiggestCatchViewProps) {
 }
 
 export default function LeagueStandingsPage() {
-  const { leagueId } = useParams<{ leagueId: string }>();
+  const { leagueId } = useParams<{ leagueId?: string }>();
   const navigate = useNavigate();
 
+  const [currentLeagueId, setCurrentLeagueId] = useState<string | null>(leagueId ?? null);
+  const [leagues, setLeagues] = useState<LeagueDto[]>([]);
   const [matrix, setMatrix] = useState<LeagueStandingsMatrixDto | null>(null);
   const [biggestCatch, setBiggestCatch] = useState<SeasonBiggestCatchDto | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadingLeagues, setLoadingLeagues] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchStandingsData = useCallback(async () => {
-    if (!leagueId) return;
+  // Cargar lista de ligas para el selector
+  useEffect(() => {
+    let cancelled = false;
+    async function loadLeagues() {
+      setLoadingLeagues(true);
+      try {
+        const [activeResult, pagedResult] = await Promise.allSettled([
+          getActiveLeague(),
+          getLeagues(0, 50),
+        ]);
+
+        if (cancelled) return;
+
+        const allLeagues: LeagueDto[] = [];
+        if (pagedResult.status === 'fulfilled' && pagedResult.value?.items) {
+          allLeagues.push(...pagedResult.value.items);
+        } else if (activeResult.status === 'fulfilled' && activeResult.value) {
+          allLeagues.push(activeResult.value);
+        }
+
+        setLeagues(allLeagues);
+
+        // Si no se especificó leagueId en la ruta, usar la liga activa o la primera disponible
+        if (!leagueId) {
+          if (activeResult.status === 'fulfilled' && activeResult.value) {
+            setCurrentLeagueId(activeResult.value.id);
+          } else if (allLeagues.length > 0) {
+            setCurrentLeagueId(allLeagues[0].id);
+          }
+        }
+      } catch {
+        // Silencioso
+      } finally {
+        if (!cancelled) setLoadingLeagues(false);
+      }
+    }
+
+    loadLeagues();
+    return () => {
+      cancelled = true;
+    };
+  }, [leagueId]);
+
+  // Si cambia el parámetro de ruta en la URL, sincronizar
+  useEffect(() => {
+    if (leagueId) {
+      setCurrentLeagueId(leagueId);
+    }
+  }, [leagueId]);
+
+  const fetchStandingsData = useCallback(async (idToFetch: string) => {
     setLoading(true);
     setError(null);
     try {
       const [matrixData, biggestCatchData] = await Promise.all([
-        getLeagueStandingsMatrix(leagueId),
-        getSeasonBiggestCatch(leagueId),
+        getLeagueStandingsMatrix(idToFetch),
+        getSeasonBiggestCatch(idToFetch),
       ]);
       setMatrix(matrixData);
       setBiggestCatch(biggestCatchData);
@@ -418,29 +477,54 @@ export default function LeagueStandingsPage() {
     } finally {
       setLoading(false);
     }
-  }, [leagueId]);
+  }, []);
 
   useEffect(() => {
-    fetchStandingsData();
-  }, [fetchStandingsData]);
+    if (currentLeagueId) {
+      fetchStandingsData(currentLeagueId);
+    } else if (!loadingLeagues) {
+      setLoading(false);
+    }
+  }, [currentLeagueId, loadingLeagues, fetchStandingsData]);
 
   return (
     <Container size="lg" py="md">
-      <Group mb="md">
-        <ActionIcon variant="subtle" onClick={() => navigate(-1)} title="Volver">
-          <IconChevronLeft size={20} />
-        </ActionIcon>
-        <Title order={3}>
-          <Group gap={6} component="span">
-            <IconChartBar size={22} />
-            Clasificación Detallada
-            {matrix && (
-              <Text span c="dimmed" fw={400} size="lg">
-                — {matrix.leagueName} {matrix.year}
-              </Text>
-            )}
-          </Group>
-        </Title>
+      <Group justify="space-between" mb="md" wrap="wrap" gap="sm">
+        <Group>
+          <ActionIcon variant="subtle" onClick={() => navigate(-1)} title="Volver">
+            <IconChevronLeft size={20} />
+          </ActionIcon>
+          <Title order={3}>
+            <Group gap={6} component="span">
+              <IconChartBar size={22} />
+              Clasificación Detallada
+              {matrix && (
+                <Text span c="dimmed" fw={400} size="lg">
+                  — {matrix.leagueName} {matrix.year}
+                </Text>
+              )}
+            </Group>
+          </Title>
+        </Group>
+
+        {leagues.length > 1 && (
+          <Select
+            size="xs"
+            w={230}
+            placeholder="Seleccionar liga"
+            value={currentLeagueId}
+            onChange={(val) => {
+              if (val) {
+                setCurrentLeagueId(val);
+                navigate(`/leagues/${val}/standings`, { replace: true });
+              }
+            }}
+            data={leagues.map((l) => ({
+              value: l.id,
+              label: `${l.name} (${l.year})${l.isActive ? ' 🟢' : l.isArchived ? ' 📦' : ''}`,
+            }))}
+          />
+        )}
       </Group>
 
       {matrix && matrix.worstResultsToDiscard > 0 && (
@@ -457,6 +541,10 @@ export default function LeagueStandingsPage() {
         <Center py="xl">
           <Loader size="lg" />
         </Center>
+      ) : !currentLeagueId && !loadingLeagues ? (
+        <Alert color="blue" variant="light" mt="lg">
+          No hay ninguna liga disponible para consultar clasificaciones.
+        </Alert>
       ) : matrix ? (
         <Tabs defaultValue="points">
           <Tabs.List>
@@ -497,3 +585,4 @@ export default function LeagueStandingsPage() {
     </Container>
   );
 }
+
