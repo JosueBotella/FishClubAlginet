@@ -34,6 +34,7 @@ import {
 } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import { getApiErrorMessage } from '../../utils/errorUtils';
+import { useAuth } from '../../hooks';
 import {
   getCompetitionById,
   getCompetitionResults,
@@ -62,6 +63,8 @@ interface EditState {
 export default function CompetitionResultsPage() {
   const { competitionId } = useParams<{ competitionId: string }>();
   const navigate = useNavigate();
+  const { hasRole } = useAuth();
+  const isAdmin = hasRole('Admin');
 
   // Competition metadata (needed for status guard)
   const [competition, setCompetition] = useState<CompetitionDto | null>(null);
@@ -107,7 +110,7 @@ export default function CompetitionResultsPage() {
 
   // Derived: can we edit weights?
   const canEditResults =
-    competition !== null && EDITABLE_STATUSES.includes(competition.status);
+    isAdmin && competition !== null && EDITABLE_STATUSES.includes(competition.status);
 
   // ── Fetch competition + results ──────────────────────────────────────────
   const fetchAll = useCallback(async () => {
@@ -120,10 +123,10 @@ export default function CompetitionResultsPage() {
         getCompetitionResults(competitionId),
       ]);
       setCompetition(comp);
-      setBiggestCatchMinWeight(comp.biggestCatchMinWeightInGrams);
+      setBiggestCatchMinWeight(comp.biggestCatchMinWeightInGrams ?? null);
       setResults(data);
     } catch {
-      setError('Error al cargar los datos del concurso.');
+      setError('Error al cargar los resultados del concurso.');
     } finally {
       setLoading(false);
     }
@@ -139,7 +142,7 @@ export default function CompetitionResultsPage() {
     setDeleting(true);
     try {
       await removeRegistration(deleteResultId);
-      notifications.show({ title: 'Inscripción eliminada', message: '', color: 'orange' });
+      notifications.show({ title: 'Inscripción eliminada', message: 'El participante ha sido desinscrito.', color: 'teal' });
       setDeleteResultId(null);
       fetchAll();
     } catch (err) {
@@ -155,7 +158,7 @@ export default function CompetitionResultsPage() {
     setSavingConfig(true);
     try {
       await updateBiggestCatchConfig(competitionId, { minWeightInGrams: biggestCatchMinWeight });
-      notifications.show({ title: 'Configuración guardada', message: 'Mínimo pieza mayor actualizado.', color: 'green' });
+      notifications.show({ title: 'Configuración guardada', message: 'Mínimo de pieza mayor actualizado correctamente.', color: 'teal' });
     } catch (err) {
       notifications.show({ title: 'Error', message: getApiErrorMessage(err, 'No se pudo guardar la configuración.'), color: 'red' });
     } finally {
@@ -165,7 +168,6 @@ export default function CompetitionResultsPage() {
 
   // ── Edit ──────────────────────────────────────────────────────────────────
   const openEdit = (r: CompetitionResultDto) => {
-    if (!canEditResults) return;
     setEditState({
       resultId: r.id,
       fishermanId: r.fishermanId,
@@ -185,10 +187,15 @@ export default function CompetitionResultsPage() {
         editState.weightInGrams,
         editState.biggestCatchWeight
       );
-      notifications.show({ title: 'Resultado actualizado', message: '', color: 'green' });
+      notifications.show({
+        title: 'Resultado actualizado',
+        message: 'Los datos del participante han sido guardados.',
+        color: 'teal',
+      });
       setEditState(null);
       fetchAll();
     } catch (err) {
+
       notifications.show({ title: 'Error', message: getApiErrorMessage(err, 'No se pudo actualizar el resultado.'), color: 'red' });
     } finally {
       setSaving(false);
@@ -305,7 +312,7 @@ export default function CompetitionResultsPage() {
             )}
           </Group>
         </Title>
-        {competition && competition.status === 'RegistrationOpen' && (
+        {isAdmin && competition && competition.status === 'RegistrationOpen' && (
           <Button leftSection={<IconUserPlus size={18} />} ml="auto" variant="light" onClick={openModal}>
             Inscribir pescadores
           </Button>
@@ -313,7 +320,7 @@ export default function CompetitionResultsPage() {
       </Group>
 
       {/* Status guard informational alert */}
-      {competition && !canEditResults && results.length > 0 && (
+      {isAdmin && competition && !canEditResults && results.length > 0 && (
         <Alert
           icon={<IconInfoCircle size={18} />}
           color="blue"
@@ -332,7 +339,7 @@ export default function CompetitionResultsPage() {
       )}
 
       {/* Biggest catch minimum weight config */}
-      {competition && (
+      {isAdmin && competition && (
         <Group mb="md" align="flex-end" gap="xs">
           <Text size="sm" c="dimmed" fw={500}>Mínimo pieza mayor (g):</Text>
           <NumberInput
@@ -357,6 +364,12 @@ export default function CompetitionResultsPage() {
         </Group>
       )}
 
+      {!isAdmin && biggestCatchMinWeight !== null && (
+        <Text size="xs" c="dimmed" mb="sm">
+          Mínimo para calificar como Pieza Mayor: <strong>{biggestCatchMinWeight.toLocaleString('es-ES')} g</strong>
+        </Text>
+      )}
+
       {error && <Alert color="red" mb="md">{error}</Alert>}
 
       {loading ? (
@@ -376,7 +389,7 @@ export default function CompetitionResultsPage() {
                 <Table.Th>Mayor (g)</Table.Th>
                 <Table.Th>Puntos</Table.Th>
                 <Table.Th>Validado</Table.Th>
-                <Table.Th style={{ width: 80 }}>Acciones</Table.Th>
+                {isAdmin && <Table.Th style={{ width: 80 }}>Acciones</Table.Th>}
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
@@ -395,37 +408,39 @@ export default function CompetitionResultsPage() {
                       {r.didAttend ? 'Sí' : 'No'}
                     </Badge>
                   </Table.Td>
-                  <Table.Td><Text size="sm">{r.weightInGrams}</Text></Table.Td>
-                  <Table.Td><Text size="sm">{r.biggestCatchWeight ?? '—'}</Text></Table.Td>
+                  <Table.Td><Text size="sm">{r.weightInGrams.toLocaleString('es-ES')}</Text></Table.Td>
+                  <Table.Td><Text size="sm">{r.biggestCatchWeight ? r.biggestCatchWeight.toLocaleString('es-ES') : '—'}</Text></Table.Td>
                   <Table.Td><Text size="sm" fw={600}>{r.points}</Text></Table.Td>
                   <Table.Td>
                     <Badge color={r.isValidated ? 'green' : 'gray'} variant="light">
                       {r.isValidated ? 'Sí' : 'No'}
                     </Badge>
                   </Table.Td>
-                  <Table.Td>
-                    <Group gap={4}>
-                      <Tooltip label={editTooltip}>
+                  {isAdmin && (
+                    <Table.Td>
+                      <Group gap={4}>
+                        <Tooltip label={editTooltip}>
+                          <ActionIcon
+                            variant="subtle"
+                            color={canEditResults ? 'blue' : 'gray'}
+                            title="Editar resultado"
+                            disabled={!canEditResults}
+                            onClick={() => openEdit(r)}
+                          >
+                            <IconPencil size={16} />
+                          </ActionIcon>
+                        </Tooltip>
                         <ActionIcon
                           variant="subtle"
-                          color={canEditResults ? 'blue' : 'gray'}
-                          title="Editar resultado"
-                          disabled={!canEditResults}
-                          onClick={() => openEdit(r)}
+                          color="red"
+                          title="Desinscribir"
+                          onClick={() => setDeleteResultId(r.id)}
                         >
-                          <IconPencil size={16} />
+                          <IconTrash size={16} />
                         </ActionIcon>
-                      </Tooltip>
-                      <ActionIcon
-                        variant="subtle"
-                        color="red"
-                        title="Desinscribir"
-                        onClick={() => setDeleteResultId(r.id)}
-                      >
-                        <IconTrash size={16} />
-                      </ActionIcon>
-                    </Group>
-                  </Table.Td>
+                      </Group>
+                    </Table.Td>
+                  )}
                 </Table.Tr>
               ))}
             </Table.Tbody>
@@ -445,188 +460,195 @@ export default function CompetitionResultsPage() {
       )}
 
       {/* ── Modal confirmación eliminar ── */}
-      <Modal
-        opened={deleteResultId !== null}
-        onClose={() => setDeleteResultId(null)}
-        title="Confirmar desinscripción"
-        centered
-        size="sm"
-      >
-        <Stack gap="md">
-          <Text size="sm">¿Seguro que quieres eliminar esta inscripción? Esta acción no se puede deshacer.</Text>
-          <Group justify="flex-end">
-            <Button variant="default" onClick={() => setDeleteResultId(null)}>Cancelar</Button>
-            <Button color="red" loading={deleting} onClick={handleDelete}>Eliminar</Button>
-          </Group>
-        </Stack>
-      </Modal>
-
-      {/* ── Modal editar resultado ── */}
-      <Modal
-        opened={editState !== null}
-        onClose={() => setEditState(null)}
-        title={editState ? `Editar resultado — Pescador #${editState.fishermanId}` : ''}
-        centered
-        size="sm"
-      >
-        {editState && (
+      {isAdmin && (
+        <Modal
+          opened={deleteResultId !== null}
+          onClose={() => setDeleteResultId(null)}
+          title="Confirmar desinscripción"
+          centered
+          size="sm"
+        >
           <Stack gap="md">
-            <Switch
-              label="Asistió al concurso"
-              checked={editState.didAttend}
-              onChange={(e) =>
-                setEditState((prev) => prev && { ...prev, didAttend: e.currentTarget.checked })
-              }
-            />
-            <NumberInput
-              label="Peso total (gramos)"
-              min={0}
-              value={editState.weightInGrams}
-              onChange={(v) =>
-                setEditState((prev) => prev && { ...prev, weightInGrams: typeof v === 'number' ? v : 0 })
-              }
-            />
-            <NumberInput
-              label="Mayor captura (gramos)"
-              description="Déjalo vacío si no aplica"
-              min={0}
-              value={editState.biggestCatchWeight ?? undefined}
-              onChange={(v) =>
-                setEditState((prev) =>
-                  prev && { ...prev, biggestCatchWeight: typeof v === 'number' ? v : null }
-                )
-              }
-            />
+            <Text size="sm">¿Seguro que quieres eliminar esta inscripción? Esta acción no se puede deshacer.</Text>
             <Group justify="flex-end">
-              <Button variant="default" onClick={() => setEditState(null)}>Cancelar</Button>
-              <Button loading={saving} onClick={handleSave}>Guardar</Button>
+              <Button variant="default" onClick={() => setDeleteResultId(null)}>Cancelar</Button>
+              <Button color="red" loading={deleting} onClick={handleDelete}>Eliminar</Button>
             </Group>
           </Stack>
-        )}
-      </Modal>
+        </Modal>
+      )}
+
+      {/* ── Modal editar resultado ── */}
+      {isAdmin && (
+        <Modal
+          opened={editState !== null}
+          onClose={() => setEditState(null)}
+          title={editState ? `Editar resultado — Pescador #${editState.fishermanId}` : ''}
+          centered
+          size="sm"
+        >
+          {editState && (
+            <Stack gap="md">
+              <Switch
+                label="Asistió al concurso"
+                checked={editState.didAttend}
+                onChange={(e) =>
+                  setEditState((prev) => prev && { ...prev, didAttend: e.currentTarget.checked })
+                }
+              />
+              <NumberInput
+                label="Peso total (gramos)"
+                min={0}
+                value={editState.weightInGrams}
+                onChange={(v) =>
+                  setEditState((prev) => prev && { ...prev, weightInGrams: typeof v === 'number' ? v : 0 })
+                }
+              />
+              <NumberInput
+                label="Mayor captura (gramos)"
+                description="Déjalo vacío si no aplica"
+                min={0}
+                value={editState.biggestCatchWeight ?? undefined}
+                onChange={(v) =>
+                  setEditState((prev) =>
+                    prev && { ...prev, biggestCatchWeight: typeof v === 'number' ? v : null }
+                  )
+                }
+              />
+              <Group justify="flex-end">
+                <Button variant="default" onClick={() => setEditState(null)}>Cancelar</Button>
+                <Button loading={saving} onClick={handleSave}>Guardar</Button>
+              </Group>
+            </Stack>
+          )}
+        </Modal>
+      )}
 
       {/* ── Modal inscripción masiva ── */}
-      <Modal
-        opened={registerOpen}
-        onClose={() => setRegisterOpen(false)}
-        title="Inscribir pescadores"
-        centered
-        size="lg"
-      >
-        <Stack gap="sm">
-          <Group>
-            <TextInput
-              placeholder="Buscar por nombre..."
-              leftSection={<IconSearch size={16} />}
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.currentTarget.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-              style={{ flex: 1 }}
-            />
-            <Button variant="light" onClick={handleSearch}>Buscar</Button>
-          </Group>
+      {isAdmin && (
+        <Modal
+          opened={registerOpen}
+          onClose={() => setRegisterOpen(false)}
+          title="Inscribir pescadores"
+          centered
+          size="lg"
+        >
+          <Stack gap="sm">
+            <Group>
+              <TextInput
+                placeholder="Buscar por nombre..."
+                leftSection={<IconSearch size={16} />}
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.currentTarget.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                style={{ flex: 1 }}
+              />
+              <Button variant="light" onClick={handleSearch}>Buscar</Button>
+            </Group>
 
-          <Group justify="space-between">
-            <Group gap="xs">
-              <Button
-                size="xs"
-                variant="light"
-                disabled={selectablePage.length === 0}
-                onClick={toggleSelectAll}
-              >
-                {allPageSelected ? 'Deseleccionar página' : 'Seleccionar página'}
-              </Button>
-              {selectedIds.size > 0 && (
-                <Button size="xs" variant="subtle" color="gray" onClick={() => setSelectedIds(new Set())}>
-                  Limpiar selección
+            <Group justify="space-between">
+              <Group gap="xs">
+                <Button
+                  size="xs"
+                  variant="light"
+                  disabled={selectablePage.length === 0}
+                  onClick={toggleSelectAll}
+                >
+                  {allPageSelected ? 'Deseleccionar página' : 'Seleccionar página'}
                 </Button>
+                {selectedIds.size > 0 && (
+                  <Button size="xs" variant="subtle" color="gray" onClick={() => setSelectedIds(new Set())}>
+                    Limpiar selección
+                  </Button>
+                )}
+              </Group>
+              {selectedIds.size > 0 && (
+                <Text size="sm" c="blue" fw={500}>
+                  {selectedIds.size} seleccionado{selectedIds.size > 1 ? 's' : ''}
+                </Text>
               )}
             </Group>
-            {selectedIds.size > 0 && (
-              <Text size="sm" c="blue" fw={500}>
-                {selectedIds.size} seleccionado{selectedIds.size > 1 ? 's' : ''}
-              </Text>
+
+            <Divider />
+
+            {loadingFishermen ? (
+              <Center py="md"><Loader size="sm" /></Center>
+            ) : fishermen.length === 0 ? (
+              <Text c="dimmed" ta="center" py="md">No se encontraron pescadores.</Text>
+            ) : (
+              <Table highlightOnHover withRowBorders>
+                <Table.Thead>
+                  <Table.Tr>
+                    <Table.Th style={{ width: 40 }}>
+                      <Checkbox
+                        checked={allPageSelected}
+                        indeterminate={!allPageSelected && selectablePage.some((f) => selectedIds.has(f.id))}
+                        disabled={selectablePage.length === 0}
+                        onChange={toggleSelectAll}
+                      />
+                    </Table.Th>
+                    <Table.Th>Pescador</Table.Th>
+                    <Table.Th>Licencia</Table.Th>
+                    <Table.Th>Ciudad</Table.Th>
+                  </Table.Tr>
+                </Table.Thead>
+                <Table.Tbody>
+                  {fishermen.map((f) => {
+                    const enrolled = alreadyRegistered.has(f.id);
+                    return (
+                      <Table.Tr
+                        key={f.id}
+                        style={{ opacity: enrolled ? 0.45 : 1, cursor: enrolled ? 'default' : 'pointer' }}
+                        onClick={() => !enrolled && toggleSelect(f.id)}
+                      >
+                        <Table.Td>
+                          <Checkbox
+                            checked={enrolled || selectedIds.has(f.id)}
+                            disabled={enrolled}
+                            onChange={() => !enrolled && toggleSelect(f.id)}
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                        </Table.Td>
+                        <Table.Td>
+                          <Text size="sm" fw={500}>
+                            {f.firstName} {f.lastName}
+                            {enrolled && (
+                              <Badge size="xs" color="green" variant="light" ml={6}>Ya inscrito</Badge>
+                            )}
+                          </Text>
+                        </Table.Td>
+                        <Table.Td><Text size="xs" c="dimmed">{f.federationLicense ?? '—'}</Text></Table.Td>
+                        <Table.Td><Text size="xs" c="dimmed">{f.addressCity}</Text></Table.Td>
+                      </Table.Tr>
+                    );
+                  })}
+                </Table.Tbody>
+              </Table>
             )}
-          </Group>
 
-          <Divider />
+            {fishermenPages > 1 && (
+              <Group justify="center">
+                <Pagination
+                  total={fishermenPages}
+                  value={fishermenPage}
+                  onChange={setFishermenPage}
+                  size="sm"
+                />
+              </Group>
+            )}
 
-          {loadingFishermen ? (
-            <Center py="md"><Loader size="sm" /></Center>
-          ) : fishermen.length === 0 ? (
-            <Text c="dimmed" ta="center" py="md">No se encontraron pescadores.</Text>
-          ) : (
-            <Table highlightOnHover withRowBorders>
-              <Table.Thead>
-                <Table.Tr>
-                  <Table.Th style={{ width: 40 }}>
-                    <Checkbox
-                      checked={allPageSelected}
-                      indeterminate={!allPageSelected && selectablePage.some((f) => selectedIds.has(f.id))}
-                      disabled={selectablePage.length === 0}
-                      onChange={toggleSelectAll}
-                    />
-                  </Table.Th>
-                  <Table.Th>Pescador</Table.Th>
-                  <Table.Th>Licencia</Table.Th>
-                  <Table.Th>Ciudad</Table.Th>
-                </Table.Tr>
-              </Table.Thead>
-              <Table.Tbody>
-                {fishermen.map((f) => {
-                  const enrolled = alreadyRegistered.has(f.id);
-                  return (
-                    <Table.Tr
-                      key={f.id}
-                      style={{ opacity: enrolled ? 0.45 : 1, cursor: enrolled ? 'default' : 'pointer' }}
-                      onClick={() => !enrolled && toggleSelect(f.id)}
-                    >
-                      <Table.Td>
-                        <Checkbox
-                          checked={enrolled || selectedIds.has(f.id)}
-                          disabled={enrolled}
-                          onChange={() => !enrolled && toggleSelect(f.id)}
-                          onClick={(e) => e.stopPropagation()}
-                        />
-                      </Table.Td>
-                      <Table.Td>
-                        <Text size="sm" fw={500}>
-                          {f.firstName} {f.lastName}
-                          {enrolled && (
-                            <Badge size="xs" color="green" variant="light" ml={6}>Ya inscrito</Badge>
-                          )}
-                        </Text>
-                      </Table.Td>
-                      <Table.Td><Text size="xs" c="dimmed">{f.federationLicense ?? '—'}</Text></Table.Td>
-                      <Table.Td><Text size="xs" c="dimmed">{f.addressCity}</Text></Table.Td>
-                    </Table.Tr>
-                  );
-                })}
-              </Table.Tbody>
-            </Table>
-          )}
+            <Divider />
 
-          {fishermenPages > 1 && (
-            <Group justify="center">
-              <Pagination
-                total={fishermenPages}
-                value={fishermenPage}
-                onChange={setFishermenPage}
-                size="sm"
-              />
+            <Group justify="flex-end">
+              <Button variant="default" onClick={() => setRegisterOpen(false)}>Cancelar</Button>
+              <Button onClick={handleRegister} loading={registering} disabled={selectedIds.size === 0}>
+                Inscribir {selectedIds.size > 0 ? `(${selectedIds.size})` : ''}
+              </Button>
             </Group>
-          )}
-
-          <Divider />
-
-          <Group justify="flex-end">
-            <Button variant="default" onClick={() => setRegisterOpen(false)}>Cancelar</Button>
-            <Button onClick={handleRegister} loading={registering} disabled={selectedIds.size === 0}>
-              Inscribir {selectedIds.size > 0 ? `(${selectedIds.size})` : ''}
-            </Button>
-          </Group>
-        </Stack>
-      </Modal>
+          </Stack>
+        </Modal>
+      )}
     </Container>
   );
 }
+

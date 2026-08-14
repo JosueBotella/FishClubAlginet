@@ -92,7 +92,15 @@ function App() {
             <Route
               path={AppRoutes.Competitions}
               element={
-                <ProtectedRoute requiredRoles={['Admin']}>
+                <ProtectedRoute requiredRoles={['Admin', 'Fisherman']}>
+                  <AdminCompetitionsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path={AppRoutes.AdminCompetitions}
+              element={
+                <ProtectedRoute requiredRoles={['Admin', 'Fisherman']}>
                   <AdminCompetitionsPage />
                 </ProtectedRoute>
               }
@@ -100,11 +108,20 @@ function App() {
             <Route
               path={AppRoutes.CompetitionResults}
               element={
-                <ProtectedRoute requiredRoles={['Admin']}>
+                <ProtectedRoute requiredRoles={['Admin', 'Fisherman']}>
                   <CompetitionResultsPage />
                 </ProtectedRoute>
               }
             />
+            <Route
+              path={AppRoutes.AdminCompetitionResults}
+              element={
+                <ProtectedRoute requiredRoles={['Admin', 'Fisherman']}>
+                  <CompetitionResultsPage />
+                </ProtectedRoute>
+              }
+            />
+
             <Route path="*" element={<NotFoundPage />} />
           </Route>
         </Routes>

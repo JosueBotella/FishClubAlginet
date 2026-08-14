@@ -8,13 +8,16 @@ export const Routes = {
   Leagues: '/admin/leagues',
   ArchivedLeagues: '/admin/leagues/archived',
   Profile: '/profile',
-  Competitions: '/admin/leagues/:leagueId/competitions',
-  CompetitionResults: '/admin/competitions/:competitionId/results',
+  Competitions: '/leagues/:leagueId/competitions',
+  AdminCompetitions: '/admin/leagues/:leagueId/competitions',
+  CompetitionResults: '/competitions/:competitionId/results',
+  AdminCompetitionResults: '/admin/competitions/:competitionId/results',
   LeagueStandings: '/leagues/:leagueId/standings',
   AdminLeagueStandings: '/admin/leagues/:leagueId/standings',
-  competitionsFor: (leagueId: string) => `/admin/leagues/${leagueId}/competitions`,
+  competitionsFor: (leagueId: string) => `/leagues/${leagueId}/competitions`,
   competitionResultsFor: (competitionId: string) =>
-    `/admin/competitions/${competitionId}/results`,
+    `/competitions/${competitionId}/results`,
   standingsFor: (leagueId: string) => `/leagues/${leagueId}/standings`,
 } as const;
+
 

@@ -38,6 +38,7 @@ import {
 import { notifications } from '@mantine/notifications';
 import type { CompetitionDto } from '../../types';
 import { Routes } from '../../constants';
+import { useAuth } from '../../hooks';
 import CreateCompetitionModal from './CreateCompetitionModal';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import { getApiErrorMessage } from '../../utils/errorUtils';
@@ -106,24 +107,25 @@ async function executeAction(type: ActionType, competitionId: string): Promise<v
 }
 
 function statusBadge(status: CompetitionDto['status']) {
-  const map: Record<CompetitionDto['status'], { label: string; color: string }> = {
-    Planned: { label: 'Planificado', color: 'gray' },
-    RegistrationOpen: { label: 'Inscripción abierta', color: 'blue' },
-    Closed: { label: 'Cerrado', color: 'orange' },
-    ResultsDraft: { label: 'Resultados borrador', color: 'yellow' },
-    ResultsValidated: { label: 'Resultados validados', color: 'green' },
-  };
-  const { label, color } = map[status] ?? { label: status, color: 'gray' };
-  return <Badge color={color} variant="light">{label}</Badge>;
+  switch (status) {
+    case 'Planned':          return <Badge color="gray" variant="light">Planificado</Badge>;
+    case 'RegistrationOpen': return <Badge color="blue" variant="filled">Inscripción abierta</Badge>;
+    case 'Closed':           return <Badge color="orange" variant="light">Inscripción cerrada</Badge>;
+    case 'ResultsDraft':     return <Badge color="yellow" variant="filled">Resultados en borrador</Badge>;
+    case 'ResultsValidated': return <Badge color="green" variant="filled">Resultados validados</Badge>;
+    default:                 return <Badge color="gray">{status}</Badge>;
+  }
 }
 
-function formatTime(t: string) {
-  return t.slice(0, 5);
+function formatTime(timeStr: string) {
+  return timeStr?.slice(0, 5) ?? timeStr;
 }
 
 export default function AdminCompetitionsPage() {
   const { leagueId } = useParams<{ leagueId: string }>();
   const navigate = useNavigate();
+  const { hasRole } = useAuth();
+  const isAdmin = hasRole('Admin');
 
   const [competitions, setCompetitions] = useState<CompetitionDto[]>([]);
   const [loading, setLoading] = useState(true);
@@ -140,7 +142,7 @@ export default function AdminCompetitionsPage() {
       const data = await getCompetitionsByLeague(leagueId);
       setCompetitions(data);
     } catch {
-      setError('Error al cargar los concursos.');
+      setError('Error al cargar los concursos de la liga.');
     } finally {
       setLoading(false);
     }
@@ -156,15 +158,14 @@ export default function AdminCompetitionsPage() {
 
   const handleConfirmAction = async () => {
     if (!pendingAction) return;
+    const config = ACTION_CONFIG[pendingAction.type];
     setActionLoading(true);
-    const { competition, type } = pendingAction;
-    const config = ACTION_CONFIG[type];
     try {
-      await executeAction(type, competition.id);
+      await executeAction(pendingAction.type, pendingAction.competition.id);
       notifications.show({
-        title: config.title,
-        message: `Concurso #${competition.competitionNumber} actualizado.`,
-        color: config.confirmColor,
+        title: 'Acción completada',
+        message: `Se ha completado: ${config.title.toLowerCase()}.`,
+        color: 'teal',
       });
       setPendingAction(null);
       fetchCompetitions();
@@ -193,7 +194,11 @@ export default function AdminCompetitionsPage() {
   return (
     <Container size="xl" py="md">
       <Group mb="md">
-        <ActionIcon variant="subtle" onClick={() => navigate(Routes.Leagues)} title="Volver a ligas">
+        <ActionIcon
+          variant="subtle"
+          onClick={() => navigate(isAdmin ? Routes.Leagues : Routes.Standings)}
+          title="Volver"
+        >
           <IconChevronLeft size={20} />
         </ActionIcon>
         <Title order={3}>
@@ -202,13 +207,15 @@ export default function AdminCompetitionsPage() {
             Concursos de la liga
           </Group>
         </Title>
-        <Button
-          leftSection={<IconPlus size={18} />}
-          ml="auto"
-          onClick={() => setModalOpen(true)}
-        >
-          Nuevo concurso
-        </Button>
+        {isAdmin && (
+          <Button
+            leftSection={<IconPlus size={18} />}
+            ml="auto"
+            onClick={() => setModalOpen(true)}
+          >
+            Nuevo concurso
+          </Button>
+        )}
       </Group>
 
       {error && (
@@ -237,7 +244,7 @@ export default function AdminCompetitionsPage() {
               <Table.Th>Modalidad</Table.Th>
               <Table.Th>Plazas</Table.Th>
               <Table.Th>Estado</Table.Th>
-              <Table.Th style={{ width: 160 }}>Acciones</Table.Th>
+              <Table.Th style={{ width: isAdmin ? 160 : 70 }}>Acciones</Table.Th>
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
@@ -269,8 +276,8 @@ export default function AdminCompetitionsPage() {
                 <Table.Td>{statusBadge(c.status)}</Table.Td>
                 <Table.Td>
                   <Group gap={4}>
-                    {/* Planned → RegistrationOpen */}
-                    {c.status === 'Planned' && (
+                    {/* Botones de gestión exclusivos de Admin */}
+                    {isAdmin && c.status === 'Planned' && (
                       <Tooltip label="Abrir inscripción">
                         <ActionIcon variant="subtle" color="blue" onClick={() => requestAction(c, 'openRegistration')}>
                           <IconLockOpen size={18} />
@@ -278,8 +285,7 @@ export default function AdminCompetitionsPage() {
                       </Tooltip>
                     )}
 
-                    {/* RegistrationOpen → Closed */}
-                    {c.status === 'RegistrationOpen' && (
+                    {isAdmin && c.status === 'RegistrationOpen' && (
                       <>
                         <Tooltip label="Cerrar inscripción">
                           <ActionIcon variant="subtle" color="orange" onClick={() => requestAction(c, 'closeRegistration')}>
@@ -294,8 +300,7 @@ export default function AdminCompetitionsPage() {
                       </>
                     )}
 
-                    {/* Closed → ReopenRegistration | ResultsDraft */}
-                    {c.status === 'Closed' && (
+                    {isAdmin && c.status === 'Closed' && (
                       <>
                         <Tooltip label="Reabrir inscripción (≤30 días)">
                           <ActionIcon variant="subtle" color="blue" onClick={() => requestAction(c, 'reopenRegistration')}>
@@ -310,8 +315,7 @@ export default function AdminCompetitionsPage() {
                       </>
                     )}
 
-                    {/* ResultsDraft → ResultsValidated */}
-                    {c.status === 'ResultsDraft' && (
+                    {isAdmin && c.status === 'ResultsDraft' && (
                       <Tooltip label="Validar resultados">
                         <ActionIcon variant="subtle" color="green" onClick={() => requestAction(c, 'validateResults')}>
                           <IconCircleCheck size={18} />
@@ -319,7 +323,7 @@ export default function AdminCompetitionsPage() {
                       </Tooltip>
                     )}
 
-                    {/* Siempre visible: ver resultados */}
+                    {/* Siempre visible para todos (Admin y Fisherman): ver resultados */}
                     <Tooltip label="Ver resultados / inscripciones">
                       <ActionIcon
                         variant="subtle"
@@ -337,7 +341,7 @@ export default function AdminCompetitionsPage() {
         </Table>
       )}
 
-      {leagueId && (
+      {isAdmin && leagueId && (
         <CreateCompetitionModal
           opened={modalOpen}
           leagueId={leagueId}
@@ -347,7 +351,7 @@ export default function AdminCompetitionsPage() {
         />
       )}
 
-      {pendingAction && confirmConfig && (
+      {isAdmin && pendingAction && confirmConfig && (
         <ConfirmationModal
           opened={pendingAction !== null}
           title={confirmConfig.title}
