@@ -65,6 +65,14 @@ function App() {
               }
             />
             <Route
+              path={AppRoutes.Standings}
+              element={
+                <ProtectedRoute requiredRoles={['Admin', 'Fisherman']}>
+                  <LeagueStandingsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path={AppRoutes.LeagueStandings}
               element={
                 <ProtectedRoute requiredRoles={['Admin', 'Fisherman']}>
@@ -72,6 +80,15 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path={AppRoutes.AdminLeagueStandings}
+              element={
+                <ProtectedRoute requiredRoles={['Admin', 'Fisherman']}>
+                  <LeagueStandingsPage />
+                </ProtectedRoute>
+              }
+            />
+
             <Route
               path={AppRoutes.Competitions}
               element={

@@ -19,6 +19,7 @@ import {
   IconTrophy,
   IconUser,
   IconLogout,
+  IconChartBar,
 } from '@tabler/icons-react';
 import { useAuth } from '../hooks';
 import { Routes } from '../constants';
@@ -37,6 +38,11 @@ const navItems: NavItem[] = [
     label: 'Inicio',
     icon: <IconHome size={20} />,
     to: Routes.Home,
+  },
+  {
+    label: 'Clasificación',
+    icon: <IconChartBar size={20} />,
+    to: Routes.Standings,
   },
   {
     label: 'Usuarios',
@@ -62,6 +68,7 @@ const navItems: NavItem[] = [
     to: Routes.Profile,
   },
 ];
+
 
 export default function AppLayout() {
   const [opened, setOpened] = useState(false);
