@@ -130,7 +130,7 @@ Mark ProcessedOnUtc = UtcNow
 
 ### Anti-patrones / inconsistencias detectadas
 
-* **Anemic Model en `Competition`** (todos setters públicos), frente a **Rich Model en `League`**. Inconsistencia de estilo.
+* **Rich Domain Model en `Competition`** — **Resuelto:** `Competition` encapsula sus transiciones de estado (`OpenRegistration`, `CloseRegistration`, `ReopenRegistration`, `MoveToResultsDraft`, `ValidateResults`) y emite Domain Events capturados por el Outbox.
 * (Eliminado) `IFishermanRepository` ha sido eliminada por violar YAGNI.
 
 ---
@@ -144,17 +144,15 @@ Mark ProcessedOnUtc = UtcNow
 | **Auth** | Login, Register, ChangePassword (+ tests del ChangePassword handler y validators de identidad) |
 | **Users** | GetAll, Create, Block, Unblock, AssignRole, RemoveRole (+ tests de cada handler) |
 | **Leagues** | Create, Update, Activate, Archive, GetAll, GetById, GetActive (+ tests completos) |
-| **Fishermen** *(parcial → ver §3.2)* | Add, GetAll, GetByUserId, SoftDelete (+ tests) |
+| **Fishermen** | Add, Update, SoftDelete, Restore, GetAll, GetByUserId (+ tests de 3 niveles y domain events) |
+| **Competitions** | Create, Open/Close/Reopen Registration, AssignSpots, MoveToDraft, ValidateResults, Register/Remove Fisherman, UpdateResult, GetResults (+ tests unitarios completos, eventos de dominio y concurrencia optimista) |
 
 ### 🟡 Componentes a medio terminar
 
-1. **`Fisherman.Update()` y `Fisherman.Delete()`** — TODOs explícitos en `Fisherman.cs:53` y `Fisherman.cs:76`. El código está escrito y comentado, falta crear los `FishermanUpdatedDomainEvent` / `FishermanDeletedDomainEvent` y descomentar.
+1. **Portal del Pescador en Frontend ("Mis Concursos / Mi Perfil")** — Visualización de concursos inscritos, puesto asignado y auto-inscripción directa para el socio logado.
+2. **Exportación de Actas y Clasificaciones** — Informes PDF / Excel de pesajes de concursos y clasificación general.
+3. **Squash de migraciones EF Core** — Consolidación de migraciones antes del despliegue final en producción.
 
-2. **`IFishermanRepository`** — ~interfaz declarada sin métodos~ **Resuelto: Eliminada por YAGNI.**
-
-3. **Competitions** — handlers escritos (Create, OpenRegistration, CloseRegistration, RegisterFisherman, RemoveRegistration, UpdateResult, GetResults, GetByLeague) **pero sin tests**. Falta también revisar concurrencia en `RegisterFishermanCommandHandler` (riesgo de race si dos pescadores reservan el último spot — no verificado a fondo).
-
-4. **Validación automática vía MediatR pipeline** — **Resuelto:** `ValidationPipelineBehavior<TRequest, TResponse>` implementado y registrado en `DependencyInjection.cs` con tests unitarios pasando.
 
 ### 🔴 Bugs / Race conditions auditados y resueltos
 

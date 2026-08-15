@@ -49,10 +49,17 @@ public sealed class MoveToResultsDraftCommandHandler
         _pointsCalculator.CalculateAndAssign(results, minPoints);
 
         competition.MoveToResultsDraft();
+        competition.RaiseDomainEvent(new CompetitionMovedToResultsDraftDomainEvent
+        {
+            CompetitionId = competition.Id,
+            LeagueId = competition.LeagueId
+        });
+
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         return Result.Success;
     }
 }
+
 
 public class MoveToResultsDraftCommandValidator : AbstractValidator<MoveToResultsDraftCommand>
 {

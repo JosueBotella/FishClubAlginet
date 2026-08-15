@@ -28,11 +28,19 @@ public sealed class CloseRegistrationCommandHandler
             return Errors.Competition.InvalidStatusTransition;
 
         competition.CloseRegistration();
+        competition.RaiseDomainEvent(new CompetitionRegistrationClosedDomainEvent
+        {
+            CompetitionId = competition.Id,
+            LeagueId = competition.LeagueId,
+            CompetitionNumber = competition.CompetitionNumber,
+            ParticipantCount = competition.ParticipantCount
+        });
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         return Result.Success;
     }
 }
+
 
 public class CloseRegistrationCommandValidator : AbstractValidator<CloseRegistrationCommand>
 {

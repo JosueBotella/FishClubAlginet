@@ -31,10 +31,18 @@ public sealed class ValidateResultsCommandHandler
             return Errors.Competition.NotInResultsDraft;
 
         competition.ValidateResults();
+        competition.RaiseDomainEvent(new CompetitionResultsValidatedDomainEvent
+        {
+            CompetitionId = competition.Id,
+            LeagueId = competition.LeagueId,
+            CompetitionNumber = competition.CompetitionNumber
+        });
+
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         return Result.Success;
     }
 }
+
 
 public class ValidateResultsCommandValidator : AbstractValidator<ValidateResultsCommand>
 {

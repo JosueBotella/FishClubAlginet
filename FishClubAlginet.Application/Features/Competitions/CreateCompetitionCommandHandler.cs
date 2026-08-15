@@ -77,9 +77,20 @@ public sealed class CreateCompetitionCommandHandler
             request.MaxSpots,
             request.BiggestCatchMinWeightInGrams);
 
+        competition.RaiseDomainEvent(new CompetitionCreatedDomainEvent
+        {
+            CompetitionId = competition.Id,
+            LeagueId = competition.LeagueId,
+            CompetitionNumber = competition.CompetitionNumber,
+            Name = competition.Name,
+            Date = competition.Date,
+            MaxSpots = competition.MaxSpots
+        });
+
         await _competitionRepository.AddAsync(competition);
 
         var saveResult = await _unitOfWork.SaveChangesAsync(cancellationToken);
+
         if (saveResult.IsError)
         {
             _logger.LogError(

@@ -1,4 +1,4 @@
-﻿global using FluentValidation;
+global using FluentValidation;
 global using ErrorOr;
 global using FishClubAlginet.Application.Constants;
 global using FishClubAlginet.Application.Resources;
@@ -20,3 +20,5 @@ global using FishClubAlginet.Application.Features.Events.Commands.Fishermen;
 global using Microsoft.Extensions.Logging;
 global using FishClubAlginet.Contracts.Dtos.Requests.Competition;
 global using FishClubAlginet.Contracts.Dtos.Responses.Competition;
+global using FishClubAlginet.Application.Features.Events.Commands.Competitions;
+
