@@ -4,21 +4,45 @@ using FishClubAlginet.Contracts.Enums;
 
 namespace FishClubAlginet.Infrastructure.Persistence.Seeds;
 
+[SuppressMessage("Security", "S2245:Using weak random number generator", Justification = "Deterministic test seed data generation only")]
 public static class FishermanSeed
 {
     public static async Task SeedAsync(AppDbContext context)
     {
+        var adminUser = await context.Users.FirstOrDefaultAsync(u => u.Email == SeedConstants.DefaultAdminEmail);
+        var fishermanUser = await context.Users.FirstOrDefaultAsync(u => u.Email == SeedConstants.DefaultFishermanEmail);
+
         if (await context.Set<Fisherman>().AnyAsync())
         {
+            // Link test accounts if not already linked
+            if (adminUser is not null && !await context.Set<Fisherman>().AnyAsync(f => f.UserId == adminUser.Id))
+            {
+                var adminFisherman = await context.Set<Fisherman>().FirstOrDefaultAsync(f => f.FirstName == "JOSE GABRIEL" || f.Id == 1);
+                if (adminFisherman is not null)
+                {
+                    adminFisherman.UserId = adminUser.Id;
+                }
+            }
+
+            if (fishermanUser is not null && !await context.Set<Fisherman>().AnyAsync(f => f.UserId == fishermanUser.Id))
+            {
+                var regularFisherman = await context.Set<Fisherman>().FirstOrDefaultAsync(f => f.FirstName == "PEDRO JOSE" || f.Id == 2);
+                if (regularFisherman is not null)
+                {
+                    regularFisherman.UserId = fishermanUser.Id;
+                }
+            }
+
+            await context.SaveChangesAsync();
             return;
         }
 
-        var fishermen = GenerateFishermen();
+        var fishermen = GenerateFishermen(adminUser?.Id, fishermanUser?.Id);
         await context.Set<Fisherman>().AddRangeAsync(fishermen);
         await context.SaveChangesAsync();
     }
 
-    private static List<Fisherman> GenerateFishermen()
+    private static List<Fisherman> GenerateFishermen(string? adminUserId, string? fishermanUserId)
     {
         var fishermen = new List<Fisherman>();
         var realNames = new[]
@@ -76,6 +100,16 @@ public static class FishermanSeed
             var federationLicense = $"FED{(i + 1):D5}";
             var zipCode = $"{random.Next(10000, 52000):D5}";
 
+            string? userId = null;
+            if (fullName.Contains("JOSE GABRIEL BOTELLA") || i == 0)
+            {
+                userId = adminUserId;
+            }
+            else if (fullName.Contains("PEDRO JOSE GARCIA") || i == 1)
+            {
+                userId = fishermanUserId;
+            }
+
             var fisherman = new Fisherman
             {
                 Id = 0,
@@ -85,6 +119,7 @@ public static class FishermanSeed
                 DocumentType = documentType,
                 DocumentNumber = documentNumber,
                 FederationLicense = federationLicense,
+                UserId = userId,
                 Address = new Address
                 {
                     Street = $"Calle {lastName} {i + 1}",

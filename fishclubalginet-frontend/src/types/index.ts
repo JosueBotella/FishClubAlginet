@@ -33,4 +33,6 @@ export type {
   FishermanMatrixRowDto,
   LeagueStandingsMatrixDto,
   SeasonBiggestCatchDto,
+  MyCompetitionRegistrationDto,
 } from './competition';
+
