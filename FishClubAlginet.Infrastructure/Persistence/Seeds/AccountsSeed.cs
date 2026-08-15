@@ -21,6 +21,22 @@ public static class AccountsSeed
             await userManager.AddToRoleAsync(adminUser, ApplicationConstants.Roles.Admin);
             await userManager.AddToRoleAsync(adminUser, ApplicationConstants.Roles.Fisherman);
         }
+        else
+        {
+            if (!await userManager.CheckPasswordAsync(adminUser, SeedConstants.DefaultPassword))
+            {
+                var token = await userManager.GeneratePasswordResetTokenAsync(adminUser);
+                await userManager.ResetPasswordAsync(adminUser, token, SeedConstants.DefaultPassword);
+            }
+            if (!await userManager.IsInRoleAsync(adminUser, ApplicationConstants.Roles.Admin))
+            {
+                await userManager.AddToRoleAsync(adminUser, ApplicationConstants.Roles.Admin);
+            }
+            if (!await userManager.IsInRoleAsync(adminUser, ApplicationConstants.Roles.Fisherman))
+            {
+                await userManager.AddToRoleAsync(adminUser, ApplicationConstants.Roles.Fisherman);
+            }
+        }
 
         // 2. Seed / Ensure Regular Fisherman User
         var fishermanUser = await userManager.FindByEmailAsync(SeedConstants.DefaultFishermanEmail);
@@ -37,6 +53,18 @@ public static class AccountsSeed
 
             await userManager.CreateAsync(fishermanUser, SeedConstants.DefaultPassword);
             await userManager.AddToRoleAsync(fishermanUser, ApplicationConstants.Roles.Fisherman);
+        }
+        else
+        {
+            if (!await userManager.CheckPasswordAsync(fishermanUser, SeedConstants.DefaultPassword))
+            {
+                var token = await userManager.GeneratePasswordResetTokenAsync(fishermanUser);
+                await userManager.ResetPasswordAsync(fishermanUser, token, SeedConstants.DefaultPassword);
+            }
+            if (!await userManager.IsInRoleAsync(fishermanUser, ApplicationConstants.Roles.Fisherman))
+            {
+                await userManager.AddToRoleAsync(fishermanUser, ApplicationConstants.Roles.Fisherman);
+            }
         }
     }
 }

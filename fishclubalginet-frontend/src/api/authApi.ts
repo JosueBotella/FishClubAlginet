@@ -4,7 +4,11 @@ import type { LoginRequest, LoginResponse, ChangePasswordRequest } from '../type
 
 export const authApi = {
   login: (data: LoginRequest) =>
-    apiClient.post<LoginResponse>(Endpoints.Account.Login, data),
+    apiClient.post<LoginResponse>(Endpoints.Account.Login, {
+      userName: data.email,
+      email: data.email,
+      password: data.password,
+    }),
 
   changePassword: (data: ChangePasswordRequest) =>
     apiClient.post(Endpoints.Account.ChangePassword, data),

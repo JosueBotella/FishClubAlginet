@@ -1,4 +1,4 @@
-﻿namespace FishClubAlginet.Infrastructure.Persistence.DbInitializer;
+namespace FishClubAlginet.Infrastructure.Persistence.DbInitializer;
 
 public static class DbInitializer
 {
@@ -9,22 +9,35 @@ public static class DbInitializer
 
         var logger = services.GetRequiredService<ILogger<AppDbContext>>();
 
-        try
-        {
-            var context = services.GetRequiredService<AppDbContext>();
-            var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-            var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
+        const int maxRetries = 10;
+        var retryCount = 0;
 
-            //await context.Database.EnsureDeletedAsync(); // Cuidado con esto
-            await context.Database.MigrateAsync();
-            await RolesSeed.SeedAsync(roleManager);
-            await AccountsSeed.SeedAsync(context, userManager);
-            await FishermanSeed.SeedAsync(context);
-        }
-        catch (Exception ex)
+        while (true)
         {
-            logger.LogError(ex, "An error occurred while initializing the database.");
-            throw;
+            try
+            {
+                var context = services.GetRequiredService<AppDbContext>();
+                var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+                var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
+
+                await context.Database.MigrateAsync();
+                await RolesSeed.SeedAsync(roleManager);
+                await AccountsSeed.SeedAsync(context, userManager);
+                await FishermanSeed.SeedAsync(context);
+                logger.LogInformation("Database initialized and seeded successfully.");
+                break;
+            }
+            catch (Exception ex) when (retryCount < maxRetries)
+            {
+                retryCount++;
+                logger.LogWarning(ex, "Database connection not ready yet. Retrying {RetryCount}/{MaxRetries} in 3 seconds...", retryCount, maxRetries);
+                await Task.Delay(TimeSpan.FromSeconds(3));
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "An error occurred while initializing the database after {MaxRetries} retries.", maxRetries);
+                throw;
+            }
         }
     }
 }
