@@ -93,3 +93,11 @@ export async function updateBiggestCatchConfig(
 ): Promise<void> {
   await apiClient.patch(Endpoints.Competitions.BiggestCatchConfig(competitionId), request);
 }
+
+export async function getMyRegistrations(): Promise<MyCompetitionRegistrationDto[]> {
+  const { data } = await apiClient.get<MyCompetitionRegistrationDto[]>(
+    Endpoints.Competitions.MyRegistrations
+  );
+  return data;
+}
+

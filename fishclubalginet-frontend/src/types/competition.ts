@@ -123,3 +123,29 @@ export interface SeasonBiggestCatchDto {
   competitionDate: string;
 }
 
+export interface MyCompetitionRegistrationDto {
+  resultId: string;
+  competitionId: string;
+  competitionName: string;
+  competitionNumber: number;
+  leagueId: string;
+  leagueName: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  venue: string;
+  zone: string | null;
+  subspecialty: 'Mar' | 'AguaDulce' | string;
+  category: 'Seniors' | 'Juvenil' | string;
+  status: 'Planned' | 'RegistrationOpen' | 'Closed' | 'ResultsDraft' | 'ResultsValidated' | string;
+  assignedSpotNumber: number | null;
+  weightInGrams: number | null;
+  biggestCatchWeight: number | null;
+  points: number;
+  ranking: number | null;
+  isValidated: boolean;
+  didAttend: boolean;
+  registrationDate: string;
+}
+
+

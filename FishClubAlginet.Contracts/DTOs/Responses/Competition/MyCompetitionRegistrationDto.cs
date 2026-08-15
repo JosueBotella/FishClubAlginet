@@ -1,0 +1,25 @@
+namespace FishClubAlginet.Contracts.Dtos.Responses.Competition;
+
+public record MyCompetitionRegistrationDto(
+    Guid ResultId,
+    Guid CompetitionId,
+    string CompetitionName,
+    int CompetitionNumber,
+    Guid LeagueId,
+    string LeagueName,
+    DateTime Date,
+    TimeSpan StartTime,
+    TimeSpan EndTime,
+    string Venue,
+    string? Zone,
+    string Subspecialty,
+    string Category,
+    string Status,
+    int? AssignedSpotNumber,
+    int? WeightInGrams,
+    int? BiggestCatchWeight,
+    decimal Points,
+    int? Ranking,
+    bool IsValidated,
+    bool DidAttend,
+    DateTime RegistrationDate);

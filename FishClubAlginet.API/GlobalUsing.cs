@@ -1,4 +1,4 @@
-﻿global using System.Text;
+global using System.Text;
 global using System.Text.Json;
 global using FluentValidation;
 global using MediatR;
@@ -33,3 +33,5 @@ global using FishClubAlginet.Infrastructure.Repositories;
 global using FishClubAlginet.Infrastructure.Services;
 global using FishClubAlginet.Application.Features.Competitions;
 global using FishClubAlginet.Contracts.Dtos.Requests.Competition;
+global using System.Security.Claims;
+

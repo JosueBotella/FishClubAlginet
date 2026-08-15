@@ -145,13 +145,14 @@ Mark ProcessedOnUtc = UtcNow
 | **Users** | GetAll, Create, Block, Unblock, AssignRole, RemoveRole (+ tests de cada handler) |
 | **Leagues** | Create, Update, Activate, Archive, GetAll, GetById, GetActive (+ tests completos) |
 | **Fishermen** | Add, Update, SoftDelete, Restore, GetAll, GetByUserId (+ tests de 3 niveles y domain events) |
-| **Competitions** | Create, Open/Close/Reopen Registration, AssignSpots, MoveToDraft, ValidateResults, Register/Remove Fisherman, UpdateResult, GetResults (+ tests unitarios completos, eventos de dominio y concurrencia optimista) |
+| **Competitions** | Create, Open/Close/Reopen Registration, AssignSpots, MoveToDraft, ValidateResults, Register/Remove Fisherman, UpdateResult, GetResults, GetMyRegistrations (+ tests unitarios completos, eventos de dominio y concurrencia optimista) |
+| **Portal del Pescador (Frontend)** | Ficha de socio, Mis Concursos, Inscripciones Abiertas con auto-registro/cancelación, visualización de pesqueras y podio (+ tests completos) |
 
 ### 🟡 Componentes a medio terminar
 
-1. **Portal del Pescador en Frontend ("Mis Concursos / Mi Perfil")** — Visualización de concursos inscritos, puesto asignado y auto-inscripción directa para el socio logado.
-2. **Exportación de Actas y Clasificaciones** — Informes PDF / Excel de pesajes de concursos y clasificación general.
-3. **Squash de migraciones EF Core** — Consolidación de migraciones antes del despliegue final en producción.
+1. **Exportación de Actas y Clasificaciones** — Informes PDF / Excel de pesajes de concursos y clasificación general.
+2. **Squash de migraciones EF Core** — Consolidación de migraciones antes del despliegue final en producción.
+
 
 
 ### 🔴 Bugs / Race conditions auditados y resueltos

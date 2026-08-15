@@ -1,4 +1,4 @@
-﻿global using FishClubAlginet.Application.Abstractions;
+global using FishClubAlginet.Application.Abstractions;
 global using FishClubAlginet.Application.Constants;
 global using FishClubAlginet.Contracts.Dtos.Requests.Identity;
 global using FishClubAlginet.Contracts.Enums;
@@ -24,4 +24,6 @@ global using System.IdentityModel.Tokens.Jwt;
 global using System.Security.Claims;
 global using System.Text;
 global using System.Text.Json;
+global using System.Diagnostics.CodeAnalysis;
+
 

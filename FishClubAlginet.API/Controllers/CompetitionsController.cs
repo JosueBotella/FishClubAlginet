@@ -36,6 +36,22 @@ public class CompetitionsController : ApiController
             errors => Problem(errors));
     }
 
+    /// <summary>Returns the competition registrations for the currently authenticated fisherman.</summary>
+    [HttpGet("my-registrations")]
+    public async Task<IActionResult> GetMyRegistrations()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized();
+
+        var query = new GetMyCompetitionRegistrationsQuery(userId);
+        var result = await _mediator.Send(query, default);
+        return result.Match(
+            dtos => Ok(dtos),
+            errors => Problem(errors));
+    }
+
+
     /// <summary>Creates a new competition inside a league. Admin only.</summary>
     [HttpPost]
     [Authorize(Roles = ApplicationConstants.Roles.Admin)]
