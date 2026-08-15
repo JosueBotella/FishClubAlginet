@@ -51,8 +51,13 @@ public static class AccountsSeed
                 EmailConfirmed = true,
             };
 
-            await userManager.CreateAsync(fishermanUser, SeedConstants.DefaultPassword);
+            var createRes = await userManager.CreateAsync(fishermanUser, SeedConstants.DefaultPassword);
+            if (!createRes.Succeeded)
+            {
+                throw new InvalidOperationException($"Failed to create regular fisherman user: {string.Join(", ", createRes.Errors.Select(e => e.Description))}");
+            }
             await userManager.AddToRoleAsync(fishermanUser, ApplicationConstants.Roles.Fisherman);
+
         }
         else
         {

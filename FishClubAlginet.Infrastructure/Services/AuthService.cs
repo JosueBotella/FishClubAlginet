@@ -1,4 +1,4 @@
-﻿namespace FishClubAlginet.Infrastructure.Services;
+namespace FishClubAlginet.Infrastructure.Services;
 
 public class AuthService : IAuthService
 {
@@ -19,7 +19,9 @@ public class AuthService : IAuthService
 
     public async Task<string?> LoginAsync(LoginDto loginDto)
     {
-        var user = await _userManager.FindByEmailAsync(loginDto.UserName);
+        var identifier = (!string.IsNullOrWhiteSpace(loginDto.UserName) ? loginDto.UserName : (loginDto.Email ?? string.Empty)).Trim();
+        var user = await _userManager.FindByEmailAsync(identifier) 
+                   ?? await _userManager.FindByNameAsync(identifier);
 
         if (user != null && await _userManager.CheckPasswordAsync(user, loginDto.Password))
         {
@@ -28,6 +30,7 @@ public class AuthService : IAuthService
 
         return null;
     }
+
 
     public async Task<IdentityResult> ChangePasswordAsync(string userId, string currentPassword, string newPassword)
     {
