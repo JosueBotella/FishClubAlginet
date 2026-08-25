@@ -4,11 +4,15 @@ description: notebooklm-aspnet-architecture
 
 # PROTOCOLO DE ARQUITECTURA: INTEGRACIÓN DE CODEGRAPH Y NOTEBOOKLM
 
+> Compatibilidad: la implementación compartida para Antigravity y Codex está en
+> `.agents/skills/aspnet-architecture/SKILL.md`. Este workflow conserva el punto
+> de entrada histórico de Antigravity.
+
 ## OBJETIVO PRINCIPAL
 Este workflow define cómo el agente debe integrar las directrices de arquitectura de ASP.NET Core provenientes del cuaderno de NotebookLM "FULL ASP.NET Core" (ID: `f2e3c464-f0c4-4168-85d2-8ab1299c5c2e`) con la exploración estructural del código provista por la herramienta `codegraph`. El propósito es garantizar que cualquier refactorización, diseño de nuevos componentes o cambios en la arquitectura del proyecto `FishClubAlginet` se alineen estrictamente con los estándares y mejores prácticas de ASP.NET Core definidos en el cuaderno.
 
 ## PROTOCOLO DE HERRAMIENTAS: CONSULTA DE NOTEBOOKLM
-Ante cualquier duda de arquitectura, patrones de diseño o mejores prácticas en ASP.NET Core, el agente DEBE consultar el cuaderno de NotebookLM utilizando la herramienta `notebooklm-mcp-server`.
+Ante una decisión arquitectónica relevante, consulta el cuaderno mediante `notebooklm-mcp-server` cuando la integración esté disponible. Si no lo está, indícalo y continúa con evidencia del código y documentación oficial de Microsoft; no inventes resultados del cuaderno.
 
 ### Flujo de Consulta Estricto:
 1. **Identificación de Concepto:** Identificar el patrón arquitectónico, API de ASP.NET Core o principio de diseño sobre el cual se tiene dudas (ej. Clean Architecture, inyección de dependencias, patrones de repositorio, configuración de middleware, etc.).
