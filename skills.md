@@ -155,10 +155,10 @@ Senior full-stack developer focused on building production-grade APIs and React 
 - **Pattern:** Use the **AAA (Arrange, Act, Assert)** pattern with explicit comments.
 - **Naming Convention:** `MethodName_StateUnderTest_ExpectedBehavior` (e.g., `Handle_WhenUserExists_ShouldReturnFailure`).
 - **Frameworks:** Use **xUnit**, **Moq**, and **FluentAssertions**.
-- **Assertions:** Use FluentAssertions exclusively (e.g., `result.IsSuccess.Should().BeTrue()`).
+- **Assertions:** Use FluentAssertions exclusively (e.g., `result.IsError.Should().BeFalse()`).
 - **Result Pattern Testing:**
-    - For Success: Assert `.IsSuccess` is true and check the `.Value`.
-    - For Failure: Assert `.IsFailure` is true and verify the specific `Error` (e.g., `result.Errors.Should().Contain(Errors.User.DuplicateEmail)`).
+    - For Success: Assert `.IsError` is false and check `.Value`.
+    - For Failure: Assert `.IsError` is true and verify the specific error in `.Errors`.
 - **Fixtures:** Proactively use and extend existing fixtures (like `FisherManFixture`) to generate test data.
 - ** Strings Hardcodeadas:** Evitar strings hardcodeadas en los tests, usar constantes o fixtures para mantener la consistencia y facilitar cambios futuros.
 
@@ -232,7 +232,7 @@ public async Task Handle_WhenValidRequest_ShouldCreateFisherman()
     var result = await _handler.Handle(command, default);
 
     // Assert
-    result.IsSuccess.Should().BeTrue();
+    result.IsError.Should().BeFalse();
     result.Value.Should().NotBeNull();
     _unitOfWorkMock.Verify(x => x.SaveChangesAsync(default), Times.Once);
 }
@@ -254,16 +254,16 @@ public async Task Handle_WhenValidRequest_ShouldCreateFisherman()
 - **UI Components:** **Mantine v7** (`@mantine/core`, `@mantine/hooks`, `@mantine/notifications`) + `@tabler/icons-react`
 
 ### Autenticación JWT
-- Token almacenado en `httpOnly cookie` o `localStorage` (decidir antes de implementar)
+- Token almacenado actualmente en `localStorage`; cualquier migración a cookie `HttpOnly` requiere coordinar API y frontend.
 - Interceptor Axios añade `Authorization: Bearer <token>` automáticamente
-- Rutas protegidas con componente `<PrivateRoute>` que verifica rol
+- Rutas protegidas con componente `<ProtectedRoute>` que verifica roles
 - Nunca exponer lógica de rol en el backend como string hardcodeado — usar claims
 
 ```tsx
 // ✅ Preferred: Rutas protegidas por rol
-<PrivateRoute requiredRole="Admin">
+<ProtectedRoute requiredRoles={['Admin']}>
   <UsersPage />
-</PrivateRoute>
+</ProtectedRoute>
 
 // ✅ Preferred: Visibilidad condicional por rol
 const { role } = useAuth();
@@ -277,7 +277,7 @@ src/
   components/   → componentes reutilizables
   pages/        → una carpeta por módulo (Auth, Users, Fishermen, Profile)
   hooks/        → custom hooks (useAuth, useFishermen...)
-  store/        → Zustand stores
+  auth/context/ → estado global de autenticación con Context API
   types/        → interfaces y tipos TypeScript
   utils/        → helpers
 ```
