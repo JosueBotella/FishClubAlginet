@@ -3,22 +3,19 @@ using Microsoft.Data.SqlClient;
 
 namespace FishClubAlginet.Infrastructure.Services;
 
-public class UnitOfWorkService : IUnitOfWork
+/// <summary>
+/// Implementación mínima del Unit of Work sobre el AppDbContext scoped.
+/// - No crea repositorios: el contenedor de DI ya inyecta IGenericRepository&lt;,&gt;
+///   compartiendo el mismo DbContext de la petición.
+/// - No hace Dispose del DbContext: su ciclo de vida pertenece al contenedor de DI.
+/// </summary>
+public sealed class UnitOfWorkService(AppDbContext context) : IUnitOfWork
 {
-    private readonly AppDbContext _context;
-    private readonly IDictionary<Type, dynamic> _repositories = new Dictionary<Type, dynamic>();
-    private bool _disposed = false;
-
-    public UnitOfWorkService(AppDbContext context)
-    {
-        _context = context;
-    }
-
     public async Task<ErrorOr<int>> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         try
         {
-            return await _context.SaveChangesAsync(cancellationToken);
+            return await context.SaveChangesAsync(cancellationToken);
         }
         catch (DbUpdateException ex)
             when (ex.InnerException is SqlException sqlEx
@@ -44,53 +41,5 @@ public class UnitOfWorkService : IUnitOfWork
         }
         // Otras excepciones (errores de programación, fallos de red, etc.) se
         // propagan: las captura el ExceptionHandler global de la API.
-    }
-
-    public void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
-
-    protected virtual void Dispose(bool disposing)
-    {
-        if (!_disposed)
-        {
-            if (disposing)
-            {
-                _context?.Dispose();
-
-                foreach (var repository in _repositories.Values)
-                {
-                    if (repository is IDisposable disposable)
-                    {
-                        disposable.Dispose();
-                    }
-                }
-                _repositories.Clear();
-            }
-
-            _disposed = true;
-        }
-    }
-
-    public IGenericRepository<T, TId> Repository<T, TId>()
-      where T : BaseEntity<TId>
-    {
-        var entityType = typeof(T);
-
-        if (_repositories.ContainsKey(entityType))
-        {
-            return _repositories[entityType];
-        }
-
-        var repositoryType = typeof(GenericRepository<,>);
-        var closedGenericType = repositoryType.MakeGenericType(typeof(T), typeof(TId));
-
-        var repository = Activator.CreateInstance(closedGenericType, _context)
-            ?? throw new InvalidOperationException($"Could not create repository instance for type {entityType.Name}");
-
-        _repositories.Add(entityType, repository);
-        return (IGenericRepository<T, TId>)repository;
     }
 }

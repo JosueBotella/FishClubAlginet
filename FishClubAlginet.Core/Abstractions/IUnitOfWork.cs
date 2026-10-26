@@ -2,15 +2,13 @@ using ErrorOr;
 
 namespace FishClubAlginet.Application.Abstractions;
 
-public interface IUnitOfWork : IDisposable
+/// <summary>
+/// Cierra un caso de uso: persiste en una única transacción todo lo que los
+/// repositorios han "stageado" en el DbContext durante la petición.
+/// Los repositorios se inyectan directamente en los handlers; el UoW solo confirma.
+/// Application no conoce DbUpdateException: los fallos de EF Core llegan mapeados a ErrorOr.
+/// </summary>
+public interface IUnitOfWork
 {
-    IGenericRepository<T, TId> Repository<T, TId>() where T : BaseEntity<TId>;
-
-    /// <summary>
-    /// Persiste todos los cambios pendientes del DbContext en una transacción.
-    /// Devuelve el número de filas afectadas, o un Error mapeado a partir de las
-    /// excepciones de EF Core (sin filtrar tipos de Infrastructure al caller),
-    /// para mantener Clean Architecture: Application no conoce DbUpdateException.
-    /// </summary>
     Task<ErrorOr<int>> SaveChangesAsync(CancellationToken cancellationToken = default);
 }
